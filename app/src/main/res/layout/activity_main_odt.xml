@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_main_odt"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context="app.com.balvarez.entregacargamovil.MainODT">
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:srcCompat="@drawable/pullman_cargo"
+        android:id="@+id/imageView"
+        android:layout_marginBottom="447dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:text="ODT"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="93dp"
+        android:id="@+id/textView"
+        android:textStyle="normal|bold"
+        android:textSize="24sp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/textView"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true">
+
+        <TextView
+            android:text="0"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/lblEntregados"
+            android:textSize="36sp"
+            android:layout_alignBaseline="@+id/lblFaltantes"
+            android:layout_alignBottom="@+id/lblFaltantes"
+            android:layout_alignLeft="@+id/textView3"
+            android:layout_alignStart="@+id/textView3"
+            android:layout_marginLeft="25dp"
+            android:layout_marginStart="25dp" />
+
+        <TextView
+            android:text="Entregadas"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="45dp"
+            android:id="@+id/textView3"
+            android:textStyle="normal|bold"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_marginLeft="53dp"
+
+            android:layout_marginStart="53dp" />
+
+        <Button
+            android:text="Finalizar Reparto"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/btnFinReparto"
+            style="@style/Botton"
+            android:layout_marginBottom="20dp"
+            android:layout_above="@+id/btnVolver"
+            android:layout_alignLeft="@+id/textView3"
+            android:layout_alignStart="@+id/textView3" />
+
+        <Button
+            android:text="Escanear ODT"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/btnScanODT"
+            style="@style/Botton"
+            android:layout_above="@+id/btnFinReparto"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="12dp" />
+
+        <TextView
+            android:text="0"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/lblFaltantes"
+            android:textSize="36sp"
+            android:layout_marginTop="22dp"
+            android:layout_below="@+id/textView4"
+            android:layout_alignRight="@+id/btnScanODT"
+            android:layout_alignEnd="@+id/btnScanODT"
+            android:layout_marginRight="14dp"
+            android:layout_marginEnd="14dp" />
+
+        <Button
+            android:text="Volver"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/Botton"
+            android:id="@+id/btnVolver"
+            android:layout_marginBottom="24dp"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true" />
+
+        <TextView
+            android:text="Faltantes     "
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/textView4"
+            android:textStyle="normal|bold"
+            android:layout_alignBaseline="@+id/textView3"
+            android:layout_alignBottom="@+id/textView3"
+            android:layout_alignRight="@+id/btnFinReparto"
+            android:layout_alignEnd="@+id/btnFinReparto"
+            android:layout_marginRight="13dp"
+            android:layout_marginEnd="13dp" />
+    </RelativeLayout>
+</RelativeLayout>

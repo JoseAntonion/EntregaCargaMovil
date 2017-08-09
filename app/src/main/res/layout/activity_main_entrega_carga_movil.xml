@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_main_entrega_carga_movil"
+
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    android:orientation="vertical"
+    android:scrollbars="vertical"
+    tools:context="app.com.balvarez.entregacargamovil.MainEntregaCargaMovil">
+
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginLeft="18dp"
+        android:layout_marginStart="18dp"
+        android:layout_marginTop="18dp">
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="168dp">
+
+            <ImageView
+                android:layout_width="fill_parent"
+                android:layout_height="110dp"
+                app:srcCompat="@drawable/pullman_cargo"
+                android:id="@+id/imageView8" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="87dp">
+
+            <TextView
+                android:text="Patente"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/textView16"
+                android:textStyle="normal|bold"
+                android:textSize="18sp" />
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <LinearLayout
+                    android:orientation="vertical"
+                    android:layout_width="30dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="0.06"></LinearLayout>
+
+                <EditText
+                    android:layout_width="93dp"
+                    android:layout_height="wrap_content"
+                    android:inputType="textPersonName"
+                    android:ems="10"
+                    android:id="@+id/txtPatente"
+                    android:textSize="36sp"
+                    android:singleLine="true"
+                    android:textAlignment="center"
+                    android:hint="FGSD-30"
+                    android:background="@drawable/fondo_txt"
+                    android:layout_weight="1" />
+
+                <LinearLayout
+                    android:orientation="vertical"
+                    android:layout_width="44dp"
+                    android:layout_height="match_parent"></LinearLayout>
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="183dp"
+            android:weightSum="1">
+
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="22dp">
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="fill_parent"
+                android:layout_height="67dp"
+                android:layout_weight="0.13">
+
+                <LinearLayout
+                    android:orientation="vertical"
+                    android:layout_width="33dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1.98"></LinearLayout>
+
+                <Button
+                    android:text="Siguiente"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/btnSiguiente"
+                    style="@style/Botton" />
+
+                <LinearLayout
+                    android:orientation="vertical"
+                    android:layout_width="29dp"
+                    android:layout_height="match_parent"></LinearLayout>
+
+                <Button
+                    android:text="Limpiar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/btnLimpiar"
+                    android:layout_weight="0.83"
+                    style="@style/Botton"/>
+
+                <LinearLayout
+                    android:orientation="vertical"
+                    android:layout_width="33dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1.72"></LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="0.14">
+
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="108dp">
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:srcCompat="@drawable/repartidor"
+                    android:id="@+id/imageView9" />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+</RelativeLayout>
