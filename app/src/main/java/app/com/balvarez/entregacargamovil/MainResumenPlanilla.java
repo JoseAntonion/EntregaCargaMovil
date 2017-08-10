@@ -7,9 +7,11 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
-public class MainResumenPlanilla extends Activity implements View.OnClickListener {
-     private Button btn_ingresar;
+public class MainResumenPlanilla extends AppCompatActivity implements View.OnClickListener {
+
+    private Button btn_ingresar;
     private Button btn_Volver;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

@@ -21,27 +21,31 @@ public class MainEntregaCarga extends AppCompatActivity implements View.OnClickL
         btn_no_entrega_carga.setOnClickListener(this);
     }
 
+
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
 
             case R.id.btnEntregaCarga: {
-                Intent intent = new Intent(MainEntregaCarga.this, MainFirma.class);
-                startActivity(intent);
+
+                Intent intento = new Intent(MainEntregaCarga.this, MainFirma.class);
+                startActivity(intento);
                 finish();
                 System.gc();
                 finish();
+                break;
             }
             case R.id.btnNoEntregaCarga: {
-                Intent intent = new Intent(MainEntregaCarga.this, MainMotivoNoEntrega.class);
-                startActivity(intent);
+
+                Intent intento = new Intent(MainEntregaCarga.this, MainMotivoNoEntrega.class);
+                startActivity(intento);
                 finish();
                 System.gc();
                 finish();
+                break;
             }
             default:
                 break;
-
         }
     }
 }
