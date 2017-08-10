@@ -10,4 +10,6 @@ public class MainEntregaCargaMovil extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_entrega_carga_movil);
     }
+
+
 }
