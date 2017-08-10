@@ -7,7 +7,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
-public class MainEntregaCargaMovil extends Activity implements View.OnClickListener {
+public class MainEntregaCargaMovil extends AppCompatActivity {
 
     private Button btn_siguiente;
     private Button btn_limpiar;
@@ -17,34 +17,32 @@ public class MainEntregaCargaMovil extends Activity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_entrega_carga_movil);
         btn_siguiente = (Button) findViewById(R.id.btnSiguiente);
-        btn_siguiente.setOnClickListener(this);
-        btn_limpiar = (Button) findViewById(R.id.btnLimpiar);
-        btn_limpiar.setOnClickListener(this);
-    }
+        btn_siguiente.setOnClickListener(new View.OnClickListener(){
 
-
-    @Override
-    public void onClick(View v) {
-
-        switch (v.getId()) {
-
-            case R.id.btnSiguiente: {
+            @Override
+            public void onClick(View v) {
                 Intent intent = new Intent(MainEntregaCargaMovil.this, MainResumenPlanilla.class);
                 startActivity(intent);
-                finish();
                 System.gc();
                 finish();
             }
-            case R.id.btnLimpiar: {
+        });
+        btn_limpiar = (Button) findViewById(R.id.btnLimpiar);
+        btn_limpiar.setOnClickListener(new View.OnClickListener(){
+
+            @Override
+            public void onClick(View v) {
                 Intent intent = new Intent(MainEntregaCargaMovil.this, MainEntregaCargaMovil.class);
                 startActivity(intent);
-                finish();
                 System.gc();
                 finish();
             }
-            default:
-                break;
-        }
+        });
+
+
     }
+
+
+
 
 }
