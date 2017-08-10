@@ -39,6 +39,8 @@ public class MainEntregaCarga extends AppCompatActivity implements View.OnClickL
                 System.gc();
                 finish();
             }
+            default:
+                break;
 
         }
     }

@@ -42,7 +42,8 @@ public class MainEntregaCargaMovil extends AppCompatActivity implements View.OnC
                 System.gc();
                 finish();
             }
-
+            default:
+                break;
         }
     }
 

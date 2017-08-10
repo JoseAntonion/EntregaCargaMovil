@@ -39,7 +39,8 @@ public class MainFirma extends AppCompatActivity implements View.OnClickListener
                 System.gc();
                 finish();
             }
-
+            default:
+                break;
         }
     }
 }
