@@ -7,9 +7,11 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
-public class MainODT extends Activity implements View.OnClickListener {
+public class MainODT extends AppCompatActivity implements View.OnClickListener {
     private Button btn_finreparto;//btnScanODT
     private Button btn_Volver;
+    private Button btn_scan_odt;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -18,6 +20,8 @@ public class MainODT extends Activity implements View.OnClickListener {
         btn_finreparto.setOnClickListener(this);
         btn_Volver = (Button) findViewById(R.id.btnVolver);
         btn_Volver.setOnClickListener(this);
+        btn_scan_odt = (Button) findViewById(R.id.btnScanODT);
+        btn_scan_odt.setOnClickListener(this);
     }
 
     @Override
