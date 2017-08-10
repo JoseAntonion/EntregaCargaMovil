@@ -8,7 +8,7 @@ import android.view.View;
 import android.widget.Button;
 
 public class MainEntregaCargaMovil extends AppCompatActivity {
-
+    //prueba
     private Button btn_siguiente;
     private Button btn_limpiar;
 
