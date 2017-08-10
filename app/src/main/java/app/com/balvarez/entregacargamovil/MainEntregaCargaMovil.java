@@ -7,7 +7,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
-public class MainEntregaCargaMovil extends Activity implements View.OnClickListener {
+public class MainEntregaCargaMovil extends AppCompatActivity implements View.OnClickListener {
 
     private Button btn_siguiente;
     private Button btn_limpiar;
@@ -31,14 +31,12 @@ public class MainEntregaCargaMovil extends Activity implements View.OnClickListe
             case R.id.btnSiguiente: {
                 Intent intent = new Intent(MainEntregaCargaMovil.this, MainResumenPlanilla.class);
                 startActivity(intent);
-                finish();
                 System.gc();
                 finish();
             }
             case R.id.btnLimpiar: {
                 Intent intent = new Intent(MainEntregaCargaMovil.this, MainEntregaCargaMovil.class);
                 startActivity(intent);
-                finish();
                 System.gc();
                 finish();
             }

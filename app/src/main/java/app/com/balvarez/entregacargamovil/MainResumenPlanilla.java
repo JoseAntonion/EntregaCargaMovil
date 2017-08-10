@@ -28,7 +28,7 @@ public class MainResumenPlanilla extends Activity implements View.OnClickListene
 
                 Intent intento = new Intent(MainResumenPlanilla.this, MainODT.class);
                 startActivity(intento);
-                finish();
+
                 System.gc();
                 finish();
                 break;
@@ -37,7 +37,7 @@ public class MainResumenPlanilla extends Activity implements View.OnClickListene
 
                 Intent intento = new Intent(MainResumenPlanilla.this, MainEntregaCargaMovil.class);
                 startActivity(intento);
-                finish();
+
                 System.gc();
                 finish();
                 break;

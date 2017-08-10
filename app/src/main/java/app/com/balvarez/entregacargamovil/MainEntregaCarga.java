@@ -28,14 +28,12 @@ public class MainEntregaCarga extends AppCompatActivity implements View.OnClickL
             case R.id.btnEntregaCarga: {
                 Intent intent = new Intent(MainEntregaCarga.this, MainFirma.class);
                 startActivity(intent);
-                finish();
                 System.gc();
                 finish();
             }
             case R.id.btnNoEntregaCarga: {
                 Intent intent = new Intent(MainEntregaCarga.this, MainMotivoNoEntrega.class);
                 startActivity(intent);
-                finish();
                 System.gc();
                 finish();
             }
