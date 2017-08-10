@@ -7,7 +7,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
-public class MainEntregaCargaMovil extends AppCompatActivity implements View.OnClickListener {
+public class MainEntregaCargaMovil extends Activity implements View.OnClickListener {
 
     private Button btn_siguiente;
     private Button btn_limpiar;
