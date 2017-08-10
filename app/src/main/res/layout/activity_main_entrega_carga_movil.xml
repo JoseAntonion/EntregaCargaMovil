@@ -23,16 +23,17 @@
         android:layout_marginStart="18dp"
         android:layout_marginTop="18dp">
 
+        <ImageView
+            android:id="@+id/imageView6"
+            android:layout_width="match_parent"
+            android:layout_height="166dp"
+            app:srcCompat="@drawable/logo_cargo" />
+
         <LinearLayout
             android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="168dp">
+            android:layout_height="27dp">
 
-            <ImageView
-                android:layout_width="fill_parent"
-                android:layout_height="110dp"
-                app:srcCompat="@drawable/pullman_cargo"
-                android:id="@+id/imageView8" />
         </LinearLayout>
 
         <LinearLayout
@@ -83,7 +84,7 @@
         <LinearLayout
             android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="183dp"
+            android:layout_height="100dp"
             android:weightSum="1">
 
             <LinearLayout
@@ -100,10 +101,9 @@
                 android:layout_weight="0.13">
 
                 <LinearLayout
-                    android:orientation="vertical"
-                    android:layout_width="33dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:layout_weight="1.98"></LinearLayout>
+                    android:orientation="vertical"></LinearLayout>
 
                 <Button
                     android:text="Siguiente"
@@ -114,7 +114,7 @@
 
                 <LinearLayout
                     android:orientation="vertical"
-                    android:layout_width="29dp"
+                    android:layout_width="16dp"
                     android:layout_height="match_parent"></LinearLayout>
 
                 <Button
@@ -127,9 +127,8 @@
 
                 <LinearLayout
                     android:orientation="vertical"
-                    android:layout_width="33dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1.72"></LinearLayout>
+                    android:layout_width="21dp"
+                    android:layout_height="match_parent"></LinearLayout>
             </LinearLayout>
         </LinearLayout>
 

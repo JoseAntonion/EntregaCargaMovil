@@ -14,7 +14,10 @@
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true">
 
         <LinearLayout
             android:orientation="vertical"
@@ -94,10 +97,10 @@
                     style="@style/Botton"
                     android:layout_weight="0.03"
                     android:layout_width="wrap_content"
-                    android:layout_marginBottom="25dp"
-                    android:layout_alignParentBottom="true"
-                    android:layout_alignRight="@+id/textView6"
-                    android:layout_alignEnd="@+id/textView6" />
+                    android:layout_alignBaseline="@+id/btnVolver"
+                    android:layout_alignBottom="@+id/btnVolver"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentEnd="true" />
 
                 <Button
                     android:text="Volver"
@@ -105,9 +108,10 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:id="@+id/btnVolver"
-                    android:layout_alignTop="@+id/btnSiguiente"
-                    android:layout_toRightOf="@+id/textView5"
-                    android:layout_toEndOf="@+id/textView5" />
+                    android:layout_marginBottom="14dp"
+                    android:layout_alignParentBottom="true"
+                    android:layout_alignLeft="@+id/textView5"
+                    android:layout_alignStart="@+id/textView5" />
             </RelativeLayout>
 
         </LinearLayout>

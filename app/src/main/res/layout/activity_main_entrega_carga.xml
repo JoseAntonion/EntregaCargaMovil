@@ -47,7 +47,7 @@
 
                 <LinearLayout
                     android:orientation="horizontal"
-                    android:layout_width="52dp"
+                    android:layout_width="34dp"
                     android:layout_height="match_parent"></LinearLayout>
 
                 <LinearLayout
@@ -107,7 +107,7 @@
 
                 <LinearLayout
                     android:orientation="horizontal"
-                    android:layout_width="52dp"
+                    android:layout_width="35dp"
                     android:layout_height="match_parent"></LinearLayout>
 
                 <LinearLayout
@@ -117,7 +117,7 @@
 
                     <LinearLayout
                         android:orientation="vertical"
-                        android:layout_width="match_parent"
+                        android:layout_width="217dp"
                         android:layout_height="match_parent"
                         android:weightSum="1">
 
@@ -166,7 +166,7 @@
             <LinearLayout
                 android:orientation="vertical"
                 android:layout_width="match_parent"
-                android:layout_height="54dp"></LinearLayout>
+                android:layout_height="24dp"></LinearLayout>
 
             <LinearLayout
                 android:orientation="horizontal"
@@ -175,7 +175,7 @@
 
                 <LinearLayout
                     android:orientation="horizontal"
-                    android:layout_width="54dp"
+                    android:layout_width="17dp"
                     android:layout_height="match_parent"></LinearLayout>
 
                 <LinearLayout
@@ -210,10 +210,9 @@
                 android:weightSum="1">
 
                 <LinearLayout
-                    android:orientation="horizontal"
-                    android:layout_width="41dp"
+                    android:layout_width="13dp"
                     android:layout_height="match_parent"
-                    android:layout_weight="1.36"></LinearLayout>
+                    android:orientation="horizontal"></LinearLayout>
 
                 <LinearLayout
                     android:orientation="horizontal"
@@ -222,7 +221,7 @@
 
                     <Button
                         android:text="NO ENTREGAR CARGA"
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:id="@+id/btnNoEntregaCarga"
                         style="@style/Botton"/>
@@ -230,8 +229,8 @@
 
                 <LinearLayout
                     android:orientation="horizontal"
-                    android:layout_width="35dp"
-                    android:layout_height="match_parent"></LinearLayout>
+                    android:layout_width="wrap_content"
+                    android:layout_height="52dp"></LinearLayout>
             </LinearLayout>
 
         </LinearLayout>
