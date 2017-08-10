@@ -14,7 +14,7 @@ public class MainResumenPlanilla extends Activity implements View.OnClickListene
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_resumen_planilla);
-        btn_ingresar = (Button) findViewById(R.id.btnVolver);
+        btn_ingresar = (Button) findViewById(R.id.btnSiguiente);
         btn_ingresar.setOnClickListener(this);
         btn_Volver = (Button) findViewById(R.id.btnVolver);
         btn_Volver.setOnClickListener(this);
