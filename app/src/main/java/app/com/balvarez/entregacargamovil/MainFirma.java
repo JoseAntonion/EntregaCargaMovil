@@ -6,8 +6,10 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
-public class MainFirma extends AppCompatActivity implements View.OnClickListener {
+import com.coatedmoose.customviews.SignatureView;
 
+public class MainFirma extends AppCompatActivity implements View.OnClickListener {
+    SignatureView signature;
     private Button btn_finalizar;
     private Button btn_limpiar;
 
@@ -19,6 +21,7 @@ public class MainFirma extends AppCompatActivity implements View.OnClickListener
         btn_finalizar.setOnClickListener(this);
         btn_limpiar = (Button) findViewById(R.id.btnLimpiar);
         btn_limpiar.setOnClickListener(this);
+        signature = (SignatureView) this.findViewById(R.id.signatureView4);
     }
 
     @Override
@@ -33,11 +36,7 @@ public class MainFirma extends AppCompatActivity implements View.OnClickListener
                 finish();
             }
             case R.id.btnLimpiar: {
-                Intent intent = new Intent(MainFirma.this, MainFirma.class);
-                startActivity(intent);
-                finish();
-                System.gc();
-                finish();
+                signature.clearSignature();
             }
             default:
                 break;

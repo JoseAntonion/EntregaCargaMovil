@@ -6,17 +6,20 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 
 public class MainEntregaCargaMovil extends AppCompatActivity {
     //prueba
     private Button btn_siguiente;
     private Button btn_limpiar;
+    private TextView patente;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_entrega_carga_movil);
         btn_siguiente = (Button) findViewById(R.id.btnSiguiente);
+       patente= (TextView) findViewById(R.id.txtPatente);
         btn_siguiente.setOnClickListener(new View.OnClickListener(){
 
             @Override
@@ -32,10 +35,7 @@ public class MainEntregaCargaMovil extends AppCompatActivity {
 
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MainEntregaCargaMovil.this, MainEntregaCargaMovil.class);
-                startActivity(intent);
-                System.gc();
-                finish();
+              patente.setText("");
             }
         });
 

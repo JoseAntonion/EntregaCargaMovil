@@ -76,9 +76,9 @@
                                 android:layout_height="25dp"></LinearLayout>
 
                             <Spinner
+                                android:id="@+id/spnMotivo"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:id="@+id/spinner"
                                 android:layout_weight="0.48" />
 
                             <LinearLayout

@@ -20,16 +20,6 @@
 
     </LinearLayout>
 
-    <ImageView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:srcCompat="@drawable/pullman_cargo"
-        android:id="@+id/imageView11"
-        android:layout_marginBottom="498dp"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
-
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -37,59 +27,78 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true">
 
-        <TextView
-            android:text="Ingrese Firma"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="47dp"
-            android:id="@+id/textView22"
-            android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true"
-            android:textStyle="normal|bold"
-            android:textSize="18sp" />
-
-        <LinearLayout
-            android:orientation="vertical"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_alignParentTop="true"
             android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true">
-
-            <view
-                android:layout_width="match_parent"
-                android:layout_height="255dp"
-                class="com.coatedmoose.customviews.SignatureView"
-                android:layout_alignParentTop="true"
-                android:layout_marginTop="75dp"
-                android:id="@+id/view"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentStart="true" />
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:orientation="vertical">
 
             <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="477dp">
 
-                <Button
-                    android:text="Finalizar"
+                <ImageView
+                    android:id="@+id/imageView11"
+                    android:layout_width="match_parent"
+                    android:layout_height="30dp"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentTop="true"
+                    app:srcCompat="@drawable/pullman_cargo" />
+
+                <TextView
+                    android:id="@+id/textView22"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_alignParentTop="true"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginTop="47dp"
+                    android:text="Ingrese Firma"
+                    android:textSize="18sp"
+                    android:textStyle="normal|bold" />
+
+                <LinearLayout
+                    android:layout_width="300dp"
+                    android:layout_height="200dp"
+                    android:orientation="horizontal"
+                    android:layout_below="@+id/textView22"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
+                    android:layout_marginTop="18dp"
+                    android:layout_above="@+id/btnFinalizar">
+
+                    <com.coatedmoose.customviews.SignatureView
+                        android:id="@+id/signatureView4"
+                        android:layout_width="wrap_content"
+                        android:layout_height="280dp"
+                        android:background="@color/black" />
+                </LinearLayout>
+
+                <Button
                     android:id="@+id/btnFinalizar"
                     style="@style/Botton"
-                    android:layout_centerVertical="true"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Finalizar"
+                    android:layout_marginBottom="44dp"
+                    android:layout_marginLeft="17dp"
+                    android:layout_marginStart="17dp"
+                    android:layout_alignParentBottom="true"
                     android:layout_alignParentLeft="true"
                     android:layout_alignParentStart="true" />
 
                 <Button
-                    android:text="Limpiar"
+                    android:id="@+id/btnLimpiar"
+                    style="@style/Botton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:id="@+id/button4"
-                    style="@style/Botton"
                     android:layout_alignBaseline="@+id/btnFinalizar"
                     android:layout_alignBottom="@+id/btnFinalizar"
+                    android:layout_alignParentEnd="true"
                     android:layout_alignParentRight="true"
-                    android:layout_alignParentEnd="true" />
+                    android:text="Limpiar" />
             </RelativeLayout>
 
         </LinearLayout>
