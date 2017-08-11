@@ -23,7 +23,7 @@ public class MainFirma extends AppCompatActivity implements View.OnClickListener
         btn_limpiar.setOnClickListener(this);
         signature = (SignatureView) this.findViewById(R.id.signatureView4);
     }
-
+//888888
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
