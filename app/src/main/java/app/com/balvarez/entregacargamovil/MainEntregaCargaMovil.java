@@ -34,6 +34,7 @@ public class MainEntregaCargaMovil extends AppCompatActivity {
     private TextView txt_patente;
     private String patente;
     private Activity activity;
+    private Utilidades util;
 
     // VARIABLES PARA VALIDACION DE CAMPOS
     private static final int NO_PATENTE = 0;
@@ -67,24 +68,26 @@ public class MainEntregaCargaMovil extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_entrega_carga_movil);
+        activity = this;
         btn_siguiente = (Button) findViewById(R.id.btnSiguiente);
         btn_siguiente.setOnClickListener(new View.OnClickListener(){
 
             @Override
             public void onClick(View v) {
-                Utilidades util = new Utilidades();
                 if(util.verificaConexion(getApplicationContext())){
+                    txt_patente = (TextView) findViewById(R.id.txtPatente);
+                    patente = txt_patente.getText().toString();
                     new TraeOdtPorPatente().execute();
-                    Intent intent = new Intent(MainEntregaCargaMovil.this, MainResumenPlanilla.class);
-                    startActivity(intent);
-                    System.gc();
-                    finish();
-                }else{
-                    Toast.makeText(MainEntregaCargaMovil.this,"Sin conexion a Internet. No se cargaran datos", Toast.LENGTH_LONG).show();
                     /*Intent intent = new Intent(MainEntregaCargaMovil.this, MainResumenPlanilla.class);
                     startActivity(intent);
                     System.gc();
                     finish();*/
+                }else{
+                    Toast.makeText(MainEntregaCargaMovil.this,"Sin conexion a Internet. No se cargaran datos", Toast.LENGTH_LONG).show();
+                    Intent intent = new Intent(MainEntregaCargaMovil.this, MainEntregaCargaMovil.class);
+                    startActivity(intent);
+                    System.gc();
+                    finish();
                 }
             }
         });
@@ -93,10 +96,7 @@ public class MainEntregaCargaMovil extends AppCompatActivity {
 
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MainEntregaCargaMovil.this, MainEntregaCargaMovil.class);
-                startActivity(intent);
-                System.gc();
-                finish();
+                txt_patente.setText("");
             }
         });
         txt_patente = (TextView) findViewById(R.id.txtPatente);
@@ -151,13 +151,17 @@ public class MainEntregaCargaMovil extends AppCompatActivity {
             try {
                 WebServices WS = new WebServices();
                 TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-                String imei = telephonyManager.getDeviceId();
+                //String imei = telephonyManager.getDeviceId();
                 listaOdts = WS.OdtsXPatente(patente);
+                //listaOdts = new ArrayList<>();
+                util.creaDirectorio();
                 util.escribirEnArchivo(listaOdts);
             }
             catch (Exception e){
                 e.printStackTrace();
             }
+
+
         return respStr;
         }
 
@@ -167,6 +171,12 @@ public class MainEntregaCargaMovil extends AppCompatActivity {
         protected void onPostExecute(String result) {
             if (MensajeProgreso.isShowing())
                 MensajeProgreso.dismiss();
+
+            Intent intent = new Intent(MainEntregaCargaMovil.this, MainResumenPlanilla.class);
+            startActivity(intent);
+            System.gc();
+            finish();
+
         }
     }
 

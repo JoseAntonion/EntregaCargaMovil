@@ -6,6 +6,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -16,7 +17,7 @@ import To.ArchivoOdtPorPatenteTO;
 
 public class WebServices {
 
-    private String RUTA_WEB_SERVICE = "RUTA DEL WEBSERVICE";
+    private String RUTA_WEB_SERVICE = "http://webservices.pullman.cl/ServiciosCarga/rest/ServiciosAndroid";
 
     public ArrayList<ArchivoOdtPorPatenteTO> OdtsXPatente(String patente) throws IOException,
             ClientProtocolException, JSONException {
@@ -33,29 +34,34 @@ public class WebServices {
         ArrayList<ArchivoOdtPorPatenteTO> archivoOdtPorPatenteTOs =  new ArrayList<ArchivoOdtPorPatenteTO>();
 
 
-        del = new HttpGet(RUTA_WEB_SERVICE + "/DatosTxtDocContable/docContable=");
+        del = new HttpGet(RUTA_WEB_SERVICE + "/TraeDocumentos/patente="+patente);
         del.setHeader("content-type", "application/json");
         resp = httpClient.execute(del);
         respStr = EntityUtils.toString(resp.getEntity());
         responseObject = new JSONObject(respStr);
-        responseObject1 = new JSONObject(respStr);
-        responseObject1 = responseObject.getJSONObject("ValidacionTO");
-        String filas = responseObject1.getString("Filas");
+        //responseObject = responseObject.getJSONObject("diDocInternoTO");
+        JSONArray respJSON = responseObject.getJSONArray("diDocInternoTO");
 
-
-        responseObject = responseObject.getJSONObject("ArregloDeElementos");
-        String cantidadElementos = responseObject.getString("CantidadDeElementos");
-
-        for(int i = 0;i<Integer.parseInt(cantidadElementos);i++) {
-            archivoOdtPorPatenteTO.setCodBarra(responseObject.getString("codigodebarra"));
-            archivoOdtPorPatenteTO.setEstadoODT(responseObject.getString("estadoodt"));
-            archivoOdtPorPatenteTO.setFormaPago(responseObject.getString("formapago"));
-            archivoOdtPorPatenteTO.setNumeroODT(responseObject.getString("numeroodt"));
-            archivoOdtPorPatenteTO.setNumeroPiezas(responseObject.getInt("numeropiezas"));
-            archivoOdtPorPatenteTO.setPlanilla(responseObject.getString("planilla"));
+        for (int i = 0; i < respJSON.length(); i++) {
+            archivoOdtPorPatenteTO =  new ArchivoOdtPorPatenteTO();
+            JSONObject obj = respJSON.getJSONObject(i);
+            archivoOdtPorPatenteTO.setCodBarra(obj.getString("Ccodigobarra"));
+            archivoOdtPorPatenteTO.setEstadoODT(obj.getString("Ueoestado"));
+            archivoOdtPorPatenteTO.setFormaPago(obj.getString("Doformapago"));
+            archivoOdtPorPatenteTO.setNumeroODT(obj.getString("Ueonumeroot"));
+            archivoOdtPorPatenteTO.setNumeroPiezas(obj.getInt("Donumeropiezas"));
+            archivoOdtPorPatenteTO.setPlanilla(obj.getString("Dinumerodocumento"));
             archivoOdtPorPatenteTOs.add(archivoOdtPorPatenteTO);
-
         }
+        /*archivoOdtPorPatenteTO.setCodBarra(respJSON.getString("codigodebarra"));
+        archivoOdtPorPatenteTO.setEstadoODT(respJSON.getString("estadoodt"));
+        archivoOdtPorPatenteTO.setFormaPago(respJSON.getString("formapago"));
+        archivoOdtPorPatenteTO.setNumeroODT(respJSON.getString("numeroodt"));
+        archivoOdtPorPatenteTO.setNumeroPiezas(respJSON.getInt("numeropiezas"));
+        archivoOdtPorPatenteTO.setPlanilla(respJSON.getString("planilla"));
+        archivoOdtPorPatenteTOs.add(archivoOdtPorPatenteTO);*/
+
+
 
         /*JSONArray respJSON = responseObject.getJSONArray("ArchivoDocElectronicoTO");
 
