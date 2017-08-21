@@ -70,10 +70,9 @@ public class Utilidades {
             lfile = new File(Globales.odtsXpatente);
             lfilewriter = new FileWriter(lfile, false);
             BufferedWriter ex = new BufferedWriter(lfilewriter);
-            for (int i = 0; i <= lista.size(); i++) {
-                ex.write("\n"+lista.get(i).getPlanilla() + "~" +lista.get(i).getNumeroODT() + "~" +lista.get(i).getEstadoODT() + "~" +lista.get(i).getFormaPago() + "~"
-                        +lista.get(i).getNumeroPiezas() + "~"
-                        +lista.get(i).getCodBarra());
+            for (int i = 0; i < lista.size(); i++) {
+                //ex.newLine();
+                ex.write("\n"+ lista.get(i).getPlanilla() + "~" +lista.get(i).getNumeroODT() + "~" +lista.get(i).getEstadoODT() + "~" +lista.get(i).getFormaPago() +"~"+ String.valueOf(lista.get(i).getNumeroPiezas()) +"~"+ lista.get(i).getCodBarra());
             }
             ex.close();
         } catch (Exception var17) {
@@ -142,31 +141,79 @@ public class Utilidades {
         }
     }*/
 
-    public ArrayList<ArchivoOdtPorPatenteTO> cargaDesdeArchivo() throws IOException, ClientProtocolException, JSONException {
-
+    public int leeCantidadOdtsArchivo() throws IOException, ClientProtocolException, JSONException {
         FileReader fr = null;
-        ArchivoOdtPorPatenteTO archivo = new ArchivoOdtPorPatenteTO();
+        ArchivoOdtPorPatenteTO archivo;
         ArrayList<ArchivoOdtPorPatenteTO> listaArchivo = new ArrayList<>();
+        String aux = "";
 
         try {
             fr = new FileReader(Globales.odtsXpatente);
             BufferedReader br = new BufferedReader(fr);
             String s = br.readLine();
             if(s != null) {
-                while(s!=null) {
-
-                    this.recibeSplit = s.split("~");
-                    archivo.setPlanilla(recibeSplit[0]);
-                    archivo.setNumeroODT(recibeSplit[1]);
-                    archivo.setEstadoODT(recibeSplit[2]);
-                    archivo.setFormaPago(recibeSplit[3]);
-                    archivo.setNumeroPiezas(Integer.parseInt(recibeSplit[4]));
-                    archivo.setCodBarra(recibeSplit[5]);
-
-                    listaArchivo.add(archivo);
-
-                    s = br.readLine();
+                do {
+                    if (!s.equalsIgnoreCase("") && !s.equalsIgnoreCase("XXXXXXXXXXXXXXXXXX")) {
+                        this.recibeSplit = s.split("~");
+                            archivo = new ArchivoOdtPorPatenteTO();
+                            archivo.setPlanilla(recibeSplit[0]);
+                            archivo.setNumeroODT(recibeSplit[1]);
+                            archivo.setEstadoODT(recibeSplit[2]);
+                            archivo.setFormaPago(recibeSplit[3]);
+                            archivo.setNumeroPiezas(Integer.parseInt(recibeSplit[4]));
+                            archivo.setCodBarra(recibeSplit[5]);
+                            listaArchivo.add(archivo);
+                            aux = recibeSplit[1];
                     }
+                    s = br.readLine();
+                }while(s!=null);
+            }
+
+        } catch (Exception ex) {
+            Log.e("error", "Error al leer fichero desde memoria interna");
+            ex.printStackTrace();
+        } finally {
+            try {
+                if(fr != null) {
+                    fr.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        }
+        return listaArchivo.size();
+    }
+
+    public ArrayList<ArchivoOdtPorPatenteTO> cargaDesdeArchivo() throws IOException, ClientProtocolException, JSONException {
+
+        FileReader fr = null;
+        ArchivoOdtPorPatenteTO archivo;
+        ArrayList<ArchivoOdtPorPatenteTO> listaArchivo = new ArrayList<>();
+        String aux = "";
+
+        try {
+            fr = new FileReader(Globales.odtsXpatente);
+            BufferedReader br = new BufferedReader(fr);
+            String s = br.readLine();
+            if(s != null) {
+                do {
+                    if (!s.equalsIgnoreCase("") && !s.equalsIgnoreCase("XXXXXXXXXXXXXXXXXX")) {
+                        this.recibeSplit = s.split("~");
+                        if(!aux.equals(recibeSplit[1])){
+                            archivo = new ArchivoOdtPorPatenteTO();
+                            archivo.setPlanilla(recibeSplit[0]);
+                            archivo.setNumeroODT(recibeSplit[1]);
+                            archivo.setEstadoODT(recibeSplit[2]);
+                            archivo.setFormaPago(recibeSplit[3]);
+                            archivo.setNumeroPiezas(Integer.parseInt(recibeSplit[4]));
+                            archivo.setCodBarra(recibeSplit[5]);
+                            listaArchivo.add(archivo);
+                            aux = recibeSplit[1];
+                        }
+                    }
+                    s = br.readLine();
+                }while(s!=null);
             }
 
         } catch (Exception ex) {
@@ -186,11 +233,4 @@ public class Utilidades {
 
     }
 
-    public ArrayList<String> cargaDesdeArchivoPrueba(){
-        ArrayList<String> lista = new ArrayList<>();
-        for(int i=0;i<=5;i++){
-            lista.add(String.valueOf(i));
-        }
-        return lista;
-    }
 }

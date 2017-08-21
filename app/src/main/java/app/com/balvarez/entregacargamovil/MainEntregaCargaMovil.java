@@ -74,7 +74,7 @@ public class MainEntregaCargaMovil extends AppCompatActivity {
 
             @Override
             public void onClick(View v) {
-                if(util.verificaConexion(getApplicationContext())){
+                /*if(util.verificaConexion(getApplicationContext())){*/
                     txt_patente = (TextView) findViewById(R.id.txtPatente);
                     patente = txt_patente.getText().toString();
                     new TraeOdtPorPatente().execute();
@@ -82,13 +82,13 @@ public class MainEntregaCargaMovil extends AppCompatActivity {
                     startActivity(intent);
                     System.gc();
                     finish();*/
-                }else{
+                /*}else{
                     Toast.makeText(MainEntregaCargaMovil.this,"Sin conexion a Internet. No se cargaran datos", Toast.LENGTH_LONG).show();
                     Intent intent = new Intent(MainEntregaCargaMovil.this, MainEntregaCargaMovil.class);
                     startActivity(intent);
                     System.gc();
                     finish();
-                }
+                }*/
             }
         });
         btn_limpiar = (Button) findViewById(R.id.btnLimpiar);
