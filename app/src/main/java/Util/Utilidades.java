@@ -233,4 +233,31 @@ public class Utilidades {
 
     }
 
+    public String buscaFormaPagoOdt(String odt) throws IOException, ClientProtocolException, JSONException {
+        String formaPago = "";
+        FileReader fr = null;
+        Boolean encontrado = false;
+
+        try {
+            fr = new FileReader(Globales.odtsXpatente);
+            BufferedReader br = new BufferedReader(fr);
+            String s = br.readLine();
+            if(s != null) {
+                while(s!=null || encontrado){
+                    this.recibeSplit = s.split("~");
+                    if (odt.equals(recibeSplit[0])) {
+                        encontrado = true;
+                        formaPago = recibeSplit[3];
+                    }
+                    s = br.readLine();
+                }
+                if(formaPago.equals("")){
+                    formaPago = "NA";
+                }
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return formaPago;
+    }
 }
