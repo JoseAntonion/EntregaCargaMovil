@@ -66,14 +66,13 @@ public class MainResumenPlanilla extends AppCompatActivity implements View.OnCli
 
             switch (v.getId()) {
 
-                /*case R.id.btnSiguiente: {
+                case R.id.btnSiguiente: {
 
-                    Intent intento = new Intent(MainResumenPlanilla.this, MainODT.class);
-                    startActivity(intento);
-                    System.gc();
-                    finish();
-                    break;
-                }*/
+                    Intent intent = new Intent(MainResumenPlanilla.this, MainODT.class);
+                    startActivity(intent);
+
+
+                }
                 case R.id.btnVolver: {
 
                     Intent intento = new Intent(MainResumenPlanilla.this, MainEntregaCargaMovil.class);
