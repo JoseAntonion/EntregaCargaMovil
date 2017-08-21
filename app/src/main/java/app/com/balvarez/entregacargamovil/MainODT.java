@@ -52,6 +52,9 @@ public class MainODT extends AppCompatActivity implements View.OnClickListener {
     protected void onCreate(Bundle savedInstanceState) {
         activity = this;
         super.onCreate(savedInstanceState);
+        mScanMgr=ScanManager.getInstance();
+        mContext = getApplicationContext();
+        //aActivity = this;
         setContentView(R.layout.activity_main_odt);
         btn_finreparto = (Button) findViewById(R.id.btnFinReparto);
         btn_finreparto.setOnClickListener(this);
@@ -227,7 +230,7 @@ public class MainODT extends AppCompatActivity implements View.OnClickListener {
     private void registerReceiver()
     {
         IntentFilter intFilter=new IntentFilter(ScanManager.ACTION_SEND_SCAN_RESULT);
-        registerReceiver(mResultReceiver, intFilter);
+        registerReceiver(this.mResultReceiver, intFilter);
         mScanMgr.startScan();
     }
 
@@ -239,7 +242,6 @@ public class MainODT extends AppCompatActivity implements View.OnClickListener {
             e.printStackTrace();
         }
     }
-
 
     @Override
     protected void onPause() {
@@ -253,14 +255,13 @@ public class MainODT extends AppCompatActivity implements View.OnClickListener {
         registerReceiver();
     }
 
-
-
     private BroadcastReceiver mResultReceiver=new BroadcastReceiver() {
 
 
         @Override
         public void onReceive(Context context, Intent intent) {
             String action=intent.getAction();
+            String formaPago = "";
 
             if(ScanManager.ACTION_SEND_SCAN_RESULT.equals(action)){
                 byte[] bvalue1=intent.getByteArrayExtra(ScanManager.EXTRA_SCAN_RESULT_ONE_BYTES);
@@ -276,7 +277,21 @@ public class MainODT extends AppCompatActivity implements View.OnClickListener {
                     svalue1=svalue1==null?"":svalue1;
                     svalue2=svalue2==null?"":svalue2;
                     if (svalue1.length()>0) {
-                        //recepcionaBulto(svalue1);
+                        formaPago = util.buscaFormaPagoOdt(svalue1);
+                        if(formaPago.equals("CTA")){
+                            Intent intento = new Intent(MainODT.this, MainEntregaCarga.class);
+                            intento.putExtra("odt",svalue1);
+                            startActivity(intento);
+                            System.gc();
+                        }else if(formaPago.equals("PED")){
+                            Intent intento = new Intent(MainODT.this, MainEscanerBulto.class);
+                            intento.putExtra("odt",svalue1);
+                            startActivity(intento);
+                            System.gc();
+                        }else{
+                            Toast.makeText(activity.getApplicationContext(),
+                                    "No se encontro FORMA DE PAGO para la odt escaneada", Toast.LENGTH_LONG).show();
+                        }
                     }
 
                 } catch (Exception e) {
@@ -290,6 +305,11 @@ public class MainODT extends AppCompatActivity implements View.OnClickListener {
         }
     };
 
+    public String formaPagoODT(String odt){
+        String tipoPago = "";
+
+        return tipoPago;
+    }
 
 }
 

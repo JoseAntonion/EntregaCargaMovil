@@ -27,8 +27,8 @@ public class MainResumenPlanilla extends AppCompatActivity implements View.OnCli
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_resumen_planilla);
         btn_ingresar = (Button) findViewById(R.id.btnSiguiente);
-        //btn_ingresar.setOnClickListener(this);
-        btn_ingresar.setOnClickListener(new View.OnClickListener(){
+        btn_ingresar.setOnClickListener(this);
+        /*btn_ingresar.setOnClickListener(new View.OnClickListener(){
 
             @Override
             public void onClick(View v) {
@@ -37,7 +37,7 @@ public class MainResumenPlanilla extends AppCompatActivity implements View.OnCli
                 System.gc();
                 finish();
             }
-        });
+        });*/
         btn_Volver = (Button) findViewById(R.id.btnVolver);
         btn_Volver.setOnClickListener(this);
         ls_lista_odts = (ListView) findViewById(R.id.lstResumenPlanilla);
@@ -67,18 +67,19 @@ public class MainResumenPlanilla extends AppCompatActivity implements View.OnCli
             switch (v.getId()) {
 
                 case R.id.btnSiguiente: {
-
-                    Intent intent = new Intent(MainResumenPlanilla.this, MainODT.class);
-                    startActivity(intent);
-
+                    Intent intento = new Intent(MainResumenPlanilla.this, MainODT.class);
+                        startActivity(intento);
+                        //System.gc();
+                       finish();
+                       break;
 
                 }
                 case R.id.btnVolver: {
 
                     Intent intento = new Intent(MainResumenPlanilla.this, MainEntregaCargaMovil.class);
                     startActivity(intento);
-                    System.gc();
-                    //finish();
+                    //System.gc();
+                    finish();
                     break;
                 }
 
