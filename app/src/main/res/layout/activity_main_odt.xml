@@ -76,7 +76,7 @@
             android:layout_marginBottom="18dp"
             android:layout_above="@+id/btnVolver"
             android:layout_centerHorizontal="true" />
-
+        <!-- :V -->
         <TextView
             android:text="0"
             android:layout_width="wrap_content"
