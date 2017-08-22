@@ -25,19 +25,23 @@
         android:text="ODT"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="93dp"
+        android:layout_marginTop="124dp"
         android:id="@+id/textView"
         android:textStyle="normal|bold"
         android:textSize="24sp"
         android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true" />
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginRight="67dp"
+        android:layout_marginEnd="67dp" />
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@+id/textView"
         android:layout_centerHorizontal="true"
-        android:layout_alignParentBottom="true">
+        android:layout_alignParentBottom="true"
+        android:id="@+id/relativeLayout">
 
         <TextView
             android:text="0"
@@ -47,10 +51,8 @@
             android:textSize="36sp"
             android:layout_alignBaseline="@+id/lblFaltantes"
             android:layout_alignBottom="@+id/lblFaltantes"
-            android:layout_alignLeft="@+id/textView3"
-            android:layout_alignStart="@+id/textView3"
-            android:layout_marginLeft="25dp"
-            android:layout_marginStart="25dp" />
+            android:layout_toRightOf="@+id/btnVolver"
+            android:layout_toEndOf="@+id/btnVolver" />
 
         <TextView
             android:text="Entregadas"
@@ -63,9 +65,8 @@
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             android:layout_marginLeft="53dp"
-
             android:layout_marginStart="53dp" />
-
+        <!-- :V -->
         <Button
             android:text="Finalizar Reparto"
             android:layout_width="wrap_content"
@@ -75,29 +76,17 @@
             android:layout_marginBottom="18dp"
             android:layout_above="@+id/btnVolver"
             android:layout_centerHorizontal="true" />
-
-        <Button
-            android:text="Escanear ODT"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/btnScanODT"
-            style="@style/Botton"
-            android:layout_above="@+id/btnFinReparto"
-            android:layout_centerHorizontal="true"
-            android:layout_marginBottom="12dp" />
-
+        <!-- :V -->
         <TextView
             android:text="0"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/lblFaltantes"
             android:textSize="36sp"
-            android:layout_marginTop="22dp"
-            android:layout_below="@+id/textView4"
-            android:layout_alignRight="@+id/btnScanODT"
-            android:layout_alignEnd="@+id/btnScanODT"
-            android:layout_marginRight="14dp"
-            android:layout_marginEnd="14dp" />
+            android:layout_marginTop="18dp"
+            android:layout_below="@+id/textView3"
+            android:layout_alignLeft="@+id/btnVolver"
+            android:layout_alignStart="@+id/btnVolver" />
 
         <Button
             android:text="Volver"
@@ -122,4 +111,25 @@
             android:layout_marginRight="13dp"
             android:layout_marginEnd="13dp" />
     </RelativeLayout>
+
+    <TextView
+        android:id="@+id/textView12"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Escanear "
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:layout_above="@+id/relativeLayout"
+        android:layout_toLeftOf="@+id/textView"
+        android:layout_toStartOf="@+id/textView" />
+
+    <TextView
+        android:id="@+id/textView15"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/textView12"
+        android:layout_alignLeft="@+id/textView12"
+        android:layout_alignStart="@+id/textView12"
+        android:text="Pistolear para"
+        android:textSize="18sp" />
 </RelativeLayout>
