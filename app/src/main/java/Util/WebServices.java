@@ -53,25 +53,6 @@ public class WebServices {
             archivoOdtPorPatenteTO.setPlanilla(obj.getString("Dinumerodocumento"));
             archivoOdtPorPatenteTOs.add(archivoOdtPorPatenteTO);
         }
-        /*archivoOdtPorPatenteTO.setCodBarra(respJSON.getString("codigodebarra"));
-        archivoOdtPorPatenteTO.setEstadoODT(respJSON.getString("estadoodt"));
-        archivoOdtPorPatenteTO.setFormaPago(respJSON.getString("formapago"));
-        archivoOdtPorPatenteTO.setNumeroODT(respJSON.getString("numeroodt"));
-        archivoOdtPorPatenteTO.setNumeroPiezas(respJSON.getInt("numeropiezas"));
-        archivoOdtPorPatenteTO.setPlanilla(respJSON.getString("planilla"));
-        archivoOdtPorPatenteTOs.add(archivoOdtPorPatenteTO);*/
-
-
-
-        /*JSONArray respJSON = responseObject.getJSONArray("ArchivoDocElectronicoTO");
-
-        for (int i = 0; i < respJSON.length(); i++) {
-            archivoDocElectronicoTO =  new ArchivoDocElectronicoTO();
-            JSONObject obj = respJSON.getJSONObject(i);
-                archivoDocElectronicoTO.setTipoDoc(obj.getString("TipoDoc"));
-                archivoDocElectronicoTOs.add(archivoDocElectronicoTO);
-        }*/
-
         return archivoOdtPorPatenteTOs;
     }
 

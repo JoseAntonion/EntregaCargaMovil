@@ -236,20 +236,23 @@ public class Utilidades {
     public String buscaFormaPagoOdt(String odt) throws IOException, ClientProtocolException, JSONException {
         String formaPago = "";
         FileReader fr = null;
-        Boolean encontrado = false;
+        //Boolean encontrado = false;
 
         try {
             fr = new FileReader(Globales.odtsXpatente);
             BufferedReader br = new BufferedReader(fr);
             String s = br.readLine();
             if(s != null) {
-                while(s!=null || encontrado){
-                    this.recibeSplit = s.split("~");
-                    if (odt.equals(recibeSplit[0])) {
-                        encontrado = true;
-                        formaPago = recibeSplit[3];
-                    }
-                    s = br.readLine();
+                while(s!=null){
+                    if (!s.equalsIgnoreCase("") && !s.equalsIgnoreCase("XXXXXXXXXXXXXXXXXX")) {
+                        this.recibeSplit = s.split("~");
+                        if (odt.equals(recibeSplit[1].toString())) {
+                            //encontrado = true;
+                            formaPago = recibeSplit[3].toString();
+                            break;
+                        }
+                        //s = br.readLine();
+                    }s = br.readLine();
                 }
                 if(formaPago.equals("")){
                     formaPago = "NA";
@@ -259,5 +262,56 @@ public class Utilidades {
             e.printStackTrace();
         }
         return formaPago;
+    }
+
+    public int leeCantidadBultosODT(String odt) throws IOException, ClientProtocolException, JSONException {
+        int cantidadBultos = 0;
+        FileReader fr = null;
+
+        try {
+            fr = new FileReader(Globales.odtsXpatente);
+            BufferedReader br = new BufferedReader(fr);
+            String s = br.readLine();
+            if(s != null) {
+                while(s!=null){
+                    if (!s.equalsIgnoreCase("") && !s.equalsIgnoreCase("XXXXXXXXXXXXXXXXXX")) {
+                        this.recibeSplit = s.split("~");
+                        if (odt.equals(recibeSplit[1].toString())) {
+                            cantidadBultos = Integer.parseInt(recibeSplit[4]);
+                            break;
+                        }
+                    }s = br.readLine();
+                }
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return cantidadBultos;
+    }
+
+    public Boolean validaBulto(String codBarra) throws  IOException, ClientProtocolException, JSONException{
+        Boolean valido = false;
+        FileReader fr = null;
+
+        try {
+            fr = new FileReader(Globales.odtsXpatente);
+            BufferedReader br = new BufferedReader(fr);
+            String s = br.readLine();
+            if(s != null) {
+                while(s!=null){
+                    if (!s.equalsIgnoreCase("") && !s.equalsIgnoreCase("XXXXXXXXXXXXXXXXXX")) {
+                        this.recibeSplit = s.split("~");
+                        if (codBarra.equals(recibeSplit[5].toString())) {
+                            valido = true;
+                            break;
+                        }
+                    }s = br.readLine();
+                }
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+        return valido;
     }
 }

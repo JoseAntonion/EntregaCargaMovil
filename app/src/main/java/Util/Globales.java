@@ -7,5 +7,6 @@ public class Globales extends Application {
 
     public static String odtsXpatente;
     public static int cantidadOriginalOdts;
+    public static int cantidadBultosOriginal;
 
 }

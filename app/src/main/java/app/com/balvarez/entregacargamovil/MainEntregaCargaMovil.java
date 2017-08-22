@@ -77,18 +77,13 @@ public class MainEntregaCargaMovil extends AppCompatActivity {
                 /*if(util.verificaConexion(getApplicationContext())){*/
                     txt_patente = (TextView) findViewById(R.id.txtPatente);
                     patente = txt_patente.getText().toString();
-                    new TraeOdtPorPatente().execute();
-                    /*Intent intent = new Intent(MainEntregaCargaMovil.this, MainResumenPlanilla.class);
-                    startActivity(intent);
-                    System.gc();
-                    finish();*/
-                /*}else{
-                    Toast.makeText(MainEntregaCargaMovil.this,"Sin conexion a Internet. No se cargaran datos", Toast.LENGTH_LONG).show();
-                    Intent intent = new Intent(MainEntregaCargaMovil.this, MainEntregaCargaMovil.class);
-                    startActivity(intent);
-                    System.gc();
-                    finish();
-                }*/
+                    if(!patente.equals("")){
+                        new TraeOdtPorPatente().execute();
+                    }else{
+                        Toast.makeText(getApplicationContext(), "Debe ingresar una PATENTE !!!",
+                                Toast.LENGTH_LONG).show();
+                    }
+
             }
         });
         btn_limpiar = (Button) findViewById(R.id.btnLimpiar);
@@ -130,6 +125,7 @@ public class MainEntregaCargaMovil extends AppCompatActivity {
         //String respStr = "";
         //long tiempo = 0;
         ProgressDialog MensajeProgreso;
+        Boolean bandera = false;
 
         @Override
         protected void onPreExecute() {
@@ -148,21 +144,23 @@ public class MainEntregaCargaMovil extends AppCompatActivity {
             ArrayList<ArchivoOdtPorPatenteTO> listaOdts = new ArrayList<>();
             Utilidades util = new Utilidades();
 
-            try {
-                WebServices WS = new WebServices();
-                TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-                //String imei = telephonyManager.getDeviceId();
-                listaOdts = WS.OdtsXPatente(patente);
-                //listaOdts = new ArrayList<>();
-                util.creaDirectorio();
-                util.escribirEnArchivo(listaOdts);
-            }
-            catch (Exception e){
-                e.printStackTrace();
-            }
 
-
-        return respStr;
+            if(util.verificaConexion(getApplicationContext())){
+                try {
+                    WebServices WS = new WebServices();
+                    TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+                    //String imei = telephonyManager.getDeviceId();
+                    listaOdts = WS.OdtsXPatente(patente);
+                    //listaOdts = new ArrayList<>();
+                    util.creaDirectorio();
+                    util.escribirEnArchivo(listaOdts);
+                    bandera = true;
+                }
+                catch (Exception e){
+                    e.printStackTrace();
+                }
+            }
+            return respStr;
         }
 
 
@@ -171,11 +169,20 @@ public class MainEntregaCargaMovil extends AppCompatActivity {
         protected void onPostExecute(String result) {
             if (MensajeProgreso.isShowing())
                 MensajeProgreso.dismiss();
+            if(bandera){
+                Intent intent = new Intent(MainEntregaCargaMovil.this, MainResumenPlanilla.class);
+                startActivity(intent);
+                System.gc();
+                finish();
+            }else{
+                Toast.makeText(getApplicationContext(), "Debe tener conexión a INTERNET para cargar datos de la Patente !!!",
+                        Toast.LENGTH_LONG).show();
+                Intent intent = new Intent(MainEntregaCargaMovil.this, MainEntregaCargaMovil.class);
+                startActivity(intent);
+                System.gc();
+                finish();
+            }
 
-            Intent intent = new Intent(MainEntregaCargaMovil.this, MainResumenPlanilla.class);
-            startActivity(intent);
-            System.gc();
-            finish();
 
         }
     }

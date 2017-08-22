@@ -143,10 +143,10 @@
                                 android:layout_height="23dp"></LinearLayout>
 
                             <TextView
-                                android:text="0"
+                                android:id="@+id/txtBultosLeidos"
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
-                                android:id="@+id/textView26"
+                                android:text="0"
                                 android:textAlignment="center"
                                 android:textSize="36sp" />
 
@@ -188,14 +188,14 @@
                                 android:layout_height="24dp"></LinearLayout>
 
                             <TextView
-                                android:text="TextView"
+                                android:id="@+id/txtBultosFaltantes"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:id="@+id/textView24"
                                 android:layout_weight="7.52"
-                                tools:text="0"
+                                android:text="0"
+                                android:textAlignment="center"
                                 android:textSize="36sp"
-                                android:textAlignment="center" />
+                                tools:text="0" />
                         </LinearLayout>
                     </LinearLayout>
                 </LinearLayout>
