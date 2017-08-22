@@ -1,18 +1,22 @@
 package app.com.balvarez.entregacargamovil;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.nlscan.android.scan.ScanManager;
 
 import org.json.JSONException;
 
 import java.io.IOException;
+import java.util.Random;
 
 import Util.Globales;
 import Util.Utilidades;
@@ -29,7 +33,7 @@ public class MainEscanerBulto extends AppCompatActivity {
     private int leidos = 0;
     ScanManager mScanMgr;
     Context mContext;
-    private Intent recibir;
+    Intent recibir;
 
 
     @Override
@@ -38,11 +42,12 @@ public class MainEscanerBulto extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_escaner_bulto);
         txt_OdtAEntregar = (EditText) findViewById(R.id.txtODT);
-        lblBultosFaltantes = (TextView) findViewById(R.id.lblFaltantes);
-        lblBultosLeidos = (TextView) findViewById(R.id.lblFaltantes);
+        lblBultosFaltantes = (TextView) findViewById(R.id.txtBultosFaltantes);
+        lblBultosLeidos = (TextView) findViewById(R.id.txtBultosLeidos);
         recibir = getIntent();
         ODT = recibir.getStringExtra("odt");
-        //txt_OdtAEntregar.setText(ODT);
+        txt_OdtAEntregar.setText(ODT);
+        txt_OdtAEntregar.setEnabled(false);
         mScanMgr = ScanManager.getInstance();
         mContext = getApplicationContext();
 
@@ -50,7 +55,7 @@ public class MainEscanerBulto extends AppCompatActivity {
             Globales.cantidadBultosOriginal = util.leeCantidadBultosODT(ODT);
             faltantes = Globales.cantidadBultosOriginal;
             lblBultosFaltantes.setText(String.valueOf(faltantes));
-            leidos = Globales.cantidadOriginalOdts-faltantes;
+            leidos = Globales.cantidadBultosOriginal-faltantes;
             lblBultosLeidos.setText(String.valueOf(leidos));
         } catch (IOException e) {
             e.printStackTrace();
@@ -82,7 +87,7 @@ public class MainEscanerBulto extends AppCompatActivity {
     }*/
 
     //Procesos de lectura de codigo barra
-    /*private void registerReceiver(){
+    private void registerReceiver(){
         IntentFilter intFilter=new IntentFilter(ScanManager.ACTION_SEND_SCAN_RESULT);
         registerReceiver(this.mResultReceiver, intFilter);
         mScanMgr.startScan();
@@ -130,8 +135,19 @@ public class MainEscanerBulto extends AppCompatActivity {
                     svalue2=svalue2==null?"":svalue2;
                     if (svalue1.length()>0) {
                         if(util.validaBulto(svalue1)){
-                            faltantes--;
-                            leidos++;
+                            if(Globales.cantidadBultosOriginal > leidos){
+                                faltantes--;
+                                leidos++;
+                                Intent intento = new Intent(MainEscanerBulto.this, MainEscanerBulto.class);
+                                intento.putExtra("odt",ODT);
+                                intento.putExtra("faltantes",faltantes);
+                                intento.putExtra("leidos",leidos);
+                                intento.putExtra("aux",1);
+                                startActivity(intento);
+                            }else{
+                                Toast.makeText(activity.getApplicationContext(),
+                                        "Ya se leyeron todos los bultos asociados !!!", Toast.LENGTH_LONG).show();
+                            }
                         }else{
                             Toast.makeText(activity.getApplicationContext(),
                                     "No se encontro bulto leido !!!", Toast.LENGTH_LONG).show();
@@ -147,7 +163,7 @@ public class MainEscanerBulto extends AppCompatActivity {
 
             }
         }
-    };*/
+    };
 
 
 }
