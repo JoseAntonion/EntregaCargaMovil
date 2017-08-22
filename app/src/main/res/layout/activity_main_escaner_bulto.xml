@@ -76,11 +76,12 @@
 
                             <TextView
                                 android:id="@+id/textView26"
-                                android:layout_width="wrap_content"
+                                android:layout_width="225dp"
                                 android:layout_height="wrap_content"
                                 android:layout_above="@+id/textView12"
                                 android:layout_centerHorizontal="true"
                                 android:text="Pistolear para Escanear"
+                                android:textAlignment="center"
                                 android:textSize="18sp"
                                 android:textStyle="bold" />
 
