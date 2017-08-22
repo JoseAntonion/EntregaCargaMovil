@@ -50,7 +50,7 @@ public class MainEntregaCargaMovil extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        String version = "v"+Build.VERSION.RELEASE;
+        String version = "v"+Build.VERSION.INCREMENTAL;
 
         int permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
         if (ContextCompat.checkSelfPermission(this,
