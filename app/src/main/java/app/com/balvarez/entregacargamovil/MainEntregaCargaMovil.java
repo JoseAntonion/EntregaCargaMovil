@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -44,10 +45,12 @@ public class MainEntregaCargaMovil extends AppCompatActivity {
     private static final int NO_INTERNET = 4;
     private static final int NO_VERSION = 5;
     private String mensaje = "";
+    private TextView vers;
     private static final int MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 1 ;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        String version = Build.VERSION.RELEASE;
 
         int permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
         if (ContextCompat.checkSelfPermission(this,
@@ -69,6 +72,8 @@ public class MainEntregaCargaMovil extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_entrega_carga_movil);
         activity = this;
+        vers= (TextView) findViewById(R.id.txtversion);
+        vers.setText(version);
         btn_siguiente = (Button) findViewById(R.id.btnSiguiente);
         btn_siguiente.setOnClickListener(new View.OnClickListener(){
 

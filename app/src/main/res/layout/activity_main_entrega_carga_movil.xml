@@ -143,6 +143,12 @@
                 android:layout_width="match_parent"
                 android:layout_height="108dp">
 
+                <TextView
+                    android:id="@+id/txtversion"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="TextView" />
+
                 <ImageView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
