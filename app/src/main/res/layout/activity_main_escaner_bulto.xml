@@ -82,13 +82,6 @@
                             android:layout_width="match_parent"
                             android:layout_height="18dp"></LinearLayout>
 
-                        <Button
-                            android:text="Escanear Bulto"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:id="@+id/btnEscanear"
-                            style="@style/Botton"/>
-
                     </LinearLayout>
                 </LinearLayout>
 
