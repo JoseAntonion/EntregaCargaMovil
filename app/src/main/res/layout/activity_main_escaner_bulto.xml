@@ -133,10 +133,11 @@
                         android:layout_height="match_parent">
 
                         <TextView
-                            android:text="Leidos"
+                            android:id="@+id/textView25"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:id="@+id/textView25" />
+                            android:text="Leidos"
+                            android:textStyle="bold" />
 
                         <LinearLayout
                             android:orientation="vertical"
@@ -178,10 +179,11 @@
                         android:layout_height="match_parent">
 
                         <TextView
-                            android:text="Faltantes"
+                            android:id="@+id/textView23"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:id="@+id/textView23" />
+                            android:text="Faltantes"
+                            android:textStyle="bold" />
 
                         <LinearLayout
                             android:orientation="vertical"
