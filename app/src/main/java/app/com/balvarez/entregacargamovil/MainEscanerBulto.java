@@ -7,6 +7,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -21,14 +23,17 @@ import java.util.Random;
 import Util.Globales;
 import Util.Utilidades;
 
-public class MainEscanerBulto extends AppCompatActivity {
+public class MainEscanerBulto extends AppCompatActivity implements View.OnClickListener {
 
     private Utilidades util = new Utilidades();
     private EditText txt_OdtAEntregar;
     private TextView lblBultosFaltantes;
     private TextView lblBultosLeidos;
+    private Button btn_entrega_carga;
+    private Button btn_NO_entrega_carga;
     private Activity activity;
     private String ODT;
+    private int aux;
     private int faltantes = 0;
     private int leidos = 0;
     ScanManager mScanMgr;
@@ -44,47 +49,82 @@ public class MainEscanerBulto extends AppCompatActivity {
         txt_OdtAEntregar = (EditText) findViewById(R.id.txtODT);
         lblBultosFaltantes = (TextView) findViewById(R.id.txtBultosFaltantes);
         lblBultosLeidos = (TextView) findViewById(R.id.txtBultosLeidos);
+        lblBultosFaltantes = (TextView) findViewById(R.id.txtBultosFaltantes);
+        btn_entrega_carga = (Button) findViewById(R.id.btnEntregaCarga2);
+        btn_entrega_carga.setOnClickListener(new View.OnClickListener(){
+
+            @Override
+            public void onClick(View v) {
+                Intent intento = new Intent(MainEscanerBulto.this, MainFirma.class);
+                intento.putExtra("odt",ODT);
+                startActivity(intento);
+                System.gc();
+                finish();
+            }
+        });
+        btn_NO_entrega_carga = (Button) findViewById(R.id.btnNoEntregaCarga2);
+        btn_NO_entrega_carga.setOnClickListener(new View.OnClickListener(){
+
+            @Override
+            public void onClick(View v) {
+                Intent intento = new Intent(MainEscanerBulto.this, MainMotivoNoEntrega.class);
+                startActivity(intento);
+                System.gc();
+                finish();
+            }
+        });
+
         recibir = getIntent();
+        //Bundle extras = recibir.getExtras();
         ODT = recibir.getStringExtra("odt");
+        aux = recibir.getExtras().getInt("aux",0);
         txt_OdtAEntregar.setText(ODT);
         txt_OdtAEntregar.setEnabled(false);
         mScanMgr = ScanManager.getInstance();
         mContext = getApplicationContext();
 
-        try {
-            Globales.cantidadBultosOriginal = util.leeCantidadBultosODT(ODT);
-            faltantes = Globales.cantidadBultosOriginal;
-            lblBultosFaltantes.setText(String.valueOf(faltantes));
-            leidos = Globales.cantidadBultosOriginal-faltantes;
-            lblBultosLeidos.setText(String.valueOf(leidos));
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        //new TraeOdtPorPatente().execute();
-    }
-
-    /*public class TraeOdtPorPatente extends AsyncTask<Void,Void,String> {
-
-        String Odt = txt_OdtAEntregar.toString();
-
-        @Override
-        protected String doInBackground(Void... params) {
+        if(aux == 0){
             try {
-                Globales.cantidadBultosOriginal = util.leeCantidadBultosODT(Odt);
+                Globales.cantidadBultosOriginal = util.leeCantidadBultosODT(ODT);
                 faltantes = Globales.cantidadBultosOriginal;
-                leidos = Globales.cantidadBultosOriginal-faltantes;
                 lblBultosFaltantes.setText(String.valueOf(faltantes));
-
+                leidos = Globales.cantidadBultosOriginal-faltantes;
+                lblBultosLeidos.setText(String.valueOf(leidos));
             } catch (IOException e) {
                 e.printStackTrace();
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-            return null;
+        }else{
+            faltantes = recibir.getExtras().getInt("faltantes",0);
+            leidos = recibir.getExtras().getInt("leidos",0);
+            lblBultosFaltantes.setText(String.valueOf(faltantes));
+            lblBultosLeidos.setText(String.valueOf(leidos));
         }
-    }*/
+    }
+
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+
+            /*case R.id.btnEntregaCarga: {
+                Intent intento = new Intent(MainEscanerBulto.this, MainFirma.class);
+                startActivity(intento);
+                System.gc();
+                break;
+            }*/
+            case R.id.btnNoEntregaCarga: {
+                Intent intento = new Intent(MainEscanerBulto.this, MainMotivoNoEntrega.class);
+                startActivity(intento);
+                System.gc();
+                break;
+            }
+
+            default:
+                break;
+        }
+    }
 
     //Procesos de lectura de codigo barra
     private void registerReceiver(){
@@ -115,7 +155,6 @@ public class MainEscanerBulto extends AppCompatActivity {
 
     private BroadcastReceiver mResultReceiver=new BroadcastReceiver() {
 
-
         @Override
         public void onReceive(Context context, Intent intent) {
             String action=intent.getAction();
@@ -144,6 +183,7 @@ public class MainEscanerBulto extends AppCompatActivity {
                                 intento.putExtra("leidos",leidos);
                                 intento.putExtra("aux",1);
                                 startActivity(intento);
+                                finish();
                             }else{
                                 Toast.makeText(activity.getApplicationContext(),
                                         "Ya se leyeron todos los bultos asociados !!!", Toast.LENGTH_LONG).show();
@@ -164,6 +204,5 @@ public class MainEscanerBulto extends AppCompatActivity {
             }
         }
     };
-
 
 }

@@ -236,11 +236,11 @@
                         android:layout_height="123dp">
 
                         <Button
-                            android:text="Entregar Carga"
+                            android:id="@+id/btnEntregaCarga2"
+                            style="@style/Botton"
                             android:layout_width="258dp"
                             android:layout_height="wrap_content"
-                            android:id="@+id/btnEntregaCarga"
-                            style="@style/Botton"/>
+                            android:text="Entregar Carga" />
 
                         <LinearLayout
                             android:orientation="vertical"
@@ -250,11 +250,11 @@
                         </LinearLayout>
 
                         <Button
-                            android:text="No Entrega Carga"
+                            android:id="@+id/btnNoEntregaCarga2"
+                            style="@style/Botton"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:id="@+id/btnNoEntregaCarga"
-                            style="@style/Botton"/>
+                            android:text="No Entrega Carga" />
 
                     </LinearLayout>
                 </LinearLayout>

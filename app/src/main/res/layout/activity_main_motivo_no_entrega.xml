@@ -90,11 +90,11 @@
                             </LinearLayout>
 
                             <Button
-                                android:text="Tomar Fotografia"
+                                android:id="@+id/btnTomarFoto"
+                                style="@style/Botton"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:id="@+id/button6"
-                                style="@style/Botton"/>
+                                android:text="Tomar Fotografia" />
 
                         </LinearLayout>
                     </LinearLayout>
@@ -123,10 +123,10 @@
                     android:layout_height="25dp"></LinearLayout>
 
                 <TextView
-                    android:text="TextView"
+                    android:id="@+id/txtNombreFoto"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:id="@+id/textView14"
+                    android:text="TextView"
                     android:textAlignment="center" />
             </LinearLayout>
 

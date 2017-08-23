@@ -29,7 +29,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Random;
 
-import Util.Globales;
+import To.EstadosOdtTO;
 import Util.Utilidades;
 
 public class MainODT extends AppCompatActivity implements View.OnClickListener {
@@ -46,6 +46,10 @@ public class MainODT extends AppCompatActivity implements View.OnClickListener {
     private Activity activity;
     ScanManager mScanMgr;
     Context mContext;
+    private int aux;
+    Intent recibir;
+    private Bundle datos;
+    private EstadosOdtTO estado;
 
 
     @Override
@@ -53,6 +57,7 @@ public class MainODT extends AppCompatActivity implements View.OnClickListener {
         activity = this;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_odt);
+        recibir = getIntent();
         btn_finreparto = (Button) findViewById(R.id.btnFinReparto);
         btn_finreparto.setOnClickListener(this);
         btn_Volver = (Button) findViewById(R.id.btnVolver);
@@ -61,22 +66,20 @@ public class MainODT extends AppCompatActivity implements View.OnClickListener {
         lblEntregadas = (TextView) findViewById(R.id.lblEntregados);
         mScanMgr = ScanManager.getInstance();
         mContext = getApplicationContext();
+        estado = new EstadosOdtTO();
+
+        // Captura variables por parametro de otros Activitis
+        datos = this.getIntent().getExtras();
 
         try {
-            faltantes = util.leeCantidadOdtsArchivo();
-            lblFaltantes.setText(String.valueOf(faltantes));
-            entregados = Globales.cantidadOriginalOdts-faltantes;
-            lblEntregadas.setText(String.valueOf(entregados));
+            estado = util.buscaLeidosFaltantes();
+            lblFaltantes.setText(estado.getFaltantes());
+            lblEntregadas.setText(estado.getEntregadas());
         } catch (IOException e) {
             e.printStackTrace();
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
-        /*InputFilter[] filtros = new InputFilter[1];
-        filtros[0] = new InputFilter.AllCaps();
-        odtEscaneada.setFilters(filtros);*/
-
     }
 
     @Override
@@ -93,7 +96,6 @@ public class MainODT extends AppCompatActivity implements View.OnClickListener {
                 break;
             }
             case R.id.btnVolver: {
-
                 Intent intento = new Intent(MainODT.this, MainResumenPlanilla.class);
                 startActivity(intento);
                 finish();
@@ -266,9 +268,10 @@ public class MainODT extends AppCompatActivity implements View.OnClickListener {
                             if(formaPago.equals("CTA")){
                                 Intent intento = new Intent(MainODT.this, MainEntregaCarga.class);
                                 intento.putExtra("odt",svalue1);
+                                intento.putExtra("aux",1);
                                 startActivity(intento);
                                 System.gc();
-                            }else if(formaPago.equals("PED")){
+                            }else if(formaPago.equals("PED") || formaPago.equals("EFE")){
                                 Intent intento = new Intent(MainODT.this, MainEscanerBulto.class);
                                 intento.putExtra("odt",svalue1);
                                 startActivity(intento);
