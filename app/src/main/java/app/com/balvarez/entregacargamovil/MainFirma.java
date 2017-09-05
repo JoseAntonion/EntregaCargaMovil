@@ -78,9 +78,11 @@ public class MainFirma extends AppCompatActivity implements View.OnClickListener
         File sd = Environment.getExternalStorageDirectory();
         File fichero = new File(sd, "Firma.jpg");
         WebServices ws = new WebServices();
-        ValidaTO resp = new ValidaTO();
-        ValidaTO resp2 = new ValidaTO();
+        ValidaTO resp;
+        ValidaTO resp2;
         ProgressDialog MensajeProgreso;
+        boolean guardoImagen = false;
+        boolean cambioEstado = false;
 
         @Override
         protected void onPreExecute() {
@@ -96,6 +98,9 @@ public class MainFirma extends AppCompatActivity implements View.OnClickListener
         @Override
         protected String doInBackground(Void... params) {
 
+            resp = new ValidaTO();
+            resp2 = new ValidaTO();
+
             try {
                 if (sd.canWrite()) {
                     ByteArrayOutputStream arrayOutputStream = new ByteArrayOutputStream();
@@ -109,37 +114,20 @@ public class MainFirma extends AppCompatActivity implements View.OnClickListener
 
                     TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
                     String imei = telephonyManager.getDeviceId();
-                    resp = ws.GrabaImagen(imei,encodedImage2,"ACT",imei,imei);
+                    resp = ws.GrabaImagen(imei,encodedImage2,"ACT",imei,imei,ODT);
                     resp2 = ws.CambiaEstadoODT(ODT,"99",imei,"MainFirma", Globales.version,"EntregaCargaMovil",imei);
                     util.cambiaEstadoOdtArchivo(ODT);
 
-                    if(resp.getValida().equals("1")){
-                        Toast.makeText(activity.getApplicationContext(),
-                                resp.getMensaje(), Toast.LENGTH_LONG).show();
-                    }else if(resp.getValida().equals("0")){
-                        Toast.makeText(activity.getApplicationContext(),
-                                "Problemas al guardar Imagen: "+resp.getMensaje(), Toast.LENGTH_LONG).show();
-                    }
-
-
-
-                    //Obtener Geo-Referencia
-                /*Utilidades utilidades = new Utilidades();
-                if (utilidades.verificaConexion(getApplicationContext())) {
-                    if(VerificarGPS()){
-                        //comenzarLocalizacion();
-                        GPSTracker gps = new GPSTracker(activity);
-                        if(gps.canGetLocation())
-                        {
-                            latitud += gps.getLatitude();
-                            longitud += gps.getLongitude();
+                    if(resp != null) {
+                        if (resp.getValida().equals("1")) {
+                            guardoImagen = true;
                         }
-                        new Valida().execute();
                     }
-
-                }else{
-                    mHandler.sendEmptyMessage(NO_INTERNET);
-                }*/
+                    if(resp2 != null){
+                        if (resp2.getValida().equals("1")) {
+                            cambioEstado = true;
+                        }
+                    }
                 }
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
@@ -153,22 +141,39 @@ public class MainFirma extends AppCompatActivity implements View.OnClickListener
 
         @Override
         protected void onPostExecute(String result) {
-            if (MensajeProgreso.isShowing())
-                MensajeProgreso.dismiss();
-            if(resp.getValida().equals("0")){
+
+            if(guardoImagen && cambioEstado){
                 Toast.makeText(activity.getApplicationContext(),
-                        "Error al guardar - ws.GrabaImagen.", Toast.LENGTH_LONG).show();
-                MensajeFinRepartoINCORRECTO();
-            }else if(resp.getValida().equals("1")){
+                        "Firma Guardada", Toast.LENGTH_LONG).show();
                 Toast.makeText(activity.getApplicationContext(),
-                        "Imagen Guardada", Toast.LENGTH_LONG).show();
-                if(resp2.getValida().equals("1")){
-                    Toast.makeText(activity.getApplicationContext(),
-                            resp2.getMensaje(), Toast.LENGTH_LONG).show();
-                }else
-                    Toast.makeText(activity.getApplicationContext(),
-                            resp2.getMensaje(), Toast.LENGTH_LONG).show();
+                        "ODT Entregada", Toast.LENGTH_LONG).show();
+                if (MensajeProgreso.isShowing())
+                    MensajeProgreso.dismiss();
                 MensajeFinRepartoCORRECTO();
+            }else if(!guardoImagen && cambioEstado){
+                Toast.makeText(activity.getApplicationContext(),
+                        "La firma no fue guardada: "+resp.getMensaje(), Toast.LENGTH_LONG).show();
+                Toast.makeText(activity.getApplicationContext(),
+                        "ODT Entregada", Toast.LENGTH_LONG).show();
+                if (MensajeProgreso.isShowing())
+                    MensajeProgreso.dismiss();
+                MensajeFinRepartoCORRECTO();
+            }else if(guardoImagen && !cambioEstado) {
+                Toast.makeText(activity.getApplicationContext(),
+                        "Firma Guardada", Toast.LENGTH_LONG).show();
+                Toast.makeText(activity.getApplicationContext(),
+                        "ODT no ingreso al sistema: "+resp2.getMensaje(), Toast.LENGTH_LONG).show();
+                if (MensajeProgreso.isShowing())
+                    MensajeProgreso.dismiss();
+                MensajeFinRepartoINCORRECTO();
+            }else if(!guardoImagen && !cambioEstado){
+                Toast.makeText(activity.getApplicationContext(),
+                        "La firma no fue guardada: "+resp.getMensaje(), Toast.LENGTH_LONG).show();
+                Toast.makeText(activity.getApplicationContext(),
+                        "ODT no ingreso al sistema: "+resp2.getMensaje(), Toast.LENGTH_LONG).show();
+                if (MensajeProgreso.isShowing())
+                    MensajeProgreso.dismiss();
+                MensajeFinRepartoINCORRECTO();
             }
         }
     }
@@ -200,7 +205,7 @@ public class MainFirma extends AppCompatActivity implements View.OnClickListener
 
     private AlertDialog MensajeFinRepartoINCORRECTO() {
         final String DEFAULT_TITLE = "Entrega Carga Movil";
-        final String DEFAULT_MESSAGE = "Problemas en el proceso - Captura de Firma";
+        final String DEFAULT_MESSAGE = "Problemas en el proceso - MainFirma";
         final String DEFAULT_YES = "Aceptar";
 
 

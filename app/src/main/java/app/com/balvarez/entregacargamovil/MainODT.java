@@ -1,21 +1,12 @@
 package app.com.balvarez.entregacargamovil;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.ProgressDialog;
-import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
-import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.text.InputFilter;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -26,8 +17,6 @@ import com.nlscan.android.scan.ScanManager;
 import org.json.JSONException;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Random;
 
 import To.EstadosOdtTO;
 import Util.Utilidades;
@@ -41,8 +30,6 @@ public class MainODT extends AppCompatActivity implements View.OnClickListener {
     private TextView lblFaltantes;
     private TextView lblEntregadas;
     private Utilidades util = new Utilidades();
-    private static final String BS_PACKAGE = "com.google.zxing.client.android";
-    public static final int REQUEST_CODE = 0x0000c0de;
     private Activity activity;
     ScanManager mScanMgr;
     Context mContext;
@@ -87,7 +74,6 @@ public class MainODT extends AppCompatActivity implements View.OnClickListener {
         switch (v.getId()) {
 
             case R.id.btnFinReparto: {
-
                 Intent intento = new Intent(MainODT.this, MainResumenEntrega.class);
                 startActivity(intento);
                 finish();
@@ -96,10 +82,10 @@ public class MainODT extends AppCompatActivity implements View.OnClickListener {
                 break;
             }
             case R.id.btnVolver: {
-                Intent intento = new Intent(MainODT.this, MainResumenPlanilla.class);
+                //Intent intento = new Intent(MainODT.this, MainResumenPlanilla.class);
+                Intent intento = new Intent(MainODT.this, MainEntregaCarga.class);
+                intento.putExtra("odt","25301618281");
                 startActivity(intento);
-                finish();
-                System.gc();
                 finish();
                 break;
             }
@@ -110,103 +96,6 @@ public class MainODT extends AppCompatActivity implements View.OnClickListener {
 
     }
 
-    private AlertDialog showDownloadDialog() {
-        final String DEFAULT_TITLE = "Instalar Barcode Scanner?";
-        final String DEFAULT_MESSAGE = "Esta aplicacion necesita Barcode Scanner. Quiere instalarla?";
-        final String DEFAULT_YES = "Si";
-        final String DEFAULT_NO = "No";
-
-        AlertDialog.Builder downloadDialog = new AlertDialog.Builder(activity);
-        downloadDialog.setTitle(DEFAULT_TITLE);
-        downloadDialog.setMessage(DEFAULT_MESSAGE);
-        downloadDialog.setPositiveButton(DEFAULT_YES,
-                new DialogInterface.OnClickListener() {
-
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        Uri uri = Uri
-                                .parse("market://details?id=" + BS_PACKAGE);
-                        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-                        try {
-                            activity.startActivity(intent);
-                        } catch (ActivityNotFoundException anfe) {
-                            // Hmm, market is not installed
-                            Toast.makeText(
-                                    MainODT.this,
-                                    "Android market no esta instalado,no puedo instalar Barcode Scanner",
-                                    Toast.LENGTH_LONG).show();
-                        }
-                    }
-                });
-
-        downloadDialog.setNegativeButton(DEFAULT_NO,
-                new DialogInterface.OnClickListener() {
-
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                    }
-                });
-        return downloadDialog.show();
-    }
-
-    private String findTargetAppPackage(Intent intent) {
-
-        PackageManager pm = activity.getPackageManager();
-        List<ResolveInfo> availableApps = pm.queryIntentActivities(intent,PackageManager.MATCH_DEFAULT_ONLY);
-
-        if (availableApps != null) {
-
-            for (ResolveInfo availableApp : availableApps) {
-                String packageName = availableApp.activityInfo.packageName;
-                if (BS_PACKAGE.contains(packageName)) {
-                    return packageName;
-                }
-            }
-        }
-        return null;
-    }
-
-    public class EscaneaODT extends AsyncTask<Void,Void,String> {
-
-        ProgressDialog MensajeProgreso;
-
-        /*@Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            MensajeProgreso = new ProgressDialog(activity);
-            MensajeProgreso.setCancelable(false);
-            MensajeProgreso.setIndeterminate(true);
-            MensajeProgreso.setMessage("Consultando Patente...");
-            MensajeProgreso.show();
-
-        }*/
-
-        @Override
-        protected String doInBackground(Void... params) {
-            Intent intentScan = new Intent(BS_PACKAGE + ".SCAN");
-            intentScan.putExtra("PROMPT_MESSAGE", "Enfoque entre 9 y 11 cm.");
-            String targetAppPackage = findTargetAppPackage(intentScan);
-            if (targetAppPackage == null) {
-                showDownloadDialog();
-            } else {
-                startActivityForResult(intentScan, REQUEST_CODE);
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(String result) {
-            if (MensajeProgreso.isShowing())
-                MensajeProgreso.dismiss();
-
-            InputFilter[] filtros = new InputFilter[1];
-            filtros[0] = new InputFilter.AllCaps();
-            Intent intento = new Intent(MainODT.this, MainEntregaCarga.class);
-            intento.putExtra("odt", filtros);
-            startActivity(intento);
-            System.gc();
-        }
-    }
 
     //Procesos de lectura de codigo barra
     private void registerReceiver()
@@ -239,7 +128,6 @@ public class MainODT extends AppCompatActivity implements View.OnClickListener {
 
     private BroadcastReceiver mResultReceiver=new BroadcastReceiver() {
 
-
         @Override
         public void onReceive(Context context, Intent intent) {
             String action=intent.getAction();
@@ -259,30 +147,31 @@ public class MainODT extends AppCompatActivity implements View.OnClickListener {
                     svalue1=svalue1==null?"":svalue1;
                     svalue2=svalue2==null?"":svalue2;
                     if (svalue1.length()>0) {
-                        formaPago = util.buscaFormaPagoOdt(svalue1.replace("*",""));
-                        /*Toast.makeText(activity.getApplicationContext(),
-                                "String ODT:"+svalue1+"", Toast.LENGTH_LONG).show();
-                        Toast.makeText(activity.getApplicationContext(),
-                                "PAGO:"+formaPago+"", Toast.LENGTH_LONG).show();*/
-                        if(formaPago != "" || formaPago != null){
-                            if(formaPago.equals("CTA")){
-                                Intent intento = new Intent(MainODT.this, MainEntregaCarga.class);
-                                intento.putExtra("odt",svalue1);
-                                intento.putExtra("aux",1);
-                                startActivity(intento);
-                                System.gc();
-                            }else if(formaPago.equals("PED") || formaPago.equals("EFE")){
-                                Intent intento = new Intent(MainODT.this, MainEscanerBulto.class);
-                                intento.putExtra("odt",svalue1);
-                                startActivity(intento);
-                                System.gc();
-                            }else{
-                                Toast.makeText(activity.getApplicationContext(),
-                                        "No se encontro FORMA DE PAGO para la ODT escaneada", Toast.LENGTH_LONG).show();
-                            }
+                        if(util.BuscaODT(svalue1.replace("*",""))) {
+                            if (!util.validaEstadoOdt(svalue1.replace("*", "")).equals("99")) {
+                                formaPago = util.buscaFormaPagoOdt(svalue1.replace("*", ""));
+                                if (formaPago != "" || formaPago != null) {
+                                    if (formaPago.equals("CTA")) {
+                                        Intent intento = new Intent(MainODT.this, MainEntregaCarga.class);
+                                        intento.putExtra("odt", svalue1);
+                                        intento.putExtra("aux", 1);
+                                        startActivity(intento);
+                                        System.gc();
+                                    } else if (formaPago.equals("PED") || formaPago.equals("EFE")) {
+                                        Intent intento = new Intent(MainODT.this, MainEscanerBulto.class);
+                                        intento.putExtra("odt", svalue1);
+                                        startActivity(intento);
+                                        System.gc();
+                                    } else {
+                                        Toast.makeText(activity.getApplicationContext(),
+                                                "No se encontro FORMA DE PAGO para la ODT escaneada", Toast.LENGTH_LONG).show();
+                                    }
+                                } else
+                                    Toast.makeText(activity.getApplicationContext(), "ERROR Forma de Pago !!!!", Toast.LENGTH_LONG).show();
+                            } else
+                                Toast.makeText(activity.getApplicationContext(), "La ODT se encuentra ENTREGADA", Toast.LENGTH_LONG).show();
                         }else
-                            Toast.makeText(activity.getApplicationContext(),
-                                    "ERROR Forma de Pago !!!!", Toast.LENGTH_LONG).show();
+                            Toast.makeText(activity.getApplicationContext(), "ODT no encontrada", Toast.LENGTH_LONG).show();
                     }
 
                 } catch (Exception e) {
@@ -290,17 +179,11 @@ public class MainODT extends AppCompatActivity implements View.OnClickListener {
                     e.printStackTrace();
                 }
 
-                Random random = new Random();
+                //Random random = new Random();
 
             }
         }
     };
-
-    public String formaPagoODT(String odt){
-        String tipoPago = "";
-
-        return tipoPago;
-    }
 
 }
 

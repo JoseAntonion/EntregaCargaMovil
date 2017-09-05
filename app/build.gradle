@@ -22,7 +22,7 @@ android {
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     /*compile files('libs/jai_imageio-1.1.jar')
-            compile files('libs/barcode.jar')*/
+                        compile files('libs/barcode.jar')*/
     compile files('src/libs/customviews.jar')
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
@@ -30,6 +30,6 @@ dependencies {
     compile 'com.android.support:appcompat-v7:23.4.0'
     compile 'org.jbundle.util.osgi.wrapped:org.jbundle.util.osgi.wrapped.org.apache.http.client:4.1.2'
     testCompile 'junit:junit:4.12'
-    compile files('C:/Desarrollo/android/EntregaCargaMovil/libs/Nlscan.ScanManager.jar')
-    compile files('libs/Nlscan.ScanManager.jar')
+    compile files('src/libs/Nlscan.ScanManager.jar')
+    compile files('src/libs/commons-io-2.4.jar')
 }

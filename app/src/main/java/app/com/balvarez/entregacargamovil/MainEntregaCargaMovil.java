@@ -1,22 +1,17 @@
 package app.com.balvarez.entregacargamovil;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.telephony.TelephonyManager;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -47,12 +42,15 @@ public class MainEntregaCargaMovil extends AppCompatActivity {
     private String mensaje = "";
     private TextView vers;
     private static final int MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 1 ;
+    private static final int MY_PERMISSIONS_REQUEST_CAMERA = 1;
+    private static final int MY_PERMISSIONS_REQUEST_READ_PHONE_STATE = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         String version = "v"+Build.VERSION.INCREMENTAL;
 
         int permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        // PERMISO PARA GUARDAR EN MEMORIA INTERNA
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -65,6 +63,38 @@ public class MainEntregaCargaMovil extends AppCompatActivity {
                 ActivityCompat.requestPermissions(this,
                         new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
                         MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
+
+            }
+        }
+        // PERMISO PARA USAR CAMARA
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.CAMERA)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    Manifest.permission.CAMERA)) {
+
+            } else {
+
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.CAMERA},
+                        MY_PERMISSIONS_REQUEST_CAMERA);
+
+            }
+        }
+        // PERMISO PARA USAR CAMARA
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.READ_PHONE_STATE)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    Manifest.permission.READ_PHONE_STATE)) {
+
+            } else {
+
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.READ_PHONE_STATE},
+                        MY_PERMISSIONS_REQUEST_READ_PHONE_STATE);
 
             }
         }
@@ -131,6 +161,7 @@ public class MainEntregaCargaMovil extends AppCompatActivity {
         //long tiempo = 0;
         ProgressDialog MensajeProgreso;
         Boolean bandera = false;
+        boolean net = false;
 
         @Override
         protected void onPreExecute() {
@@ -152,14 +183,14 @@ public class MainEntregaCargaMovil extends AppCompatActivity {
 
             if(util.verificaConexion(getApplicationContext())){
                 try {
+                    net = true;
                     WebServices WS = new WebServices();
-                    TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-                    //String imei = telephonyManager.getDeviceId();
                     listaOdts = WS.OdtsXPatente(patente);
-                    //listaOdts = new ArrayList<>();
-                    util.creaDirectorio();
-                    util.escribirEnArchivo(listaOdts);
-                    bandera = true;
+                    if(!listaOdts.isEmpty()){
+                        util.creaDirectorio();
+                        util.escribirEnArchivo(listaOdts);
+                        bandera = true;
+                    }
                 }
                 catch (Exception e){
                     e.printStackTrace();
@@ -174,53 +205,22 @@ public class MainEntregaCargaMovil extends AppCompatActivity {
         protected void onPostExecute(String result) {
             if (MensajeProgreso.isShowing())
                 MensajeProgreso.dismiss();
-            if(bandera){
-                Intent intent = new Intent(MainEntregaCargaMovil.this, MainResumenPlanilla.class);
-                startActivity(intent);
-                System.gc();
-                finish();
-            }else{
-                Toast.makeText(getApplicationContext(), "Debe tener conexión a INTERNET para cargar datos de la Patente !!!",
+            if(!net){
+                Toast.makeText(activity.getApplicationContext(), "Debe tener conexión a INTERNET para cargar datos de la Patente !!!",
                         Toast.LENGTH_LONG).show();
-                Intent intent = new Intent(MainEntregaCargaMovil.this, MainEntregaCargaMovil.class);
-                startActivity(intent);
-                System.gc();
-                finish();
+            }else {
+                if (bandera) {
+                    Intent intent = new Intent(MainEntregaCargaMovil.this, MainResumenPlanilla.class);
+                    startActivity(intent);
+                    System.gc();
+                    finish();
+                } else {
+                    Toast.makeText(activity.getApplicationContext(), "No se encontraron ODT asociada a la patente !!!",
+                            Toast.LENGTH_LONG).show();
+                }
             }
 
 
         }
     }
-
-    // MANEJO DE ERRORES
-    @SuppressLint("HandlerLeak")
-    private Handler mHandler = new Handler() {
-        public void handleMessage(Message msg) {
-            if (msg.what == NO_PATENTE) {
-                Toast.makeText(getApplicationContext(), "Favor Ingrese Patente",
-                        Toast.LENGTH_LONG).show();
-            }
-
-            if (msg.what == NO_CLAVE) {
-                Toast.makeText(activity.getApplicationContext(),
-                        "Favor Ingrese una Clave", Toast.LENGTH_LONG).show();
-            }
-            if (msg.what == USUARIO_VALIDA) {
-                Toast.makeText(activity.getApplicationContext(), mensaje,
-                        Toast.LENGTH_LONG).show();
-            }
-            if (msg.what == NO_INTERNET) {
-                Toast.makeText(getApplicationContext(),
-                        "Favor revisar conexion a internet", Toast.LENGTH_LONG)
-                        .show();
-            }
-            if (msg.what == NO_VERSION) {
-                Toast.makeText(getApplicationContext(),
-                        "Debe actualizar la version de la aplicacion", Toast.LENGTH_LONG)
-                        .show();
-            }
-
-        }
-    };
-
 }

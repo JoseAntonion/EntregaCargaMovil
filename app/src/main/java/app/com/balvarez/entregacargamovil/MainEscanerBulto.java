@@ -1,10 +1,12 @@
 package app.com.balvarez.entregacargamovil;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -51,17 +53,14 @@ public class MainEscanerBulto extends AppCompatActivity implements View.OnClickL
         lblBultosLeidos = (TextView) findViewById(R.id.txtBultosLeidos);
         lblBultosFaltantes = (TextView) findViewById(R.id.txtBultosFaltantes);
         btn_entrega_carga = (Button) findViewById(R.id.btnEntregaCarga2);
-        btn_entrega_carga.setOnClickListener(new View.OnClickListener(){
+        /*btn_entrega_carga.setOnClickListener(new View.OnClickListener(){
 
             @Override
             public void onClick(View v) {
-                Intent intento = new Intent(MainEscanerBulto.this, MainFirma.class);
-                intento.putExtra("odt",ODT);
-                startActivity(intento);
-                System.gc();
-                finish();
+                new ValidaEntrega().execute();
             }
-        });
+        });*/
+        btn_entrega_carga.setOnClickListener(this);
         btn_NO_entrega_carga = (Button) findViewById(R.id.btnNoEntregaCarga2);
         btn_NO_entrega_carga.setOnClickListener(new View.OnClickListener(){
 
@@ -108,16 +107,14 @@ public class MainEscanerBulto extends AppCompatActivity implements View.OnClickL
     public void onClick(View v) {
         switch (v.getId()) {
 
-            /*case R.id.btnEntregaCarga: {
-                Intent intento = new Intent(MainEscanerBulto.this, MainFirma.class);
-                startActivity(intento);
-                System.gc();
-                break;
-            }*/
             case R.id.btnNoEntregaCarga: {
                 Intent intento = new Intent(MainEscanerBulto.this, MainMotivoNoEntrega.class);
                 startActivity(intento);
                 System.gc();
+                break;
+            }
+            case R.id.btnEntregaCarga2: {
+                new ValidaEntrega().execute();
                 break;
             }
 
@@ -205,4 +202,57 @@ public class MainEscanerBulto extends AppCompatActivity implements View.OnClickL
         }
     };
 
+    public class ValidaEntrega extends AsyncTask<Void,Void,String> {
+
+        ProgressDialog MensajeProgreso;
+        Boolean bandera = false;
+        int bultosLeidos = Integer.parseInt((String) lblBultosLeidos.getText());
+        int bultosTotales = 0;
+
+       /* public ValidaEntrega() throws IOException, JSONException {
+        }*/
+
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            MensajeProgreso = new ProgressDialog(activity);
+            MensajeProgreso.setCancelable(false);
+            MensajeProgreso.setIndeterminate(true);
+            MensajeProgreso.setMessage("Validando Entrega...");
+            MensajeProgreso.show();
+        }
+
+        @Override
+        protected String doInBackground(Void... params) {
+            String respStr = null;
+            bultosLeidos = 1;
+            try {
+                bultosTotales = util.leeCantidadBultosODT(ODT);
+                if (bultosLeidos == bultosTotales) {
+                    bandera = true;
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            return respStr;
+        }
+
+
+        @Override
+        protected void onPostExecute(String result) {
+            if (MensajeProgreso.isShowing())
+                MensajeProgreso.dismiss();
+            if (bandera) {
+                Intent intent = new Intent(MainEscanerBulto.this, MainFirma.class);
+                intent.putExtra("odt",ODT);
+                startActivity(intent);
+            }else{
+                Toast.makeText(getApplicationContext(), "Faltan Bultos por Escanear",
+                        Toast.LENGTH_LONG).show();
+            }
+        }
+    }
 }

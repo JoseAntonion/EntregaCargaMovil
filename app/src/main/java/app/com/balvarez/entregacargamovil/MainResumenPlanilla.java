@@ -28,16 +28,6 @@ public class MainResumenPlanilla extends AppCompatActivity implements View.OnCli
         setContentView(R.layout.activity_main_resumen_planilla);
         btn_ingresar = (Button) findViewById(R.id.btnSiguiente);
         btn_ingresar.setOnClickListener(this);
-        /*btn_ingresar.setOnClickListener(new View.OnClickListener(){
-
-            @Override
-            public void onClick(View v) {
-                Intent intento = new Intent(MainResumenPlanilla.this, MainODT.class);
-                startActivity(intento);
-                System.gc();
-                finish();
-            }
-        });*/
         btn_Volver = (Button) findViewById(R.id.btnVolver);
         btn_Volver.setOnClickListener(this);
         ls_lista_odts = (ListView) findViewById(R.id.lstResumenPlanilla);
@@ -68,17 +58,15 @@ public class MainResumenPlanilla extends AppCompatActivity implements View.OnCli
 
                 case R.id.btnSiguiente: {
                     Intent intento = new Intent(MainResumenPlanilla.this, MainODT.class);
-                        startActivity(intento);
-                        //System.gc();
-                       finish();
-                       break;
+                    startActivity(intento);
+                    finish();
+                    break;
 
                 }
                 case R.id.btnVolver: {
 
                     Intent intento = new Intent(MainResumenPlanilla.this, MainEntregaCargaMovil.class);
                     startActivity(intento);
-                    //System.gc();
                     finish();
                     break;
                 }
@@ -89,30 +77,4 @@ public class MainResumenPlanilla extends AppCompatActivity implements View.OnCli
 
 
     }
-
-
-   /* public class LlenaListaOdts extends AsyncTask<Void,Void,String>{
-
-        @Override
-        protected ArrayAdapter<ArchivoOdtPorPatenteTO> doInBackground(Void... params) {
-            try {
-                ArrayList<ArchivoOdtPorPatenteTO> contenidoArchivo = new ArrayList<>();
-                ArrayList<String> contenidoArchivoPrueba = new ArrayList<>();
-                contenidoArchivo = util.leeArchivo();
-                //contenidoArchivoPrueba = util.cargaDesdeArchivoPrueba();
-                ArrayAdapter<ArchivoOdtPorPatenteTO> adaptador = new ArrayAdapter<ArchivoOdtPorPatenteTO>(this,android.R.layout.simple_list_item_1,contenidoArchivo);
-                //ArrayAdapter<String> adaptador = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,contenidoArchivoPrueba);
-                ls_lista_odts.setAdapter(adaptador);
-
-        *//*} catch (IOException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
-            e.printStackTrace();*//*
-            }catch (Exception e) {
-                e.printStackTrace();
-            }
-            return adaptador;
-        }
-    }*/
-
 }

@@ -199,7 +199,6 @@ public class Utilidades {
                     if (!s.equalsIgnoreCase("") && !s.equalsIgnoreCase("XXXXXXXXXXXXXXXXXX")) {
                         this.recibeSplit = s.split("~");
                         if (odt.equals(recibeSplit[1].toString())) {
-                            //encontrado = true;
                             formaPago = recibeSplit[3].toString();
                             break;
                         }
@@ -413,5 +412,59 @@ public class Utilidades {
             }
 
         }
+    }
+
+    public String validaEstadoOdt(String odt) throws  IOException,ClientProtocolException,JSONException{
+        String estado = "";
+        FileReader fr = null;
+
+        try {
+            fr = new FileReader(Globales.odtsXpatente);
+            BufferedReader br = new BufferedReader(fr);
+            String s = br.readLine();
+            if (s != null) {
+                while (s != null) {
+                    if (!s.equalsIgnoreCase("") && !s.equalsIgnoreCase("XXXXXXXXXXXXXXXXXX")) {
+                        this.recibeSplit = s.split("~");
+                        if (odt.equals(recibeSplit[1].toString())) {
+                            estado = recibeSplit[2];
+                            break;
+                        }
+                    }
+                    s = br.readLine();
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return estado;
+    }
+
+    public Boolean BuscaODT(String odt) throws  IOException,ClientProtocolException,JSONException{
+        Boolean encontrado = false;
+        FileReader fr = null;
+
+        try {
+            fr = new FileReader(Globales.odtsXpatente);
+            BufferedReader br = new BufferedReader(fr);
+            String s = br.readLine();
+            if (s != null) {
+                while (s != null) {
+                    if (!s.equalsIgnoreCase("") && !s.equalsIgnoreCase("XXXXXXXXXXXXXXXXXX")) {
+                        this.recibeSplit = s.split("~");
+                        if (odt.equals(recibeSplit[1].toString())) {
+                            encontrado = true;
+                            break;
+                        }
+                    }
+                    s = br.readLine();
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return encontrado;
     }
 }
