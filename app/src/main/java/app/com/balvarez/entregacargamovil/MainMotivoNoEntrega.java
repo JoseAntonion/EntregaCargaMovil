@@ -9,12 +9,15 @@ import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.provider.MediaStore;
+import android.provider.Settings;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.telephony.TelephonyManager;
 import android.util.Base64;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
@@ -25,12 +28,15 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 
+import To.TipoReingresoTO;
 import To.ValidaTO;
+import Util.GPSTraker;
 import Util.Utilidades;
 import Util.WebServices;
 
-public class MainMotivoNoEntrega extends AppCompatActivity implements View.OnClickListener {
+public class MainMotivoNoEntrega extends AppCompatActivity implements View.OnClickListener, AdapterView.OnItemSelectedListener {
 
     private Button btn_finalizar;
     private Button btn_limpiar;
@@ -50,7 +56,10 @@ public class MainMotivoNoEntrega extends AppCompatActivity implements View.OnCli
     private int REQUEST_CAMERA = 0, SELECT_FILE = 1;
     String imgDecodableString;
     private String userChoosenTask;
-
+    private static final int ACTIVAR_GPS = 1;
+    private Handler mHandler;
+    private AlertDialog alert;
+    private String codigoReingreso = "";
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,18 +69,17 @@ public class MainMotivoNoEntrega extends AppCompatActivity implements View.OnCli
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_motivo_no_entrega);
         ODT = recibir.getStringExtra("odt");
-        btn_finalizar = (Button) findViewById(R.id.btnFinalizar);
+        btn_finalizar = (Button) findViewById(R.id.btnFinalizarNoEntrega);
         btn_finalizar.setOnClickListener(this);
-        btn_limpiar = (Button) findViewById(R.id.btnLimpiar);
+        btn_limpiar = (Button) findViewById(R.id.btnLimpiarNoEntrega);
         btn_limpiar.setOnClickListener(this);
         btn_tomarFoto = (Button) findViewById(R.id.btnTomarFoto);
         btn_tomarFoto.setOnClickListener(this);
         spn_motivo = (Spinner) findViewById(R.id.spnMotivo);
+        spn_motivo.setAdapter(creaSpinnerReingresos());
+        spn_motivo.setOnItemSelectedListener(this);
         txtNombreFoto = (TextView) findViewById(R.id.txtNombreFoto);
         txtNombreFoto.setVisibility(View.INVISIBLE);
-        spinner_adapter = ArrayAdapter.createFromResource( this, R.array.reingreso , android.R.layout.simple_spinner_item);
-        spinner_adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spn_motivo.setAdapter(spinner_adapter);
     }
 
 
@@ -80,87 +88,26 @@ public class MainMotivoNoEntrega extends AppCompatActivity implements View.OnCli
     public void onClick(View v) {
         switch (v.getId()) {
 
-            case R.id.btnFinalizar: {
+            case R.id.btnFinalizarNoEntrega: {
                 new CapturaImagen().execute();
-                /*Intent intento = new Intent(MainMotivoNoEntrega.this, MainODT.class);
-                startActivity(intento);
-                finish();
-                System.gc();
-                finish();*/
                 break;
             }
             case R.id.btnTomarFoto: {
-                //tomarFoto();
                 Intent foto = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                 if(foto.resolveActivity(getPackageManager()) != null )
                 {
                     startActivityForResult(foto,REQUEST_IMAGE_CAPTURE);
                 }
-                /*//Creamos el Intent para llamar a la Camara
-                Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-                //Creamos una carpeta en la memoria del terminal
-                File imagesFolder = new File(Globales.rutaArchivos2, "Fotos");
-                imagesFolder.mkdirs();
-                //añadimos el nombre de la imagen
-                //File image = new File(imagesFolder, ODT+getCode()+".jpg");
-                File image = new File(imagesFolder, NombreFoto);
-                Uri uriSavedImage = Uri.fromFile(image);
-                //Le decimos al Intent que queremos grabar la imagen
-                cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, uriSavedImage);
-                //Lanzamos la aplicacion de la camara con retorno (forResult)
-                startActivityForResult(cameraIntent, 1);
-                break;*/
                 break;
             }
-            case R.id.btnLimpiar: {
-                spn_motivo.setAdapter(null);
+            case R.id.btnLimpiarNoEntrega: {
+                txtNombreFoto.setVisibility(View.INVISIBLE);
+                spn_motivo.setAdapter(creaSpinnerReingresos());
             }
             default:
                 break;
         }
     }
-
-    public boolean tomarFoto()
-    {
-        try
-        {
-            Intent foto = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-            if(foto.resolveActivity(getPackageManager()) != null )
-            {
-                startActivityForResult(foto,REQUEST_IMAGE_CAPTURE);
-            }
-
-            return true;
-        }catch (Exception e)
-        {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    /*@SuppressLint("SimpleDateFormat")
-    private String getCode()
-    {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyymmddhhmmss");
-        String date = dateFormat.format(new Date());
-        String photoCode = "pic_" + date;
-        return photoCode;
-    }*/
-
-    /*@Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
-        return true;
-    }*/
-
-    /*private void tomarFoto() {
-        Intent foto = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        if(foto.resolveActivity(getPackageManager()) != null )
-        {
-            startActivityForResult(foto,REQUEST_IMAGE_CAPTURE);
-        }
-    }*/
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -178,42 +125,37 @@ public class MainMotivoNoEntrega extends AppCompatActivity implements View.OnCli
             //bMap = BitmapFactory.decodeFile(Globales.rutaArchivos2 + "/Fotos/" + NombreFoto);
             txtNombreFoto.setText(NombreFoto);
             txtNombreFoto.setVisibility(View.VISIBLE);
-            spn_motivo.setAdapter(spinner_adapter);
+            spn_motivo.setAdapter(creaSpinnerReingresos());
         }
 
     }
 
-   /* protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        //Comprovamos que la foto se a realizado
-        if (requestCode == 1 && resultCode == RESULT_OK) {
-            //Creamos un bitmap con la imagen recientemente
-            //almacenada en la memoria
-            //Bitmap bMap = BitmapFactory.decodeFile(Environment.getExternalStorageDirectory() + "/Fotos/" + NombreFoto);
-            bMap = BitmapFactory.decodeFile(Globales.rutaArchivos2 + "/Fotos/" + NombreFoto);
-            encodedImage2 = encodeTobase64(bMap);
-            //Añadimos el bitmap al imageView para
-            //mostrarlo por pantalla
-            //img.setImageBitmap(bMap);
-            txtNombreFoto.setText(NombreFoto);
-            txtNombreFoto.setVisibility(View.VISIBLE);
-            spn_motivo.setAdapter(spinner_adapter);
+    // Asigna el valor del indice seleccionado en el spinner a una variable
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        if ((position!=0) && (id!=0)) {
+            Object item = parent.getItemAtPosition(position);
+            codigoReingreso = ((TipoReingresoTO) item).getIndice();
         }
-    }*/
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+
+    }
 
     public class CapturaImagen extends AsyncTask<Void,Void,String> {
 
-        /*Bitmap imagen = signature.getImage();
         File sd = Environment.getExternalStorageDirectory();
-        File fichero = new File(sd, "Firma.jpg");*/
-
-        File sd = Environment.getExternalStorageDirectory();
-        //File fichero = new File(sd+"/Fotos/", NombreFoto);
-        //Bitmap imagen = BitmapFactory.decodeFile(Environment.getExternalStorageDirectory() +"/Fotos/"+NombreFoto);
-        //Bitmap imagen = bMap;
         WebServices ws = new WebServices();
         ValidaTO resp = new ValidaTO();
         ValidaTO resp2 = new ValidaTO();
         ProgressDialog MensajeProgreso;
+        Utilidades util = new Utilidades();
+        String latitud = "";
+        String longitud = "";
+        boolean guardoImagen = false;
+        boolean reingreso = false;
 
         @Override
         protected void onPreExecute() {
@@ -230,34 +172,31 @@ public class MainMotivoNoEntrega extends AppCompatActivity implements View.OnCli
 
             try {
                 if (sd.canWrite()) {
-                    //ByteArrayOutputStream arrayOutputStream = new ByteArrayOutputStream();
-                    //imagen.compress(Bitmap.CompressFormat.PNG, 100, arrayOutputStream);
-                    //Globales.Imagen = getBitmapBytes(imagen);
-                    //encodedImage2 = Base64.encodeToString(Globales.Imagen,Base64.DEFAULT);
-                    //encodedImage2 = encodeTobase64(imagen);
-                    //encodedImage2 = encodeTobase64(imagen);
-                    /*fichero.createNewFile();
-                    OutputStream os = new FileOutputStream(fichero);
-                    imagen.compress(Bitmap.CompressFormat.JPEG, 90, os);
-                    os.close();*/
-
-                    //FotoTO fotos = ListaFotosTO.lista.pop();
-
-                    //String base = android.util.Base64.encodeToString(ListaFotosTO.lista.pop(), Base64.NO_WRAP);
-
-                    TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-                    String imei = telephonyManager.getDeviceId();
-                    resp = ws.GrabaImagen(imei,encodedImage2,"ACT",imei,imei,ODT);
-                    //resp2 = ws.CambiaEstadoODT(ODT,"99",imei,"MainFirma", Globales.version,"EntregaCargaMovil",imei);
-                    //util.cambiaEstadoOdtArchivo(ODT);
-
-                    /*if(resp.getValida().equals("1")){
-                        Toast.makeText(activity.getApplicationContext(),
-                                resp.getMensaje(), Toast.LENGTH_LONG).show();
-                    }else if(resp.getValida().equals("0")){
-                        Toast.makeText(activity.getApplicationContext(),
-                                "Problemas al guardar Imagen: "+resp.getMensaje(), Toast.LENGTH_LONG).show();
-                    }*/
+                    if(codigoReingreso.isEmpty()){
+                        TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+                        String imei = telephonyManager.getDeviceId();
+                        // GEO-REFERENCIA
+                        if(VerificarGPS()){
+                            GPSTraker gps = new GPSTraker(getApplicationContext());
+                            if (gps.canGetLocation()) {
+                                latitud = String.valueOf(gps.getLatitude());
+                                longitud = String.valueOf(gps.getLongitude());
+                            }
+                        }
+                        resp = ws.GrabaImagen(imei,encodedImage2,"ACT",imei,imei,ODT);
+                        resp2 = ws.GrabaReingreso(util.TraePlanillaDeODT(ODT),ODT,util.leeCantidadBultosODT(ODT),"T","0",latitud,longitud);
+                        util.cambiaEstadoOdtArchivoREINGRESO(ODT);
+                        if(resp != null) {
+                            if (resp.getValida().equals("1")) {
+                                guardoImagen = true;
+                            }
+                        }
+                        if(resp2 != null){
+                            if (resp2.getValida().equals("1")) {
+                                reingreso = true;
+                            }
+                        }
+                    }
                 }
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
@@ -273,20 +212,38 @@ public class MainMotivoNoEntrega extends AppCompatActivity implements View.OnCli
         protected void onPostExecute(String result) {
             if (MensajeProgreso.isShowing())
                 MensajeProgreso.dismiss();
-            if(resp.getValida().equals("0")){
-                Toast.makeText(activity.getApplicationContext(),
-                        "Error al guardar - ws.GrabaImagen."+resp.getMensaje(), Toast.LENGTH_LONG).show();
-                MensajeFinRepartoINCORRECTO(resp.getMensaje());
-            }else if(resp.getValida().equals("1")){
+            if(guardoImagen && reingreso){
                 Toast.makeText(activity.getApplicationContext(),
                         "Imagen Guardada", Toast.LENGTH_LONG).show();
-                /*if(resp2.getValida().equals("1")){
-                    Toast.makeText(activity.getApplicationContext(),
-                            resp2.getMensaje(), Toast.LENGTH_LONG).show();
-                }else
-                    Toast.makeText(activity.getApplicationContext(),
-                            resp2.getMensaje(), Toast.LENGTH_LONG).show();*/
+                Toast.makeText(activity.getApplicationContext(),
+                        "Observacion insertada en Reingreso", Toast.LENGTH_LONG).show();
+                if (MensajeProgreso.isShowing())
+                    MensajeProgreso.dismiss();
                 MensajeFinRepartoCORRECTO();
+            }else if(!guardoImagen && reingreso){
+                Toast.makeText(activity.getApplicationContext(),
+                        "La firma no fue guardada: "+resp.getMensaje(), Toast.LENGTH_LONG).show();
+                Toast.makeText(activity.getApplicationContext(),
+                        "Observacion insertada en Reingreso", Toast.LENGTH_LONG).show();
+                if (MensajeProgreso.isShowing())
+                    MensajeProgreso.dismiss();
+                MensajeFinRepartoCORRECTO();
+            }else if(guardoImagen && !reingreso) {
+                Toast.makeText(activity.getApplicationContext(),
+                        "Firma Guardada", Toast.LENGTH_LONG).show();
+                Toast.makeText(activity.getApplicationContext(),
+                        "No se guarda registro de Reingreso: "+resp2.getMensaje(), Toast.LENGTH_LONG).show();
+                if (MensajeProgreso.isShowing())
+                    MensajeProgreso.dismiss();
+                MensajeFinRepartoINCORRECTO(resp2.getMensaje());
+            }else if(!guardoImagen && !reingreso){
+                Toast.makeText(activity.getApplicationContext(),
+                        "La firma no fue guardada: "+resp.getMensaje(), Toast.LENGTH_LONG).show();
+                Toast.makeText(activity.getApplicationContext(),
+                        "No se guarda registro de Reingreso: "+resp2.getMensaje(), Toast.LENGTH_LONG).show();
+                if (MensajeProgreso.isShowing())
+                    MensajeProgreso.dismiss();
+                MensajeFinRepartoINCORRECTO(resp.getMensaje()+" - "+resp2.getMensaje());
             }
         }
     }
@@ -341,4 +298,54 @@ public class MainMotivoNoEntrega extends AppCompatActivity implements View.OnCli
         return downloadDialog.show();
     }
 
+    private boolean VerificarGPS(){
+        boolean retorna = false;
+        String provider = Settings.Secure.getString(getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
+
+        if(!provider.contains("gps")){ //if gps is disabled
+            final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setMessage("El sistema GPS esta desactivado, ¿Desea activarlo?")
+                    .setCancelable(false)
+                    .setPositiveButton("Si", new DialogInterface.OnClickListener() {
+                        public void onClick(@SuppressWarnings("unused") final DialogInterface dialog, @SuppressWarnings("unused") final int id) {
+                            startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+                        }
+                    })
+                    .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                        public void onClick(final DialogInterface dialog, @SuppressWarnings("unused") final int id) {
+                            mHandler.sendEmptyMessage(ACTIVAR_GPS);
+                            dialog.cancel();
+                        }
+                    });
+            alert = builder.create();
+            alert.show();
+        }else{
+            retorna = true;
+        }
+        return retorna;
+    }
+
+    public ArrayAdapter<TipoReingresoTO> creaSpinnerReingresos(){
+
+        //Creamos la lista
+        ArrayList<TipoReingresoTO> reingresos = new ArrayList<>();
+        //La poblamos con los ejemplos
+        reingresos.add(new TipoReingresoTO("99", "Seleccione Motivo"));
+        reingresos.add(new TipoReingresoTO("0", "SIN MORADORES"));
+        reingresos.add(new TipoReingresoTO("10", "CLIENTE SIN DINERO"));
+        reingresos.add(new TipoReingresoTO("2", "FUERA DE PLAZO"));
+        reingresos.add(new TipoReingresoTO("3", "SE CAMBIO DE DOMICILIO"));
+        reingresos.add(new TipoReingresoTO("4", "NO EXISTE DIRECCION"));
+        reingresos.add(new TipoReingresoTO("5", "NO RESPONDEN"));
+        reingresos.add(new TipoReingresoTO("6", "NO RECIBE"));
+        reingresos.add(new TipoReingresoTO("7", "FALTA ORDEN DE COMPRA"));
+        reingresos.add(new TipoReingresoTO("8", "BULTO NO CORRESPONDE"));
+        reingresos.add(new TipoReingresoTO("9", "DAÑO MERCADERIA"));
+
+        //Creamos el adaptador
+        ArrayAdapter<TipoReingresoTO> adapter = new ArrayAdapter<TipoReingresoTO>(this,R.layout.support_simple_spinner_dropdown_item,reingresos);
+        adapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
+
+        return adapter;
+    }
 }

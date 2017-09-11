@@ -9,6 +9,8 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -25,10 +27,12 @@ public class MainODT extends AppCompatActivity implements View.OnClickListener {
     private Button btn_finreparto;
     private Button btn_Volver;
     private Button btn_scan_odt;
+    private ImageButton btn_odt_manual;
     private int faltantes;
     private int entregados;
     private TextView lblFaltantes;
     private TextView lblEntregadas;
+    private EditText txtOdtManual;
     private Utilidades util = new Utilidades();
     private Activity activity;
     ScanManager mScanMgr;
@@ -37,6 +41,7 @@ public class MainODT extends AppCompatActivity implements View.OnClickListener {
     Intent recibir;
     private Bundle datos;
     private EstadosOdtTO estado;
+    private String formaPago = "";
 
 
     @Override
@@ -47,8 +52,11 @@ public class MainODT extends AppCompatActivity implements View.OnClickListener {
         recibir = getIntent();
         btn_finreparto = (Button) findViewById(R.id.btnFinReparto);
         btn_finreparto.setOnClickListener(this);
-        btn_Volver = (Button) findViewById(R.id.btnVolver);
+        txtOdtManual = (EditText) findViewById(R.id.txtIngresoOdtManual);
+        btn_Volver = (Button) findViewById(R.id.btnVolverODT);
         btn_Volver.setOnClickListener(this);
+        btn_odt_manual = (ImageButton) findViewById(R.id.btnOdtManual);
+        btn_odt_manual.setOnClickListener(this);
         lblFaltantes = (TextView) findViewById(R.id.lblFaltantes);
         lblEntregadas = (TextView) findViewById(R.id.lblEntregados);
         mScanMgr = ScanManager.getInstance();
@@ -81,12 +89,42 @@ public class MainODT extends AppCompatActivity implements View.OnClickListener {
                 finish();
                 break;
             }
-            case R.id.btnVolver: {
-                //Intent intento = new Intent(MainODT.this, MainResumenPlanilla.class);
-                Intent intento = new Intent(MainODT.this, MainEntregaCarga.class);
-                intento.putExtra("odt","25301618281");
+            case R.id.btnVolverODT: {
+                Intent intento = new Intent(MainODT.this, MainResumenPlanilla.class);
+                //Intent intento = new Intent(MainODT.this, MainEscanerBulto.class);
+                //intento.putExtra("odt","50000002670");
                 startActivity(intento);
-                finish();
+                break;
+            }
+            case R.id.btnOdtManual: {
+                try {
+                    if (!util.validaEstadoOdt(txtOdtManual.getText().toString()).equals("99")) {
+                        formaPago = util.buscaFormaPagoOdt(txtOdtManual.getText().toString());
+                        if (formaPago != "" || formaPago != null) {
+                            if (formaPago.equals("CTA")) {
+                                Intent intento = new Intent(MainODT.this, MainEntregaCarga.class);
+                                intento.putExtra("odt", txtOdtManual.getText().toString());
+                                intento.putExtra("aux", 1);
+                                startActivity(intento);
+                            } else if (formaPago.equals("PED") || formaPago.equals("EFE")) {
+                                Intent intento = new Intent(MainODT.this, MainEscanerBulto.class);
+                                intento.putExtra("odt", txtOdtManual.getText().toString());
+                                startActivity(intento);
+                            } else {
+                                Toast.makeText(activity.getApplicationContext(),
+                                        "No se encontro FORMA DE PAGO para la ODT escaneada", Toast.LENGTH_LONG).show();
+                            }
+                        } else
+                            Toast.makeText(activity.getApplicationContext(), "ERROR!! Forma de Pago VACIA o NULA", Toast.LENGTH_LONG).show();
+                    } else
+                        Toast.makeText(activity.getApplicationContext(), "La ODT se encuentra ENTREGADA", Toast.LENGTH_LONG).show();
+                } catch (IOException e) {
+                    Toast.makeText(activity.getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
+                    e.printStackTrace();
+                } catch (JSONException e) {
+                    Toast.makeText(activity.getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
+                    e.printStackTrace();
+                }
                 break;
             }
 
@@ -131,7 +169,6 @@ public class MainODT extends AppCompatActivity implements View.OnClickListener {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action=intent.getAction();
-            String formaPago = "";
 
             if(ScanManager.ACTION_SEND_SCAN_RESULT.equals(action)){
                 byte[] bvalue1=intent.getByteArrayExtra(ScanManager.EXTRA_SCAN_RESULT_ONE_BYTES);

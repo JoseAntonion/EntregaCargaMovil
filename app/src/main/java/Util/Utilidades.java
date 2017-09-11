@@ -292,6 +292,7 @@ public class Utilidades {
                             }
                         }else{
                             if(!odtF.equals(recibeSplit[1])){
+                                if(!recibeSplit[2].toString().equals("57"))//EVITA QUE SE CONTABILICEN ODTS EN REINGRESO
                                 faltantes++;
                                 odtF = recibeSplit[1];
                             }
@@ -309,7 +310,7 @@ public class Utilidades {
         return leidosFaltantes;
     }
 
-    public void cambiaEstadoOdtArchivo(String odt) throws  IOException, ClientProtocolException,JSONException{
+    public void cambiaEstadoOdtArchivoENTREGADO(String odt) throws  IOException, ClientProtocolException,JSONException{
 
         FileReader fr = null;
 
@@ -326,6 +327,36 @@ public class Utilidades {
                             EliminaFilaArchivo(Globales.odtsXpatente,s);
                             recibeSplitAux = sAux.split("~");
                             sAux = recibeSplitAux[0]+"~"+recibeSplitAux[1]+"~99~"+recibeSplitAux[3]+"~"
+                                    +recibeSplitAux[4]+"~"+recibeSplitAux[5];
+                            EscribeLineaArchivo(sAux);
+                        }
+
+                    }
+                    s = br.readLine();
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void cambiaEstadoOdtArchivoREINGRESO(String odt) throws  IOException, ClientProtocolException,JSONException{
+
+        FileReader fr = null;
+
+        try {
+            fr = new FileReader(Globales.odtsXpatente);
+            BufferedReader br = new BufferedReader(fr);
+            String s = br.readLine();
+            if (s != null) {
+                while (s != null) {
+                    if (!s.equalsIgnoreCase("") && !s.equalsIgnoreCase("XXXXXXXXXXXXXXXXXX")) {
+                        this.recibeSplit = s.split("~");
+                        if (odt.equals(recibeSplit[1])) {
+                            String sAux = s;
+                            EliminaFilaArchivo(Globales.odtsXpatente,s);
+                            recibeSplitAux = sAux.split("~");
+                            sAux = recibeSplitAux[0]+"~"+recibeSplitAux[1]+"~57~"+recibeSplitAux[3]+"~"
                                     +recibeSplitAux[4]+"~"+recibeSplitAux[5];
                             EscribeLineaArchivo(sAux);
                         }
@@ -466,5 +497,31 @@ public class Utilidades {
         }
 
         return encontrado;
+    }
+
+    public String TraePlanillaDeODT(String odt) throws  IOException,ClientProtocolException,JSONException{
+        String planilla = "";
+        FileReader fr = null;
+
+        try {
+            fr = new FileReader(Globales.odtsXpatente);
+            BufferedReader br = new BufferedReader(fr);
+            String s = br.readLine();
+            if (s != null) {
+                while (s != null) {
+                    if (!s.equalsIgnoreCase("") && !s.equalsIgnoreCase("XXXXXXXXXXXXXXXXXX")) {
+                        this.recibeSplit = s.split("~");
+                        if (odt.equals(recibeSplit[1].toString())) {
+                            planilla = recibeSplit[0].toString();
+                            break;
+                        }
+                    }
+                    s = br.readLine();
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return planilla;
     }
 }

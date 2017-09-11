@@ -12,6 +12,6 @@ public class Globales extends Application {
     public static int cantidadBultosOriginal;
     public static String imagenCodificada;
     public static byte[] Imagen;
-    public static String version = "1.0";
+    public static String version = "v1.0";
 
 }

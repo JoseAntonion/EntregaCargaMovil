@@ -32,7 +32,7 @@ public class MainResumenEntrega extends AppCompatActivity implements View.OnClic
         util = new Utilidades();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_resumen_entrega);
-        btn_finalizar = (Button) findViewById(R.id.btnFinalizar);
+        btn_finalizar = (Button) findViewById(R.id.btnLimpiar);
         btn_finalizar.setOnClickListener(this);
         lst_resumen_entrega = (ListView) findViewById(R.id.lstResumenEntrega);
         try {
@@ -65,7 +65,7 @@ public class MainResumenEntrega extends AppCompatActivity implements View.OnClic
     public void onClick(View v) {
         switch (v.getId()) {
 
-            case R.id.btnFinalizar: {
+            case R.id.btnLimpiar: {
                 MensajeFinReparto();
                 break;
             }

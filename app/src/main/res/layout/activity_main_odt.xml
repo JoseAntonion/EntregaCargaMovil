@@ -16,10 +16,9 @@
         android:layout_height="wrap_content"
         app:srcCompat="@drawable/pullman_cargo"
         android:id="@+id/imageView"
-        android:layout_marginBottom="447dp"
-        android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:layout_alignParentStart="true"
+        android:layout_above="@+id/textView15" />
 
     <TextView
         android:text="ODT"
@@ -38,10 +37,10 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/textView"
-        android:layout_centerHorizontal="true"
-        android:layout_alignParentBottom="true"
-        android:id="@+id/relativeLayout">
+        android:id="@+id/relativeLayout"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/textView">
 
         <TextView
             android:id="@+id/lblFaltantes"
@@ -51,21 +50,21 @@
             android:textSize="36sp"
             android:layout_alignBaseline="@+id/lblEntregados"
             android:layout_alignBottom="@+id/lblEntregados"
-            android:layout_toRightOf="@+id/btnVolver"
-            android:layout_toEndOf="@+id/btnVolver" />
+            android:layout_toRightOf="@+id/btnVolverODT"
+            android:layout_toEndOf="@+id/btnVolverODT" />
 
         <TextView
             android:text="Entregadas"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="45dp"
             android:id="@+id/textView3"
             android:textStyle="normal|bold"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_marginLeft="53dp"
-            android:layout_marginStart="53dp" />
+            android:layout_marginLeft="26dp"
+            android:layout_marginStart="26dp"
+            android:layout_above="@+id/lblEntregados"
+            android:layout_alignLeft="@+id/btnFinReparto"
+            android:layout_alignStart="@+id/btnFinReparto"
+            android:layout_marginBottom="16dp" />
         <!-- :V -->
         <Button
             android:text="Finalizar Reparto"
@@ -74,7 +73,7 @@
             android:id="@+id/btnFinReparto"
             style="@style/Botton"
             android:layout_marginBottom="18dp"
-            android:layout_above="@+id/btnVolver"
+            android:layout_above="@+id/btnVolverODT"
             android:layout_centerHorizontal="true" />
         <!-- :V -->
         <TextView
@@ -83,17 +82,17 @@
             android:layout_height="wrap_content"
             android:id="@+id/lblEntregados"
             android:textSize="36sp"
-            android:layout_marginTop="18dp"
-            android:layout_below="@+id/textView3"
-            android:layout_alignLeft="@+id/btnVolver"
-            android:layout_alignStart="@+id/btnVolver" />
+            android:layout_marginBottom="30dp"
+            android:layout_above="@+id/btnFinReparto"
+            android:layout_toLeftOf="@+id/btnVolverODT"
+            android:layout_toStartOf="@+id/btnVolverODT" />
 
         <Button
             android:text="Volver"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             style="@style/Botton"
-            android:id="@+id/btnVolver"
+            android:id="@+id/btnVolverODT"
             android:layout_marginBottom="24dp"
             android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true" />
@@ -104,12 +103,12 @@
             android:layout_height="wrap_content"
             android:id="@+id/textView4"
             android:textStyle="normal|bold"
+            android:layout_marginRight="14dp"
+            android:layout_marginEnd="14dp"
             android:layout_alignBaseline="@+id/textView3"
             android:layout_alignBottom="@+id/textView3"
             android:layout_alignRight="@+id/btnFinReparto"
-            android:layout_alignEnd="@+id/btnFinReparto"
-            android:layout_marginRight="13dp"
-            android:layout_marginEnd="13dp" />
+            android:layout_alignEnd="@+id/btnFinReparto" />
     </RelativeLayout>
 
     <TextView
@@ -131,4 +130,31 @@
         android:textSize="18sp"
         android:layout_above="@+id/textView12"
         android:layout_centerHorizontal="true" />
+
+    <EditText
+        android:id="@+id/txtIngresoOdtManual"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignEnd="@+id/textView"
+        android:layout_alignRight="@+id/textView"
+        android:layout_below="@+id/textView"
+        android:layout_marginTop="17dp"
+        android:background="@drawable/fondo_txt"
+        android:ems="10"
+        android:maxLength="11"
+        android:hint="Ingreso ODT Manual"
+        android:inputType="textPersonName"
+        android:singleLine="true"
+        android:textAlignment="center"
+        android:textSize="24sp" />
+
+    <ImageButton
+        android:id="@+id/btnOdtManual"
+        style="@style/Botton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:srcCompat="?android:attr/actionModeFindDrawable"
+        android:layout_alignTop="@+id/txtIngresoOdtManual"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
 </RelativeLayout>

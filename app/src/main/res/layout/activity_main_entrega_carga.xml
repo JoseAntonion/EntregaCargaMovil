@@ -220,11 +220,11 @@
                     android:layout_height="match_parent">
 
                     <Button
-                        android:text="NO ENTREGAR CARGA"
+                        android:id="@+id/btnNoEntregaCarga"
+                        style="@style/Botton"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:id="@+id/btnNoEntregaCarga"
-                        style="@style/Botton"/>
+                        android:text="NO ENTREGAR CARGA" />
                 </LinearLayout>
 
                 <LinearLayout

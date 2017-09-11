@@ -20,6 +20,7 @@ import android.widget.Toast;
 import java.util.ArrayList;
 
 import To.ArchivoOdtPorPatenteTO;
+import Util.Globales;
 import Util.Utilidades;
 import Util.WebServices;
 
@@ -30,16 +31,6 @@ public class MainEntregaCargaMovil extends AppCompatActivity {
     private TextView txt_patente;
     private String patente;
     private Activity activity;
-    private Utilidades util;
-
-    // VARIABLES PARA VALIDACION DE CAMPOS
-    private static final int NO_PATENTE = 0;
-    private static final int NO_CLAVE = 1;
-    private static final int USUARIO_VALIDA = 2;
-    private static final int NO_CARGA_DE_DATOS = 3;
-    private static final int NO_INTERNET = 4;
-    private static final int NO_VERSION = 5;
-    private String mensaje = "";
     private TextView vers;
     private static final int MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 1 ;
     private static final int MY_PERMISSIONS_REQUEST_CAMERA = 1;
@@ -103,14 +94,12 @@ public class MainEntregaCargaMovil extends AppCompatActivity {
         setContentView(R.layout.activity_main_entrega_carga_movil);
         activity = this;
         vers= (TextView) findViewById(R.id.txtversion);
-        vers.setText(version);
-        btn_siguiente = (Button) findViewById(R.id.btnSiguiente);
+        vers.setText(Globales.version);
+        btn_siguiente = (Button) findViewById(R.id.btnSiguienteInicio);
         btn_siguiente.setOnClickListener(new View.OnClickListener(){
 
             @Override
             public void onClick(View v) {
-                /*if(util.verificaConexion(getApplicationContext())){*/
-                    txt_patente = (TextView) findViewById(R.id.txtPatente);
                     patente = txt_patente.getText().toString();
                     if(!patente.equals("")){
                         new TraeOdtPorPatente().execute();
@@ -121,7 +110,7 @@ public class MainEntregaCargaMovil extends AppCompatActivity {
 
             }
         });
-        btn_limpiar = (Button) findViewById(R.id.btnLimpiar);
+        btn_limpiar = (Button) findViewById(R.id.btnLimpiarInicio);
         btn_limpiar.setOnClickListener(new View.OnClickListener(){
 
             @Override
@@ -131,7 +120,6 @@ public class MainEntregaCargaMovil extends AppCompatActivity {
         });
         txt_patente = (TextView) findViewById(R.id.txtPatente);
         patente = txt_patente.getText().toString();
-
     }
 
     @Override
@@ -199,8 +187,6 @@ public class MainEntregaCargaMovil extends AppCompatActivity {
             return respStr;
         }
 
-
-
         @Override
         protected void onPostExecute(String result) {
             if (MensajeProgreso.isShowing())
@@ -215,7 +201,7 @@ public class MainEntregaCargaMovil extends AppCompatActivity {
                     System.gc();
                     finish();
                 } else {
-                    Toast.makeText(activity.getApplicationContext(), "No se encontraron ODT asociada a la patente !!!",
+                    Toast.makeText(activity.getApplicationContext(), "No se encontraron ODT asociadas. Verifique Patente !",
                             Toast.LENGTH_LONG).show();
                 }
             }

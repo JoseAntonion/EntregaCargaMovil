@@ -26,9 +26,9 @@ public class MainResumenPlanilla extends AppCompatActivity implements View.OnCli
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_resumen_planilla);
-        btn_ingresar = (Button) findViewById(R.id.btnSiguiente);
+        btn_ingresar = (Button) findViewById(R.id.btnLimpiar);
         btn_ingresar.setOnClickListener(this);
-        btn_Volver = (Button) findViewById(R.id.btnVolver);
+        btn_Volver = (Button) findViewById(R.id.btnVolverODT);
         btn_Volver.setOnClickListener(this);
         ls_lista_odts = (ListView) findViewById(R.id.lstResumenPlanilla);
         try {
@@ -56,14 +56,14 @@ public class MainResumenPlanilla extends AppCompatActivity implements View.OnCli
 
             switch (v.getId()) {
 
-                case R.id.btnSiguiente: {
+                case R.id.btnLimpiar: {
                     Intent intento = new Intent(MainResumenPlanilla.this, MainODT.class);
                     startActivity(intento);
                     finish();
                     break;
 
                 }
-                case R.id.btnVolver: {
+                case R.id.btnVolverODT: {
 
                     Intent intento = new Intent(MainResumenPlanilla.this, MainEntregaCargaMovil.class);
                     startActivity(intento);

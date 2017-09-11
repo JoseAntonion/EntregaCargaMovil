@@ -34,27 +34,40 @@ public class WebServices {
         httpClient = new DefaultHttpClient();
         ArchivoOdtPorPatenteTO archivoOdtPorPatenteTO = null;
         ArrayList<ArchivoOdtPorPatenteTO> archivoOdtPorPatenteTOs =  new ArrayList<ArchivoOdtPorPatenteTO>();
-
+        int filas;
 
         del = new HttpGet(RUTA_WEB_SERVICE + "/TraeDocumentos/patente="+patente);
         del.setHeader("content-type", "application/json");
         resp = httpClient.execute(del);
         respStr = EntityUtils.toString(resp.getEntity());
         responseObject = new JSONObject(respStr);
-        //responseObject = responseObject.getJSONObject("diDocInternoTO");
-        JSONArray respJSON = responseObject.getJSONArray("diDocInternoTO");
+        filas = responseObject.getInt("Filas");
+        if(filas>1){
+            JSONArray respJSON = responseObject.getJSONArray("DocumentoInterno");
 
-        for (int i = 0; i < respJSON.length(); i++) {
+            for (int i = 0; i < respJSON.length(); i++) {
+                archivoOdtPorPatenteTO =  new ArchivoOdtPorPatenteTO();
+                JSONObject obj = respJSON.getJSONObject(i);
+                archivoOdtPorPatenteTO.setCodBarra(obj.getString("Ccodigobarra"));
+                archivoOdtPorPatenteTO.setEstadoODT(obj.getString("Ueoestado"));
+                archivoOdtPorPatenteTO.setFormaPago(obj.getString("Doformapago"));
+                archivoOdtPorPatenteTO.setNumeroODT(obj.getString("Ueonumeroot"));
+                archivoOdtPorPatenteTO.setNumeroPiezas(obj.getInt("Donumeropiezas"));
+                archivoOdtPorPatenteTO.setPlanilla(obj.getString("Dinumerodocumento"));
+                archivoOdtPorPatenteTOs.add(archivoOdtPorPatenteTO);
+            }
+        } else {
             archivoOdtPorPatenteTO =  new ArchivoOdtPorPatenteTO();
-            JSONObject obj = respJSON.getJSONObject(i);
-            archivoOdtPorPatenteTO.setCodBarra(obj.getString("Ccodigobarra"));
-            archivoOdtPorPatenteTO.setEstadoODT(obj.getString("Ueoestado"));
-            archivoOdtPorPatenteTO.setFormaPago(obj.getString("Doformapago"));
-            archivoOdtPorPatenteTO.setNumeroODT(obj.getString("Ueonumeroot"));
-            archivoOdtPorPatenteTO.setNumeroPiezas(obj.getInt("Donumeropiezas"));
-            archivoOdtPorPatenteTO.setPlanilla(obj.getString("Dinumerodocumento"));
+            responseObject1 = responseObject.getJSONObject("DocumentoInterno");
+            archivoOdtPorPatenteTO.setCodBarra(responseObject1.getString("Ccodigobarra"));
+            archivoOdtPorPatenteTO.setEstadoODT(responseObject1.getString("Ueoestado"));
+            archivoOdtPorPatenteTO.setFormaPago(responseObject1.getString("Doformapago"));
+            archivoOdtPorPatenteTO.setNumeroODT(responseObject1.getString("Ueonumeroot"));
+            archivoOdtPorPatenteTO.setNumeroPiezas(responseObject1.getInt("Donumeropiezas"));
+            archivoOdtPorPatenteTO.setPlanilla(responseObject1.getString("Dinumerodocumento"));
             archivoOdtPorPatenteTOs.add(archivoOdtPorPatenteTO);
         }
+
         return archivoOdtPorPatenteTOs;
     }
 
@@ -119,6 +132,47 @@ public class WebServices {
             jsonObject.put("version", version);
             jsonObject.put("proyecto", proyecto);
             jsonObject.put("imei", imei);
+            //
+            StringEntity stringEntity = new StringEntity(jsonObject.toString());
+            stringEntity.setContentType("application/json");
+            httppost.setEntity(stringEntity);
+            // ejecuta
+            HttpResponse response = httpclient.execute(httppost);
+            String respStr = EntityUtils.toString(response.getEntity());
+
+            responseObject = new JSONObject(respStr);
+            validaTO.setValida(responseObject.getString("Valida"));
+            validaTO.setError(responseObject.getString("Error"));
+            validaTO.setMensaje(responseObject.getString("Mensaje"));
+            // return true;
+
+        } catch (Exception e) {
+
+            System.out.print(e.getMessage());
+            return validaTO;
+        }
+        return validaTO;
+    }
+
+    public ValidaTO GrabaReingreso(String planilla,String odt,int piezas, String tipoDevolucion,String codigoReingreso, String latitud, String longitud) throws IOException,ClientProtocolException,JSONException{
+        ValidaTO validaTO = new ValidaTO();
+
+        try {
+
+            HttpClient httpclient = new DefaultHttpClient();
+            JSONObject responseObject;
+            HttpPost httppost = new HttpPost(RUTA_WEB_SERVICE+ "/AgregaReingreso");
+            httppost.setHeader("Content-Type", "application/json");
+
+            // forma el JSON y tipo de contenido
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("planilla", planilla);
+            jsonObject.put("odt", odt);
+            jsonObject.put("piezas", piezas);
+            jsonObject.put("tipo_devolucion", tipoDevolucion);
+            jsonObject.put("codigo_reingreso", codigoReingreso);
+            jsonObject.put("latitud", latitud);
+            jsonObject.put("longitud", longitud);
             //
             StringEntity stringEntity = new StringEntity(jsonObject.toString());
             stringEntity.setContentType("application/json");

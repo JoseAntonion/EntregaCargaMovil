@@ -67,7 +67,8 @@
                     android:layout_alignParentLeft="true"
                     android:layout_alignParentStart="true"
                     android:layout_marginTop="18dp"
-                    android:layout_above="@+id/btnFinalizar">
+                    android:layout_above="@+id/btnLimpiar"
+                    android:id="@+id/linearLayout">
 
                     <com.coatedmoose.customviews.SignatureView
                         android:id="@+id/signatureView4"
@@ -78,28 +79,28 @@
                 </LinearLayout>
 
                 <Button
-                    android:id="@+id/btnFinalizar"
-                    style="@style/Botton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Finalizar"
-                    android:layout_marginBottom="44dp"
-                    android:layout_marginLeft="17dp"
-                    android:layout_marginStart="17dp"
-                    android:layout_alignParentBottom="true"
-                    android:layout_alignParentLeft="true"
-                    android:layout_alignParentStart="true" />
-
-                <Button
                     android:id="@+id/btnLimpiar"
                     style="@style/Botton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignBaseline="@+id/btnFinalizar"
-                    android:layout_alignBottom="@+id/btnFinalizar"
-                    android:layout_alignParentEnd="true"
-                    android:layout_alignParentRight="true"
+                    android:layout_alignParentBottom="true"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
+                    android:layout_marginBottom="68dp"
                     android:text="Limpiar" />
+
+                <Button
+
+                    style="@style/Botton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Finalizar"
+                    android:id="@+id/btn_Finalizar"
+                    android:layout_marginBottom="67dp"
+                    android:layout_alignParentBottom="true"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentEnd="true" />
+
             </RelativeLayout>
 
         </LinearLayout>

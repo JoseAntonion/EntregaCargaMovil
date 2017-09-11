@@ -65,7 +65,7 @@ public class MainEntregaCarga extends AppCompatActivity implements View.OnClickL
 
             case R.id.btnEntregaCarga: {
                 if(cantidadBultosIngresado == cantidadBultosMaximo){
-                    Intent intento = new Intent(MainEntregaCarga.this, MainFirma.class);
+                    Intent intento = new Intent(MainEntregaCarga.this, MainInfoReceptorCarga.class);
                     intento.putExtra("odt", ODT);
                     startActivity(intento);
                 }else{

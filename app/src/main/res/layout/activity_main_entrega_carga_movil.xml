@@ -26,13 +26,13 @@
         <ImageView
             android:id="@+id/imageView6"
             android:layout_width="match_parent"
-            android:layout_height="166dp"
+            android:layout_height="123dp"
             app:srcCompat="@drawable/logo_cargo" />
 
         <LinearLayout
             android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="27dp">
+            android:layout_height="wrap_content">
 
         </LinearLayout>
 
@@ -42,12 +42,12 @@
             android:layout_height="87dp">
 
             <TextView
-                android:text="Patente"
+                android:id="@+id/textView16"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/textView16"
-                android:textStyle="normal|bold"
-                android:textSize="18sp" />
+                android:text="Patente"
+                android:textSize="18sp"
+                android:textStyle="normal|bold" />
 
             <LinearLayout
                 android:orientation="horizontal"
@@ -71,12 +71,13 @@
                     android:textAlignment="center"
                     android:hint="FGSD-30"
                     android:background="@drawable/fondo_txt"
-                    android:layout_weight="1" />
+                    android:layout_weight="1"
+                    android:maxLength="7"/>
 
                 <LinearLayout
-                    android:orientation="vertical"
                     android:layout_width="44dp"
-                    android:layout_height="match_parent"></LinearLayout>
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"></LinearLayout>
             </LinearLayout>
 
         </LinearLayout>
@@ -98,7 +99,8 @@
                 android:orientation="horizontal"
                 android:layout_width="fill_parent"
                 android:layout_height="67dp"
-                android:layout_weight="0.13">
+                android:layout_weight="0.13"
+                android:weightSum="1">
 
                 <LinearLayout
                     android:layout_width="wrap_content"
@@ -106,28 +108,28 @@
                     android:orientation="vertical"></LinearLayout>
 
                 <Button
-                    android:text="Siguiente"
+                    android:id="@+id/btnLimpiarInicio"
+                    style="@style/Botton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:id="@+id/btnSiguiente"
-                    style="@style/Botton" />
+                    android:text="Limpiar" />
 
                 <LinearLayout
                     android:orientation="vertical"
                     android:layout_width="16dp"
-                    android:layout_height="match_parent"></LinearLayout>
+                    android:layout_height="match_parent"
+                    android:layout_weight="0.38"></LinearLayout>
 
                 <Button
-                    android:text="Limpiar"
+                    android:id="@+id/btnSiguienteInicio"
+                    style="@style/Botton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:id="@+id/btnLimpiar"
-                    android:layout_weight="0.83"
-                    style="@style/Botton"/>
+                    android:text="Siguiente" />
 
                 <LinearLayout
                     android:orientation="vertical"
-                    android:layout_width="21dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="match_parent"></LinearLayout>
             </LinearLayout>
         </LinearLayout>
@@ -136,12 +138,13 @@
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="0.14">
+            android:weightSum="1">
 
             <LinearLayout
                 android:orientation="vertical"
                 android:layout_width="match_parent"
-                android:layout_height="108dp">
+                android:layout_height="match_parent"
+                android:weightSum="1">
 
                 <TextView
                     android:id="@+id/txtversion"
@@ -151,9 +154,10 @@
 
                 <ImageView
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     app:srcCompat="@drawable/repartidor"
                     android:id="@+id/imageView9" />
+
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>

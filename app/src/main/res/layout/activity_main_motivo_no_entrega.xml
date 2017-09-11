@@ -147,19 +147,12 @@
                         android:layout_height="61dp"
                         android:weightSum="1">
 
-                        <Button
-                            android:id="@+id/btnFinalizar"
-                            style="@style/Botton"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Finalizar" />
                     </LinearLayout>
 
                     <LinearLayout
                         android:orientation="vertical"
-                        android:layout_width="16dp"
-                        android:layout_height="70dp"
-                        android:layout_weight="0.03"></LinearLayout>
+                        android:layout_width="wrap_content"
+                        android:layout_height="70dp"></LinearLayout>
 
                     <LinearLayout
                         android:layout_width="wrap_content"
@@ -167,7 +160,7 @@
                         android:orientation="vertical">
 
                         <Button
-                            android:id="@+id/btnLimpiar"
+                            android:id="@+id/btnLimpiarNoEntrega"
                             style="@style/Botton"
                             android:layout_width="130dp"
                             android:layout_height="wrap_content"
@@ -177,4 +170,15 @@
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>
+
+    <Button
+        android:id="@+id/btnFinalizarNoEntrega"
+        style="@style/Botton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Finalizar"
+        android:layout_marginBottom="16dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
 </RelativeLayout>

@@ -2,7 +2,6 @@
 <resources>
     <string-array name="reingreso">
         <item>SIN MORADORES</item>
-        <item>ENTREGA PARCIAL</item>
         <item>CLIENTE SIN DINERO</item>
         <item>FUERA DE PLAZO</item>
         <item>SE CAMBIO DE DOMICILIO</item>

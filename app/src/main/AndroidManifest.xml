@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="app.com.balvarez.entregacargamovil">
+
+    <uses-permission
+        android:name="android.permission.ACCESS_COARSE_LOCATION"
+        android:maxSdkVersion="22" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission  android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
@@ -26,6 +30,7 @@
         <activity android:name=".MainResumenEntrega" />
         <activity android:name=".MainEntregaCarga" />
         <activity android:name=".MainFirma" />
+        <activity android:name=".MainInfoReceptorCarga" />
         <activity android:name=".MainEscanerBulto" />
         <activity android:name=".MainMotivoNoEntrega"></activity>
     </application>

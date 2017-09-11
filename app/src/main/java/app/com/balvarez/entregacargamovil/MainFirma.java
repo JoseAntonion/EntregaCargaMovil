@@ -40,6 +40,7 @@ public class MainFirma extends AppCompatActivity implements View.OnClickListener
     private Activity activity;
     Intent recibir;
     private String ODT;
+    private String RUT;
     private Utilidades util;
 
     @Override
@@ -48,12 +49,13 @@ public class MainFirma extends AppCompatActivity implements View.OnClickListener
         recibir = getIntent();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_firma);
-        btn_finalizar = (Button) findViewById(R.id.btnFinalizar);
+        btn_finalizar = (Button) findViewById(R.id.btn_Finalizar);
         btn_finalizar.setOnClickListener(this);
         btn_limpiar = (Button) findViewById(R.id.btnLimpiar);
         btn_limpiar.setOnClickListener(this);
         signature = (SignatureView) this.findViewById(R.id.signatureView4);
         ODT = recibir.getStringExtra("odt");
+        RUT = recibir.getStringExtra("rut");
         util = new Utilidades();
     }
 
@@ -61,7 +63,7 @@ public class MainFirma extends AppCompatActivity implements View.OnClickListener
     public void onClick(View v) {
         switch (v.getId()) {
 
-            case R.id.btnFinalizar: {
+            case R.id.btn_Finalizar: {
                 new CapturaImagen().execute();
             }
             case R.id.btnLimpiar: {
@@ -116,7 +118,7 @@ public class MainFirma extends AppCompatActivity implements View.OnClickListener
                     String imei = telephonyManager.getDeviceId();
                     resp = ws.GrabaImagen(imei,encodedImage2,"ACT",imei,imei,ODT);
                     resp2 = ws.CambiaEstadoODT(ODT,"99",imei,"MainFirma", Globales.version,"EntregaCargaMovil",imei);
-                    util.cambiaEstadoOdtArchivo(ODT);
+                    util.cambiaEstadoOdtArchivoENTREGADO(ODT);
 
                     if(resp != null) {
                         if (resp.getValida().equals("1")) {

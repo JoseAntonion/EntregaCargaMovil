@@ -93,12 +93,12 @@
                 <Button
                     android:text="Siguiente"
                     android:layout_height="wrap_content"
-                    android:id="@+id/btnSiguiente"
+                    android:id="@+id/btnLimpiar"
                     style="@style/Botton"
                     android:layout_weight="0.03"
                     android:layout_width="wrap_content"
-                    android:layout_alignBaseline="@+id/btnVolver"
-                    android:layout_alignBottom="@+id/btnVolver"
+                    android:layout_alignBaseline="@+id/btnVolverODT"
+                    android:layout_alignBottom="@+id/btnVolverODT"
                     android:layout_alignParentRight="true"
                     android:layout_alignParentEnd="true" />
 
@@ -107,7 +107,7 @@
                     style="@style/Botton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:id="@+id/btnVolver"
+                    android:id="@+id/btnVolverODT"
                     android:layout_marginBottom="14dp"
                     android:layout_alignParentBottom="true"
                     android:layout_alignLeft="@+id/textView5"
