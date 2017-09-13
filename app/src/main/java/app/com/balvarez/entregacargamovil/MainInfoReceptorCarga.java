@@ -9,6 +9,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import Util.Globales;
+
 public class MainInfoReceptorCarga extends AppCompatActivity implements View.OnClickListener, View.OnFocusChangeListener {
 
     private Activity activity;
@@ -22,6 +24,7 @@ public class MainInfoReceptorCarga extends AppCompatActivity implements View.OnC
     private String rutReceptor = "";
     private String nombreReceptor = "";
     private String RUT = "";
+    //private ArrayList<EntregaOdtMasivoTO> listaOdt = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,7 +40,9 @@ public class MainInfoReceptorCarga extends AppCompatActivity implements View.OnC
         btn_limpiar.setOnClickListener(this);
         btn_siguiente = (Button) findViewById(R.id.btnSiguienteInfoReceptor);
         btn_siguiente.setOnClickListener(this);
-        ODT = recibir.getStringExtra("odt");
+        Bundle extras = recibir.getExtras();
+        //listaOdt = (ArrayList<EntregaOdtMasivoTO>) ((extras == null)?new ArrayList<>():extras.get("odtses"));
+        ODT = (extras == null)?"":extras.get("odt").toString();
         txt_RutReceptor.setOnFocusChangeListener(this);
         txt_RutReceptor.requestFocus();
     }
@@ -52,11 +57,22 @@ public class MainInfoReceptorCarga extends AppCompatActivity implements View.OnC
             }
             case R.id.btnSiguienteInfoReceptor: {
                 if(validarRut(txt_RutReceptor.getText().toString())) {
-                    Intent intento = new Intent(MainInfoReceptorCarga.this, MainFirma.class);
-                    intento.putExtra("odt", ODT);
-                    intento.putExtra("rut", txt_RutReceptor.getText().toString());
-                    startActivity(intento);
+                    if(Globales.odtMasiva == null){
+                        Intent intento = new Intent(MainInfoReceptorCarga.this, MainFirma.class);
+                        intento.putExtra("odt", ODT);
+                        intento.putExtra("rut", txt_RutReceptor.getText().toString());
+                        startActivity(intento);
+                    }else{
+                        Intent intento = new Intent(MainInfoReceptorCarga.this, MainFirma.class);
+                        //intento.putExtra("odtses", listaOdt);
+                        intento.putExtra("rut", txt_RutReceptor.getText().toString());
+                        startActivity(intento);
+                    }
+
                     break;
+                }else{
+                    Toast.makeText(activity.getApplicationContext(),
+                            "Debe ingresa un RUT VALIDO !!", Toast.LENGTH_LONG).show();
                 }
             }
             default:

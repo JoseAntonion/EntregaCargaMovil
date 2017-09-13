@@ -71,7 +71,7 @@ public class WebServices {
         return archivoOdtPorPatenteTOs;
     }
 
-    public ValidaTO GrabaImagen(String rut,String imagen,String estado, String usuario,String imei, String odt) throws IOException,ClientProtocolException,JSONException{
+    public ValidaTO GrabaImagen(String rut,String imagen,String estado, String usuario,String imei, String odt,String motivo) throws IOException,ClientProtocolException,JSONException{
 
         ValidaTO validaTO = new ValidaTO();
 
@@ -91,6 +91,7 @@ public class WebServices {
             jsonObject.put("usuario", usuario);
             jsonObject.put("imei", imei);
             jsonObject.put("odt", odt);
+            jsonObject.put("motivo", motivo);
             //
             StringEntity stringEntity = new StringEntity(jsonObject.toString());
             stringEntity.setContentType("application/json");

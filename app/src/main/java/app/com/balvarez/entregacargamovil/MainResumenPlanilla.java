@@ -16,7 +16,7 @@ import Util.Utilidades;
 
 public class MainResumenPlanilla extends AppCompatActivity implements View.OnClickListener {
 
-    private Button btn_ingresar;
+    private Button btn_siguente;
     private Button btn_Volver;
     private ListView ls_lista_odts;
     private Utilidades util = new Utilidades();
@@ -26,8 +26,8 @@ public class MainResumenPlanilla extends AppCompatActivity implements View.OnCli
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_resumen_planilla);
-        btn_ingresar = (Button) findViewById(R.id.btnLimpiar);
-        btn_ingresar.setOnClickListener(this);
+        btn_siguente = (Button) findViewById(R.id.btnSiguienteOdt);
+        btn_siguente.setOnClickListener(this);
         btn_Volver = (Button) findViewById(R.id.btnVolverODT);
         btn_Volver.setOnClickListener(this);
         ls_lista_odts = (ListView) findViewById(R.id.lstResumenPlanilla);
@@ -36,7 +36,9 @@ public class MainResumenPlanilla extends AppCompatActivity implements View.OnCli
             ArrayList<String> arregloStringAdaptador = new ArrayList<>();
             contenidoArchivo = util.cargaDesdeArchivo();
             for (int i=0 ; i < contenidoArchivo.size() ; i++){
-                arregloStringAdaptador.add(contenidoArchivo.get(i).getNumeroODT()+"                                "+contenidoArchivo.get(i).getNumeroPiezas());
+                if(!contenidoArchivo.get(i).getEstadoODT().equals("99")){
+                    arregloStringAdaptador.add(contenidoArchivo.get(i).getNumeroODT()+"                                "+contenidoArchivo.get(i).getNumeroPiezas());
+                }
             }
             adaptador = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1, arregloStringAdaptador);
             //ArrayAdapter<String> adaptador = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,contenidoArchivoPrueba);
@@ -56,7 +58,7 @@ public class MainResumenPlanilla extends AppCompatActivity implements View.OnCli
 
             switch (v.getId()) {
 
-                case R.id.btnLimpiar: {
+                case R.id.btnSiguienteOdt: {
                     Intent intento = new Intent(MainResumenPlanilla.this, MainODT.class);
                     startActivity(intento);
                     finish();

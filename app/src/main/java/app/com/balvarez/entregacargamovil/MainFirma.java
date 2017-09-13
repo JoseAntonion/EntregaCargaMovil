@@ -36,12 +36,13 @@ public class MainFirma extends AppCompatActivity implements View.OnClickListener
     private SignatureView signature;
     private Button btn_finalizar;
     private Button btn_limpiar;
-    private String encodedImage2;
+    private String encodedFirma;
     private Activity activity;
     Intent recibir;
     private String ODT;
     private String RUT;
     private Utilidades util;
+    //private ArrayList<EntregaOdtMasivoTO> listaOdt = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,8 +55,10 @@ public class MainFirma extends AppCompatActivity implements View.OnClickListener
         btn_limpiar = (Button) findViewById(R.id.btnLimpiar);
         btn_limpiar.setOnClickListener(this);
         signature = (SignatureView) this.findViewById(R.id.signatureView4);
-        ODT = recibir.getStringExtra("odt");
-        RUT = recibir.getStringExtra("rut");
+        Bundle extras = recibir.getExtras();
+        //listaOdt = (ArrayList<EntregaOdtMasivoTO>) ((extras == null)?new ArrayList<>():extras.get("odtses"));
+        ODT = (extras.get("odt") == null)?"":extras.get("odt").toString();
+        RUT = (extras.get("rut") == null)?"":extras.get("rut").toString();
         util = new Utilidades();
     }
 
@@ -78,7 +81,7 @@ public class MainFirma extends AppCompatActivity implements View.OnClickListener
 
         Bitmap imagen = signature.getImage();
         File sd = Environment.getExternalStorageDirectory();
-        File fichero = new File(sd, "Firma.jpg");
+        File fichero = new File(sd, "firma.jpg");
         WebServices ws = new WebServices();
         ValidaTO resp;
         ValidaTO resp2;
@@ -108,7 +111,7 @@ public class MainFirma extends AppCompatActivity implements View.OnClickListener
                     ByteArrayOutputStream arrayOutputStream = new ByteArrayOutputStream();
                     imagen.compress(Bitmap.CompressFormat.PNG, 90, arrayOutputStream);
                     Globales.Imagen = arrayOutputStream.toByteArray();
-                    encodedImage2 = Base64.encodeToString(Globales.Imagen,Base64.DEFAULT);
+                    encodedFirma = Base64.encodeToString(Globales.Imagen,Base64.DEFAULT);
                     fichero.createNewFile();
                     OutputStream os = new FileOutputStream(fichero);
                     imagen.compress(Bitmap.CompressFormat.JPEG, 90, os);
@@ -116,9 +119,17 @@ public class MainFirma extends AppCompatActivity implements View.OnClickListener
 
                     TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
                     String imei = telephonyManager.getDeviceId();
-                    resp = ws.GrabaImagen(imei,encodedImage2,"ACT",imei,imei,ODT);
-                    resp2 = ws.CambiaEstadoODT(ODT,"99",imei,"MainFirma", Globales.version,"EntregaCargaMovil",imei);
-                    util.cambiaEstadoOdtArchivoENTREGADO(ODT);
+                    if(Globales.odtMasiva != null){
+                        for (int i=0;i<Globales.odtMasiva.size();i++){
+                            resp = ws.GrabaImagen(RUT,encodedFirma,"ACT",RUT,imei,Globales.odtMasiva.get(i).getOdt(),"ENTREGA");
+                            resp2 = ws.CambiaEstadoODT(Globales.odtMasiva.get(i).getOdt(),"99",RUT,"MainFirma", Globales.version,"EntregaCargaMovil",imei);
+                            util.cambiaEstadoOdtArchivoENTREGADO(Globales.odtMasiva.get(i).getOdt());
+                        }
+                    }else{
+                        resp = ws.GrabaImagen(RUT,encodedFirma,"ACT",RUT,imei,ODT,"ENTREGA");
+                        resp2 = ws.CambiaEstadoODT(ODT,"99",imei,"MainFirma", Globales.version,"EntregaCargaMovil",imei);
+                        util.cambiaEstadoOdtArchivoENTREGADO(ODT);
+                    }
 
                     if(resp != null) {
                         if (resp.getValida().equals("1")) {
@@ -132,10 +143,16 @@ public class MainFirma extends AppCompatActivity implements View.OnClickListener
                     }
                 }
             } catch (FileNotFoundException e) {
+                Toast.makeText(activity.getApplicationContext(),
+                        e.getMessage(), Toast.LENGTH_LONG).show();
                 e.printStackTrace();
             } catch (IOException e) {
+                Toast.makeText(activity.getApplicationContext(),
+                        e.getMessage(), Toast.LENGTH_LONG).show();
                 e.printStackTrace();
             } catch (Exception e){
+                Toast.makeText(activity.getApplicationContext(),
+                        e.getMessage(), Toast.LENGTH_LONG).show();
                 e.printStackTrace();
             }
             return null;

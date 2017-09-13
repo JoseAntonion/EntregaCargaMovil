@@ -91,16 +91,16 @@
                     android:layout_alignParentEnd="true" />
 
                 <Button
-                    android:text="Siguiente"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/btnLimpiar"
+                    android:id="@+id/btnSiguienteOdt"
                     style="@style/Botton"
-                    android:layout_weight="0.03"
                     android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_alignBaseline="@+id/btnVolverODT"
                     android:layout_alignBottom="@+id/btnVolverODT"
+                    android:layout_alignParentEnd="true"
                     android:layout_alignParentRight="true"
-                    android:layout_alignParentEnd="true" />
+                    android:layout_weight="0.03"
+                    android:text="Siguiente" />
 
                 <Button
                     android:text="Volver"

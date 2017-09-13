@@ -1,8 +1,10 @@
 package app.com.balvarez.entregacargamovil;
 
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
@@ -13,6 +15,8 @@ import org.json.JSONException;
 
 import java.io.IOException;
 
+import To.EntregaOdtMasivoTO;
+import Util.Globales;
 import Util.Utilidades;
 
 public class MainEntregaCarga extends AppCompatActivity implements View.OnClickListener {
@@ -20,11 +24,14 @@ public class MainEntregaCarga extends AppCompatActivity implements View.OnClickL
     private Button btn_entrega_carga;
     private Button btn_no_entrega_carga;
     private EditText odtAentregar;
-    private String ODT = "";
+    private String ODT;
+    private String OLD;
     private Intent recibir;
     private Utilidades util;
     private EditText txtCantidadBultos;
     private Activity activity;
+    //private ArrayList<EntregaOdtMasivoTO> odtMasiva;
+    EntregaOdtMasivoTO odtM;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,10 +45,13 @@ public class MainEntregaCarga extends AppCompatActivity implements View.OnClickL
         btn_no_entrega_carga = (Button) findViewById(R.id.btnNoEntregaCarga);
         btn_no_entrega_carga.setOnClickListener(this);
         txtCantidadBultos = (EditText) findViewById(R.id.txtCantBultos);
-        ODT = recibir.getStringExtra("odt");
+        Bundle extras = recibir.getExtras();
+        ODT = (extras.isEmpty())?"":extras.get("odt").toString();
+        OLD = (extras.get("old") == null)?"":extras.get("old").toString();
         odtAentregar = (EditText) findViewById(R.id.txtODT);
         odtAentregar.setText(ODT);
         odtAentregar.setEnabled(false);
+        //odtMasiva = new ArrayList<EntregaOdtMasivoTO>();
     }
 
 
@@ -65,13 +75,12 @@ public class MainEntregaCarga extends AppCompatActivity implements View.OnClickL
 
             case R.id.btnEntregaCarga: {
                 if(cantidadBultosIngresado == cantidadBultosMaximo){
-                    Intent intento = new Intent(MainEntregaCarga.this, MainInfoReceptorCarga.class);
-                    intento.putExtra("odt", ODT);
-                    startActivity(intento);
+                    MensajeEntregaMasivo(cantidadBultosMaximo,cantidadBultosIngresado);
                 }else{
                     Toast.makeText(activity.getApplicationContext(),
                             "Debe ingresa cantidad Exacta de Bultos", Toast.LENGTH_LONG).show();
                 }
+
                 break;
             }
             case R.id.btnNoEntregaCarga: {
@@ -79,12 +88,59 @@ public class MainEntregaCarga extends AppCompatActivity implements View.OnClickL
                 intento.putExtra("odt", ODT);
                 startActivity(intento);
                 finish();
-                System.gc();
-                finish();
                 break;
             }
             default:
                 break;
         }
+    }
+
+    private AlertDialog MensajeEntregaMasivo(final int cantidadBultosMaximo,final int cantidadBultosIngresado) {
+        final String DEFAULT_TITLE = "Entrega Carga Movil";
+        final String DEFAULT_MESSAGE = "Desea cargas mas ODTs ?";
+        final String DEFAULT_YES = "Si";
+        final String DEFAULT_NO = "No";
+
+        odtM = new EntregaOdtMasivoTO();
+        odtM.setOdt(ODT);
+        odtM.setCantidad(Integer.parseInt(txtCantidadBultos.getText().toString()));
+        Globales.odtMasiva.add(odtM);
+
+        AlertDialog.Builder downloadDialog = new AlertDialog.Builder(activity);
+        downloadDialog.setTitle(DEFAULT_TITLE);
+        downloadDialog.setMessage(DEFAULT_MESSAGE);
+        downloadDialog.setPositiveButton(DEFAULT_YES,
+                new DialogInterface.OnClickListener() {
+
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        /*odtM = new EntregaOdtMasivoTO();
+                        odtM.setOdt(ODT);
+                        odtM.setCantidad(Integer.parseInt(txtCantidadBultos.getText().toString()));
+                        Globales.odtMasiva.add(odtM);*/
+                        Intent intent = new Intent(MainEntregaCarga.this, MainODT.class);
+                        //intent.putExtra("masivo", 1);
+                        intent.putExtra("old", "1");
+                        startActivity(intent);
+                    }
+                });
+        downloadDialog.setNegativeButton(DEFAULT_NO,
+                new DialogInterface.OnClickListener() {
+
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        if(OLD.equals("")){
+                            Intent intento = new Intent(MainEntregaCarga.this, MainInfoReceptorCarga.class);
+                            intento.putExtra("odt", ODT);
+                            startActivity(intento);
+                        }else{
+                            Intent intento = new Intent(MainEntregaCarga.this, MainInfoReceptorCarga.class);
+                            //intento.putExtra("odtses", odtMasiva);
+                            startActivity(intento);
+                        }
+                    }
+                });
+
+        return downloadDialog.show();
     }
 }

@@ -89,7 +89,17 @@ public class MainMotivoNoEntrega extends AppCompatActivity implements View.OnCli
         switch (v.getId()) {
 
             case R.id.btnFinalizarNoEntrega: {
-                new CapturaImagen().execute();
+                if(!codigoReingreso.isEmpty() && !codigoReingreso.equals("99")){
+                    if(txtNombreFoto.getVisibility() != View.INVISIBLE){
+                        new CapturaImagen().execute();
+                    }else{
+                        Toast.makeText(activity.getApplicationContext(),
+                                "Debe tomar FOTOGRAFIA !!!", Toast.LENGTH_LONG).show();
+                    }
+                }else{
+                    Toast.makeText(activity.getApplicationContext(),
+                            "Debe ingresar un MOTIVO !!!", Toast.LENGTH_LONG).show();
+                }
                 break;
             }
             case R.id.btnTomarFoto: {
@@ -125,7 +135,7 @@ public class MainMotivoNoEntrega extends AppCompatActivity implements View.OnCli
             //bMap = BitmapFactory.decodeFile(Globales.rutaArchivos2 + "/Fotos/" + NombreFoto);
             txtNombreFoto.setText(NombreFoto);
             txtNombreFoto.setVisibility(View.VISIBLE);
-            spn_motivo.setAdapter(creaSpinnerReingresos());
+            //spn_motivo.setAdapter(creaSpinnerReingresos());
         }
 
     }
@@ -172,29 +182,27 @@ public class MainMotivoNoEntrega extends AppCompatActivity implements View.OnCli
 
             try {
                 if (sd.canWrite()) {
-                    if(codigoReingreso.isEmpty()){
-                        TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-                        String imei = telephonyManager.getDeviceId();
-                        // GEO-REFERENCIA
-                        if(VerificarGPS()){
-                            GPSTraker gps = new GPSTraker(getApplicationContext());
-                            if (gps.canGetLocation()) {
-                                latitud = String.valueOf(gps.getLatitude());
-                                longitud = String.valueOf(gps.getLongitude());
-                            }
+                    TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+                    String imei = telephonyManager.getDeviceId();
+                    // GEO-REFERENCIA
+                    if(VerificarGPS()){
+                        GPSTraker gps = new GPSTraker(getApplicationContext());
+                        if (gps.canGetLocation()) {
+                            latitud = String.valueOf(gps.getLatitude());
+                            longitud = String.valueOf(gps.getLongitude());
                         }
-                        resp = ws.GrabaImagen(imei,encodedImage2,"ACT",imei,imei,ODT);
-                        resp2 = ws.GrabaReingreso(util.TraePlanillaDeODT(ODT),ODT,util.leeCantidadBultosODT(ODT),"T","0",latitud,longitud);
-                        util.cambiaEstadoOdtArchivoREINGRESO(ODT);
-                        if(resp != null) {
-                            if (resp.getValida().equals("1")) {
-                                guardoImagen = true;
-                            }
+                    }
+                    resp = ws.GrabaImagen(imei,encodedImage2,"ACT",imei,imei,ODT,"REINGRESO");
+                    resp2 = ws.GrabaReingreso(util.TraePlanillaDeODT(ODT),ODT,util.leeCantidadBultosODT(ODT),"T",codigoReingreso,latitud,longitud);
+                    util.cambiaEstadoOdtArchivoREINGRESO(ODT);
+                    if(resp != null) {
+                        if (resp.getValida().equals("1")) {
+                            guardoImagen = true;
                         }
-                        if(resp2 != null){
-                            if (resp2.getValida().equals("1")) {
-                                reingreso = true;
-                            }
+                    }
+                    if(resp2 != null){
+                        if (resp2.getValida().equals("1")) {
+                            reingreso = true;
                         }
                     }
                 }
@@ -335,7 +343,6 @@ public class MainMotivoNoEntrega extends AppCompatActivity implements View.OnCli
         reingresos.add(new TipoReingresoTO("10", "CLIENTE SIN DINERO"));
         reingresos.add(new TipoReingresoTO("2", "FUERA DE PLAZO"));
         reingresos.add(new TipoReingresoTO("3", "SE CAMBIO DE DOMICILIO"));
-        reingresos.add(new TipoReingresoTO("4", "NO EXISTE DIRECCION"));
         reingresos.add(new TipoReingresoTO("5", "NO RESPONDEN"));
         reingresos.add(new TipoReingresoTO("6", "NO RECIBE"));
         reingresos.add(new TipoReingresoTO("7", "FALTA ORDEN DE COMPRA"));

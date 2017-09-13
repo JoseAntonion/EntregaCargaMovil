@@ -2,6 +2,10 @@ package Util;
 
 import android.app.Application;
 
+import java.util.ArrayList;
+
+import To.EntregaOdtMasivoTO;
+
 
 public class Globales extends Application {
 
@@ -13,5 +17,6 @@ public class Globales extends Application {
     public static String imagenCodificada;
     public static byte[] Imagen;
     public static String version = "v1.0";
+    public static ArrayList<EntregaOdtMasivoTO> odtMasiva = new ArrayList<>();
 
 }

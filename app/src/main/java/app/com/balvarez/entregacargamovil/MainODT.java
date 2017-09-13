@@ -42,6 +42,7 @@ public class MainODT extends AppCompatActivity implements View.OnClickListener {
     private Bundle datos;
     private EstadosOdtTO estado;
     private String formaPago = "";
+    private String OLD;
 
 
     @Override
@@ -64,7 +65,12 @@ public class MainODT extends AppCompatActivity implements View.OnClickListener {
         estado = new EstadosOdtTO();
 
         // Captura variables por parametro de otros Activitis
-        datos = this.getIntent().getExtras();
+        Bundle extras = recibir.getExtras();
+        OLD = (extras == null)?"":extras.get("old").toString();
+        if(!OLD.equals("")){
+            btn_finreparto.setEnabled(false);
+            btn_Volver.setEnabled(false);
+        }
 
         try {
             estado = util.buscaLeidosFaltantes();
@@ -85,8 +91,6 @@ public class MainODT extends AppCompatActivity implements View.OnClickListener {
                 Intent intento = new Intent(MainODT.this, MainResumenEntrega.class);
                 startActivity(intento);
                 finish();
-                System.gc();
-                finish();
                 break;
             }
             case R.id.btnVolverODT: {
@@ -105,6 +109,7 @@ public class MainODT extends AppCompatActivity implements View.OnClickListener {
                                 Intent intento = new Intent(MainODT.this, MainEntregaCarga.class);
                                 intento.putExtra("odt", txtOdtManual.getText().toString());
                                 intento.putExtra("aux", 1);
+                                intento.putExtra("old", OLD);
                                 startActivity(intento);
                             } else if (formaPago.equals("PED") || formaPago.equals("EFE")) {
                                 Intent intento = new Intent(MainODT.this, MainEscanerBulto.class);
@@ -207,8 +212,11 @@ public class MainODT extends AppCompatActivity implements View.OnClickListener {
                                     Toast.makeText(activity.getApplicationContext(), "ERROR Forma de Pago !!!!", Toast.LENGTH_LONG).show();
                             } else
                                 Toast.makeText(activity.getApplicationContext(), "La ODT se encuentra ENTREGADA", Toast.LENGTH_LONG).show();
-                        }else
+                        }else{
                             Toast.makeText(activity.getApplicationContext(), "ODT no encontrada", Toast.LENGTH_LONG).show();
+                            Intent intento = new Intent(MainODT.this, MainODT.class);
+                            startActivity(intento);
+                        }
                     }
 
                 } catch (Exception e) {
