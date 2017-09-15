@@ -26,6 +26,7 @@ import Util.WebServices;
 
 public class MainEntregaCargaMovil extends AppCompatActivity {
 
+    private static final int PETICION_PERMISO_LOCALIZACION = 1;
     private Button btn_siguiente;
     private Button btn_limpiar;
     private TextView txt_patente;
@@ -35,6 +36,10 @@ public class MainEntregaCargaMovil extends AppCompatActivity {
     private static final int MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 1 ;
     private static final int MY_PERMISSIONS_REQUEST_CAMERA = 1;
     private static final int MY_PERMISSIONS_REQUEST_READ_PHONE_STATE = 1;
+    private static final int MY_PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION = 1;
+    private static final int MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
+    private static final int MY_ACCESS_LOCATION_EXTRA_COMMANDS = 1;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,7 +78,23 @@ public class MainEntregaCargaMovil extends AppCompatActivity {
 
             }
         }
-        // PERMISO PARA USAR CAMARA
+        //LATI LONG
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_LOCATION_EXTRA_COMMANDS)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    Manifest.permission.ACCESS_LOCATION_EXTRA_COMMANDS)) {
+
+            } else {
+
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.ACCESS_LOCATION_EXTRA_COMMANDS},
+                        MY_ACCESS_LOCATION_EXTRA_COMMANDS);
+
+            }
+        }
+        // PERMISO PARA USAR CONTACTOS
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.READ_PHONE_STATE)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -86,6 +107,38 @@ public class MainEntregaCargaMovil extends AppCompatActivity {
                 ActivityCompat.requestPermissions(this,
                         new String[]{Manifest.permission.READ_PHONE_STATE},
                         MY_PERMISSIONS_REQUEST_READ_PHONE_STATE);
+
+            }
+        }
+
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    Manifest.permission.ACCESS_FINE_LOCATION)) {
+
+            } else {
+
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                        MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+
+            }
+        }
+        int permissionCheck3 = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION);
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_COARSE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    Manifest.permission.ACCESS_COARSE_LOCATION)) {
+
+            } else {
+
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
+                        MY_PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION);
 
             }
         }
@@ -119,14 +172,32 @@ public class MainEntregaCargaMovil extends AppCompatActivity {
             }
         });
         txt_patente = (TextView) findViewById(R.id.txtPatente);
+        txt_patente = (TextView) findViewById(R.id.txtPatente);
         patente = txt_patente.getText().toString();
     }
+
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
 
         if (requestCode == MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE) {
+            if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                //populateAutoComplete();
+            }
+        }
+        if (requestCode == MY_PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION) {
+            if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                //populateAutoComplete();
+            }
+        }
+
+        if (requestCode == MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION) {
+            if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                //populateAutoComplete();
+            }
+        }
+        if (requestCode == MY_ACCESS_LOCATION_EXTRA_COMMANDS) {
             if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 //populateAutoComplete();
             }
@@ -196,7 +267,8 @@ public class MainEntregaCargaMovil extends AppCompatActivity {
                         Toast.LENGTH_LONG).show();
             }else {
                 if (bandera) {
-                    Intent intent = new Intent(MainEntregaCargaMovil.this, MainResumenPlanilla.class);
+                    //Intent intent = new Intent(MainEntregaCargaMovil.this, MainResumenPlanilla.class);
+                    Intent intent = new Intent(MainEntregaCargaMovil.this, MainCancelacionOdt.class);
                     startActivity(intent);
                     System.gc();
                     finish();

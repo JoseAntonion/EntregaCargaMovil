@@ -141,9 +141,9 @@
         android:layout_marginTop="17dp"
         android:background="@drawable/fondo_txt"
         android:ems="10"
-        android:maxLength="11"
         android:hint="Ingreso ODT Manual"
-        android:inputType="textPersonName"
+        android:inputType="number"
+        android:maxLength="11"
         android:singleLine="true"
         android:textAlignment="center"
         android:textSize="24sp" />

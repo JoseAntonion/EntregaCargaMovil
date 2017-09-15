@@ -18,5 +18,7 @@ public class Globales extends Application {
     public static byte[] Imagen;
     public static String version = "v1.0";
     public static ArrayList<EntregaOdtMasivoTO> odtMasiva = new ArrayList<>();
+    public static double latitud;
+    public static double longitud;
 
 }

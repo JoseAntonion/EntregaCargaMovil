@@ -42,7 +42,8 @@ public class MainODT extends AppCompatActivity implements View.OnClickListener {
     private Bundle datos;
     private EstadosOdtTO estado;
     private String formaPago = "";
-    private String OLD;
+    private String OLD = "";
+    private String OLD2 = "";
 
 
     @Override
@@ -66,8 +67,11 @@ public class MainODT extends AppCompatActivity implements View.OnClickListener {
 
         // Captura variables por parametro de otros Activitis
         Bundle extras = recibir.getExtras();
-        OLD = (extras == null)?"":extras.get("old").toString();
-        if(!OLD.equals("")){
+        if(extras != null){
+            OLD = (extras.get("old") == null)?"":extras.get("old").toString();
+            OLD2 = (extras.get("old2") == null)?"":extras.get("old2").toString();
+        }
+        if(!OLD.equals("") || !OLD2.equals("")){
             btn_finreparto.setEnabled(false);
             btn_Volver.setEnabled(false);
         }
@@ -197,11 +201,13 @@ public class MainODT extends AppCompatActivity implements View.OnClickListener {
                                         Intent intento = new Intent(MainODT.this, MainEntregaCarga.class);
                                         intento.putExtra("odt", svalue1);
                                         intento.putExtra("aux", 1);
+                                        intento.putExtra("old", OLD);
                                         startActivity(intento);
                                         System.gc();
                                     } else if (formaPago.equals("PED") || formaPago.equals("EFE")) {
                                         Intent intento = new Intent(MainODT.this, MainEscanerBulto.class);
                                         intento.putExtra("odt", svalue1);
+                                        intento.putExtra("old2", OLD2);
                                         startActivity(intento);
                                         System.gc();
                                     } else {

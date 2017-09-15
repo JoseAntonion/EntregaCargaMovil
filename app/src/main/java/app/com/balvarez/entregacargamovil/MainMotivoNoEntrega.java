@@ -6,12 +6,14 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.provider.MediaStore;
 import android.provider.Settings;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.telephony.TelephonyManager;
@@ -33,11 +35,14 @@ import java.util.ArrayList;
 import To.TipoReingresoTO;
 import To.ValidaTO;
 import Util.GPSTraker;
+import Util.Globales;
 import Util.Utilidades;
 import Util.WebServices;
 
 public class MainMotivoNoEntrega extends AppCompatActivity implements View.OnClickListener, AdapterView.OnItemSelectedListener {
 
+    private static final String LOGTAG = "";
+    private static final int PETICION_PERMISO_LOCALIZACION = 1;
     private Button btn_finalizar;
     private Button btn_limpiar;
     private Button btn_tomarFoto;
@@ -52,7 +57,7 @@ public class MainMotivoNoEntrega extends AppCompatActivity implements View.OnCli
     private Activity activity;
     private Utilidades util;
     private Bitmap bMap;
-    private  int RESULT_LOAD_IMG = 0;
+    private int RESULT_LOAD_IMG = 0;
     private int REQUEST_CAMERA = 0, SELECT_FILE = 1;
     String imgDecodableString;
     private String userChoosenTask;
@@ -60,7 +65,10 @@ public class MainMotivoNoEntrega extends AppCompatActivity implements View.OnCli
     private Handler mHandler;
     private AlertDialog alert;
     private String codigoReingreso = "";
-    
+    private double latitud;
+    private double longitud;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         util = new Utilidades();
@@ -80,6 +88,7 @@ public class MainMotivoNoEntrega extends AppCompatActivity implements View.OnCli
         spn_motivo.setOnItemSelectedListener(this);
         txtNombreFoto = (TextView) findViewById(R.id.txtNombreFoto);
         txtNombreFoto.setVisibility(View.INVISIBLE);
+        ActivityCompat.requestPermissions(MainMotivoNoEntrega.this,new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},123);
     }
 
 
@@ -89,14 +98,23 @@ public class MainMotivoNoEntrega extends AppCompatActivity implements View.OnCli
         switch (v.getId()) {
 
             case R.id.btnFinalizarNoEntrega: {
-                if(!codigoReingreso.isEmpty() && !codigoReingreso.equals("99")){
-                    if(txtNombreFoto.getVisibility() != View.INVISIBLE){
+                // GEO-REFERENCIA
+                if (VerificarGPS()) {
+                    GPSTraker gps = new GPSTraker(activity.getApplicationContext());
+                    Location l = gps.getLocation();
+                    if (l != null) {
+                        Globales.latitud = l.getLatitude();
+                        Globales.longitud = l.getLongitude();
+                    }
+                }
+                if (!codigoReingreso.isEmpty() && !codigoReingreso.equals("99")) {
+                    if (txtNombreFoto.getVisibility() != View.INVISIBLE) {
                         new CapturaImagen().execute();
-                    }else{
+                    } else {
                         Toast.makeText(activity.getApplicationContext(),
                                 "Debe tomar FOTOGRAFIA !!!", Toast.LENGTH_LONG).show();
                     }
-                }else{
+                } else {
                     Toast.makeText(activity.getApplicationContext(),
                             "Debe ingresar un MOTIVO !!!", Toast.LENGTH_LONG).show();
                 }
@@ -104,9 +122,8 @@ public class MainMotivoNoEntrega extends AppCompatActivity implements View.OnCli
             }
             case R.id.btnTomarFoto: {
                 Intent foto = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                if(foto.resolveActivity(getPackageManager()) != null )
-                {
-                    startActivityForResult(foto,REQUEST_IMAGE_CAPTURE);
+                if (foto.resolveActivity(getPackageManager()) != null) {
+                    startActivityForResult(foto, REQUEST_IMAGE_CAPTURE);
                 }
                 break;
             }
@@ -122,10 +139,9 @@ public class MainMotivoNoEntrega extends AppCompatActivity implements View.OnCli
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         //Comprovamos que la foto se a realizado
-        if(requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK)
-        {
+        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
             Bundle extras = data.getExtras();
-            Bitmap imageBitmap = (Bitmap)extras.get("data");
+            Bitmap imageBitmap = (Bitmap) extras.get("data");
             ByteArrayOutputStream stream = new ByteArrayOutputStream();
             imageBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
             byte[] byteArray = stream.toByteArray();
@@ -143,7 +159,7 @@ public class MainMotivoNoEntrega extends AppCompatActivity implements View.OnCli
     // Asigna el valor del indice seleccionado en el spinner a una variable
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-        if ((position!=0) && (id!=0)) {
+        if ((position != 0) && (id != 0)) {
             Object item = parent.getItemAtPosition(position);
             codigoReingreso = ((TipoReingresoTO) item).getIndice();
         }
@@ -154,7 +170,7 @@ public class MainMotivoNoEntrega extends AppCompatActivity implements View.OnCli
 
     }
 
-    public class CapturaImagen extends AsyncTask<Void,Void,String> {
+    public class CapturaImagen extends AsyncTask<Void, Void, String> {
 
         File sd = Environment.getExternalStorageDirectory();
         WebServices ws = new WebServices();
@@ -162,10 +178,9 @@ public class MainMotivoNoEntrega extends AppCompatActivity implements View.OnCli
         ValidaTO resp2 = new ValidaTO();
         ProgressDialog MensajeProgreso;
         Utilidades util = new Utilidades();
-        String latitud = "";
-        String longitud = "";
         boolean guardoImagen = false;
         boolean reingreso = false;
+
 
         @Override
         protected void onPreExecute() {
@@ -184,16 +199,8 @@ public class MainMotivoNoEntrega extends AppCompatActivity implements View.OnCli
                 if (sd.canWrite()) {
                     TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
                     String imei = telephonyManager.getDeviceId();
-                    // GEO-REFERENCIA
-                    if(VerificarGPS()){
-                        GPSTraker gps = new GPSTraker(getApplicationContext());
-                        if (gps.canGetLocation()) {
-                            latitud = String.valueOf(gps.getLatitude());
-                            longitud = String.valueOf(gps.getLongitude());
-                        }
-                    }
                     resp = ws.GrabaImagen(imei,encodedImage2,"ACT",imei,imei,ODT,"REINGRESO");
-                    resp2 = ws.GrabaReingreso(util.TraePlanillaDeODT(ODT),ODT,util.leeCantidadBultosODT(ODT),"T",codigoReingreso,latitud,longitud);
+                    resp2 = ws.GrabaReingreso(util.TraePlanillaDeODT(ODT),ODT,util.leeCantidadBultosODT(ODT),"T",codigoReingreso);
                     util.cambiaEstadoOdtArchivoREINGRESO(ODT);
                     if(resp != null) {
                         if (resp.getValida().equals("1")) {
@@ -255,6 +262,7 @@ public class MainMotivoNoEntrega extends AppCompatActivity implements View.OnCli
             }
         }
     }
+
 
     private AlertDialog MensajeFinRepartoCORRECTO() {
         final String DEFAULT_TITLE = "Entrega Carga Movil";
@@ -355,4 +363,7 @@ public class MainMotivoNoEntrega extends AppCompatActivity implements View.OnCli
 
         return adapter;
     }
+
 }
+
+

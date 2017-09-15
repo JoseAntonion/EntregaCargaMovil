@@ -155,7 +155,7 @@ public class WebServices {
         return validaTO;
     }
 
-    public ValidaTO GrabaReingreso(String planilla,String odt,int piezas, String tipoDevolucion,String codigoReingreso, String latitud, String longitud) throws IOException,ClientProtocolException,JSONException{
+    public ValidaTO GrabaReingreso(String planilla,String odt,int piezas, String tipoDevolucion,String codigoReingreso) throws IOException,ClientProtocolException,JSONException{
         ValidaTO validaTO = new ValidaTO();
 
         try {
@@ -172,8 +172,8 @@ public class WebServices {
             jsonObject.put("piezas", piezas);
             jsonObject.put("tipo_devolucion", tipoDevolucion);
             jsonObject.put("codigo_reingreso", codigoReingreso);
-            jsonObject.put("latitud", latitud);
-            jsonObject.put("longitud", longitud);
+            jsonObject.put("latitud", String.valueOf(Globales.latitud));
+            jsonObject.put("longitud", String.valueOf(Globales.longitud));
             //
             StringEntity stringEntity = new StringEntity(jsonObject.toString());
             stringEntity.setContentType("application/json");

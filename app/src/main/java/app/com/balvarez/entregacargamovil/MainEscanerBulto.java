@@ -4,10 +4,12 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
@@ -23,6 +25,7 @@ import org.json.JSONException;
 import java.io.IOException;
 import java.util.Random;
 
+import To.EntregaOdtMasivoTO;
 import Util.Globales;
 import Util.Utilidades;
 
@@ -38,12 +41,14 @@ public class MainEscanerBulto extends AppCompatActivity implements View.OnClickL
     private ImageButton btn_bulto_manual;
     private Activity activity;
     private String ODT;
+    private String OLD2;
     private int aux;
     private int faltantes = 0;
     private int leidos = 0;
     ScanManager mScanMgr;
     Context mContext;
     Intent recibir;
+    EntregaOdtMasivoTO odtM;
 
 
     @Override
@@ -81,9 +86,10 @@ public class MainEscanerBulto extends AppCompatActivity implements View.OnClickL
         });*/
 
         recibir = getIntent();
-        //Bundle extras = recibir.getExtras();
-        ODT = recibir.getStringExtra("odt");
-        aux = recibir.getExtras().getInt("aux",0);
+        Bundle extras = recibir.getExtras();
+        OLD2 = (extras.get("old2") == null)?"":extras.get("old2").toString();
+        ODT = (extras.get("odt") == null)?"":extras.get("odt").toString();
+        aux = (extras.get("aux") == null)?0: (int) extras.get("aux");
         txt_OdtAEntregar.setText(ODT);
         txt_OdtAEntregar.setEnabled(false);
         mScanMgr = ScanManager.getInstance();
@@ -290,13 +296,60 @@ public class MainEscanerBulto extends AppCompatActivity implements View.OnClickL
             if (MensajeProgreso.isShowing())
                 MensajeProgreso.dismiss();
             if (bandera) {
-                Intent intent = new Intent(MainEscanerBulto.this, MainInfoReceptorCarga.class);
-                intent.putExtra("odt",ODT);
-                startActivity(intent);
+                MensajeEntregaMasivoEfePed();
             }else{
                 Toast.makeText(getApplicationContext(), "Faltan Bultos por Escanear",
                         Toast.LENGTH_LONG).show();
             }
         }
+    }
+
+    private AlertDialog MensajeEntregaMasivoEfePed() {
+        final String DEFAULT_TITLE = "Entrega Carga Movil";
+        final String DEFAULT_MESSAGE = "Desea cargas mas ODTs ?";
+        final String DEFAULT_YES = "Si";
+        final String DEFAULT_NO = "No";
+
+        odtM = new EntregaOdtMasivoTO();
+        odtM.setOdt(ODT);
+        odtM.setCantidad(Integer.parseInt(lblBultosLeidos.getText().toString()));
+        Globales.odtMasiva.add(odtM);
+
+        AlertDialog.Builder downloadDialog = new AlertDialog.Builder(activity);
+        downloadDialog.setTitle(DEFAULT_TITLE);
+        downloadDialog.setMessage(DEFAULT_MESSAGE);
+        downloadDialog.setPositiveButton(DEFAULT_YES,
+                new DialogInterface.OnClickListener() {
+
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        /*odtM = new EntregaOdtMasivoTO();
+                        odtM.setOdt(ODT);
+                        odtM.setCantidad(Integer.parseInt(txtCantidadBultos.getText().toString()));
+                        Globales.odtMasiva.add(odtM);*/
+                        Intent intent = new Intent(MainEscanerBulto.this, MainODT.class);
+                        //intent.putExtra("masivo", 1);
+                        intent.putExtra("old2", "1");
+                        startActivity(intent);
+                    }
+                });
+        downloadDialog.setNegativeButton(DEFAULT_NO,
+                new DialogInterface.OnClickListener() {
+
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        if(OLD2.equals("")){
+                            Intent intento = new Intent(MainEscanerBulto.this, MainInfoReceptorCarga.class);
+                            intento.putExtra("odt", ODT);
+                            startActivity(intento);
+                        }else{
+                            Intent intento = new Intent(MainEscanerBulto.this, MainInfoReceptorCarga.class);
+                            //intento.putExtra("odtses", odtMasiva);
+                            startActivity(intento);
+                        }
+                    }
+                });
+
+        return downloadDialog.show();
     }
 }
