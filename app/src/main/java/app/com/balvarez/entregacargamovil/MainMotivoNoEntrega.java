@@ -263,7 +263,6 @@ public class MainMotivoNoEntrega extends AppCompatActivity implements View.OnCli
         }
     }
 
-
     private AlertDialog MensajeFinRepartoCORRECTO() {
         final String DEFAULT_TITLE = "Entrega Carga Movil";
         final String DEFAULT_MESSAGE = "Datos Guardados";
@@ -345,7 +344,7 @@ public class MainMotivoNoEntrega extends AppCompatActivity implements View.OnCli
 
         //Creamos la lista
         ArrayList<TipoReingresoTO> reingresos = new ArrayList<>();
-        //La poblamos con los ejemplos
+        //La poblamos
         reingresos.add(new TipoReingresoTO("99", "Seleccione Motivo"));
         reingresos.add(new TipoReingresoTO("0", "SIN MORADORES"));
         reingresos.add(new TipoReingresoTO("10", "CLIENTE SIN DINERO"));

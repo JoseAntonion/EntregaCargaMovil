@@ -2,6 +2,7 @@ package app.com.balvarez.entregacargamovil;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -18,6 +19,8 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.coatedmoose.customviews.SignatureView;
+import com.epson.eposprint.EposException;
+import com.google.zxing.WriterException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -41,7 +44,10 @@ public class MainFirma extends AppCompatActivity implements View.OnClickListener
     Intent recibir;
     private String ODT;
     private String RUT;
+    private String tipoDoc;
     private Utilidades util;
+    private BluetoothAdapter bAdapter;
+
     //private ArrayList<EntregaOdtMasivoTO> listaOdt = new ArrayList<>();
 
     @Override
@@ -57,9 +63,18 @@ public class MainFirma extends AppCompatActivity implements View.OnClickListener
         signature = (SignatureView) this.findViewById(R.id.signatureView4);
         Bundle extras = recibir.getExtras();
         //listaOdt = (ArrayList<EntregaOdtMasivoTO>) ((extras == null)?new ArrayList<>():extras.get("odtses"));
-        ODT = (extras.get("odt") == null)?"":extras.get("odt").toString();
-        RUT = (extras.get("rut") == null)?"":extras.get("rut").toString();
+        if(extras != null){
+            ODT = (extras.get("odt") == null)?"":extras.getString("odt");
+            RUT = (extras.get("rut") == null)?"":extras.getString("rut");
+            tipoDoc = (extras.get("tipoDoc") == null)?"":extras.getString("tipoDoc");
+        }
         util = new Utilidades();
+        bAdapter = BluetoothAdapter.getDefaultAdapter();
+        if(bAdapter != null) {
+            if(!bAdapter.isEnabled()){
+                bAdapter.enable();
+            }
+        }
     }
 
     @Override
@@ -155,53 +170,71 @@ public class MainFirma extends AppCompatActivity implements View.OnClickListener
                         e.getMessage(), Toast.LENGTH_LONG).show();
                 e.printStackTrace();
             }
+            // PRUEBAS IMPRESION ----------------------------------------------------------------
+            TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+            String imei = telephonyManager.getDeviceId();
+
+            //WebServices ws = new WebServices();
+            Globales.Impresora = "00:01:90:C2:C4:C6";
+            try {
+                //ws.retornaImpresoraPrueba(imei);
+                if(util.ConectarEpsonPrueba(activity.getApplicationContext())) {
+                    if (tipoDoc.equals("factura"))
+                        util.FacturaPrueba(activity);
+                    else
+                        util.BoletaPrueba(activity);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (EposException e) {
+                e.printStackTrace();
+            } catch (WriterException e) {
+                e.printStackTrace();
+            }
+            // ----------------------------------------------------------------------------------
             return null;
         }
 
         @Override
         protected void onPostExecute(String result) {
+            if (MensajeProgreso.isShowing())
+                MensajeProgreso.dismiss();
 
             if(guardoImagen && cambioEstado){
                 Toast.makeText(activity.getApplicationContext(),
                         "Firma Guardada", Toast.LENGTH_LONG).show();
                 Toast.makeText(activity.getApplicationContext(),
                         "ODT Entregada", Toast.LENGTH_LONG).show();
-                if (MensajeProgreso.isShowing())
-                    MensajeProgreso.dismiss();
                 MensajeFinRepartoCORRECTO();
             }else if(!guardoImagen && cambioEstado){
                 Toast.makeText(activity.getApplicationContext(),
                         "La firma no fue guardada: "+resp.getMensaje(), Toast.LENGTH_LONG).show();
                 Toast.makeText(activity.getApplicationContext(),
                         "ODT Entregada", Toast.LENGTH_LONG).show();
-                if (MensajeProgreso.isShowing())
-                    MensajeProgreso.dismiss();
                 MensajeFinRepartoCORRECTO();
             }else if(guardoImagen && !cambioEstado) {
                 Toast.makeText(activity.getApplicationContext(),
                         "Firma Guardada", Toast.LENGTH_LONG).show();
                 Toast.makeText(activity.getApplicationContext(),
                         "ODT no ingreso al sistema: "+resp2.getMensaje(), Toast.LENGTH_LONG).show();
-                if (MensajeProgreso.isShowing())
-                    MensajeProgreso.dismiss();
                 MensajeFinRepartoINCORRECTO();
             }else if(!guardoImagen && !cambioEstado){
                 Toast.makeText(activity.getApplicationContext(),
                         "La firma no fue guardada: "+resp.getMensaje(), Toast.LENGTH_LONG).show();
                 Toast.makeText(activity.getApplicationContext(),
                         "ODT no ingreso al sistema: "+resp2.getMensaje(), Toast.LENGTH_LONG).show();
-                if (MensajeProgreso.isShowing())
-                    MensajeProgreso.dismiss();
                 MensajeFinRepartoINCORRECTO();
             }
         }
     }
 
     private AlertDialog MensajeFinRepartoCORRECTO() {
+
         final String DEFAULT_TITLE = "Entrega Carga Movil";
         final String DEFAULT_MESSAGE = "ODT Entregada Correctamente";
         final String DEFAULT_YES = "Aceptar";
 
+        Globales.totalValoresODT = 0;
 
         AlertDialog.Builder downloadDialog = new AlertDialog.Builder(activity);
         downloadDialog.setTitle(DEFAULT_TITLE);
@@ -213,9 +246,6 @@ public class MainFirma extends AppCompatActivity implements View.OnClickListener
                     public void onClick(DialogInterface dialogInterface, int i) {
                         Intent intent = new Intent(MainFirma.this, MainODT.class);
                         startActivity(intent);
-                        finish();
-                        System.gc();
-                        finish();
                     }
                 });
 

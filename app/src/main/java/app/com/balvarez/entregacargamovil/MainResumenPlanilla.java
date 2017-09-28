@@ -59,9 +59,32 @@ public class MainResumenPlanilla extends AppCompatActivity implements View.OnCli
             switch (v.getId()) {
 
                 case R.id.btnSiguienteOdt: {
+                    // PRUEBAS IMPRESION ----------------------------------------------------------------
+                    /*TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+                    String imei = telephonyManager.getDeviceId();
+
+                    //WebServices ws = new WebServices();
+                    Globales.Impresora = "00:01:90:C2:C4:C6";
+                    try {
+                        //ws.retornaImpresoraPrueba(imei);
+                        if(util.ConectarEpsonPrueba(this.getApplicationContext())){
+                            //util.BoletaPrueba(this);
+                            util.FacturaPrueba(this);
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (EposException e) {
+                        e.printStackTrace();
+                    } catch (WriterException e) {
+                        e.printStackTrace();
+                    }*/
+                    // ----------------------------------------------------------------------------------
+
+
+
                     Intent intento = new Intent(MainResumenPlanilla.this, MainODT.class);
+                    //Intent intento = new Intent(MainResumenPlanilla.this, MainCancelacionOdt.class);
                     startActivity(intento);
-                    finish();
                     break;
 
                 }

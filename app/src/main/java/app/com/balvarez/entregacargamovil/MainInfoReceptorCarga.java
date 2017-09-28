@@ -21,6 +21,7 @@ public class MainInfoReceptorCarga extends AppCompatActivity implements View.OnC
     private Button btn_limpiar;
     private Intent recibir;
     private String ODT = "";
+    private String tipoDoc = "";
     private String rutReceptor = "";
     private String nombreReceptor = "";
     private String RUT = "";
@@ -42,7 +43,11 @@ public class MainInfoReceptorCarga extends AppCompatActivity implements View.OnC
         btn_siguiente.setOnClickListener(this);
         Bundle extras = recibir.getExtras();
         //listaOdt = (ArrayList<EntregaOdtMasivoTO>) ((extras == null)?new ArrayList<>():extras.get("odtses"));
-        ODT = (extras == null)?"":extras.get("odt").toString();
+        if(extras != null){
+            ODT = (extras.get("odt") == null)?"":extras.get("odt").toString();
+            tipoDoc = (extras.get("tipoDoc") == null)?"":extras.get("tipoDoc").toString();
+        }
+
         txt_RutReceptor.setOnFocusChangeListener(this);
         txt_RutReceptor.requestFocus();
     }
@@ -60,12 +65,14 @@ public class MainInfoReceptorCarga extends AppCompatActivity implements View.OnC
                     if(Globales.odtMasiva == null){
                         Intent intento = new Intent(MainInfoReceptorCarga.this, MainFirma.class);
                         intento.putExtra("odt", ODT);
+                        intento.putExtra("tipoDoc", tipoDoc);
                         intento.putExtra("rut", txt_RutReceptor.getText().toString());
                         startActivity(intento);
                     }else{
                         Intent intento = new Intent(MainInfoReceptorCarga.this, MainFirma.class);
                         //intento.putExtra("odtses", listaOdt);
                         intento.putExtra("rut", txt_RutReceptor.getText().toString());
+                        intento.putExtra("tipoDoc", tipoDoc);
                         startActivity(intento);
                     }
 
@@ -123,4 +130,6 @@ public class MainInfoReceptorCarga extends AppCompatActivity implements View.OnC
         }
         return validacion;
     }
+
+
 }

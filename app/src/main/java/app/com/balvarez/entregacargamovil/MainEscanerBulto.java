@@ -49,6 +49,7 @@ public class MainEscanerBulto extends AppCompatActivity implements View.OnClickL
     Context mContext;
     Intent recibir;
     EntregaOdtMasivoTO odtM;
+    private int totalEntrega;
 
 
     @Override
@@ -314,6 +315,13 @@ public class MainEscanerBulto extends AppCompatActivity implements View.OnClickL
         odtM.setOdt(ODT);
         odtM.setCantidad(Integer.parseInt(lblBultosLeidos.getText().toString()));
         Globales.odtMasiva.add(odtM);
+        try {
+            Globales.totalValoresODT += util.buscaValorOdt(ODT);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
         AlertDialog.Builder downloadDialog = new AlertDialog.Builder(activity);
         downloadDialog.setTitle(DEFAULT_TITLE);
@@ -339,11 +347,13 @@ public class MainEscanerBulto extends AppCompatActivity implements View.OnClickL
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         if(OLD2.equals("")){
-                            Intent intento = new Intent(MainEscanerBulto.this, MainInfoReceptorCarga.class);
+                            //Intent intento = new Intent(MainEscanerBulto.this, MainInfoReceptorCarga.class);
+                            Intent intento = new Intent(MainEscanerBulto.this, MainCancelacionOdt.class);
                             intento.putExtra("odt", ODT);
                             startActivity(intento);
                         }else{
-                            Intent intento = new Intent(MainEscanerBulto.this, MainInfoReceptorCarga.class);
+                            //Intent intento = new Intent(MainEscanerBulto.this, MainInfoReceptorCarga.class);
+                            Intent intento = new Intent(MainEscanerBulto.this, MainCancelacionOdt.class);
                             //intento.putExtra("odtses", odtMasiva);
                             startActivity(intento);
                         }

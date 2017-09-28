@@ -116,7 +116,8 @@
                     android:hint="   RUT"
                     android:inputType="textPersonName"
                     android:singleLine="true"
-                    android:textAlignment="textStart" />
+                    android:imeOptions="actionNext"
+                    android:imeActionLabel ="Validar" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -160,11 +161,14 @@
                 </LinearLayout>
 
                 <Spinner
+                    android:id="@+id/sprCiudadFactura"
+                    android:layout_width="match_parent"
+                    android:layout_height="32dp" />
+
+                <Spinner
                     android:id="@+id/sprComunaFactura"
                     android:layout_width="match_parent"
-                    android:layout_height="32dp"
-                    tools:style="?android:attr/webTextViewStyle"
-                    tools:theme="@style/AlertDialog.AppCompat.Light" />
+                    android:layout_height="32dp" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -172,13 +176,6 @@
                     android:orientation="horizontal">
 
                 </LinearLayout>
-
-                <Spinner
-                    android:id="@+id/sprCiudadFactura"
-                    android:layout_width="match_parent"
-                    android:layout_height="32dp"
-                    tools:style="?android:attr/webTextViewStyle"
-                    tools:theme="@style/AlertDialog.AppCompat.Light" />
 
                 <LinearLayout
                     android:layout_width="match_parent"

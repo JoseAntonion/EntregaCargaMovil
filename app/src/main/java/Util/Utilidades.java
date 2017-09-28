@@ -1,11 +1,21 @@
 package Util;
 
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Environment;
 import android.util.Log;
+
+import com.epson.eposprint.Builder;
+import com.epson.eposprint.EposException;
+import com.epson.eposprint.Print;
+import com.google.zxing.Writer;
+import com.google.zxing.WriterException;
+import com.google.zxing.pdf417.PDF417Writer;
 
 import org.apache.http.client.ClientProtocolException;
 import org.json.JSONException;
@@ -18,15 +28,27 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 
 import To.ArchivoOdtPorPatenteTO;
+import To.CiudadTO;
+import To.ComunaTO;
 import To.EstadosOdtTO;
+import To.FacturaTO;
 
 public class Utilidades {
 
     private String[] recibeSplit;
     private String[] recibeSplitAux;
+    static Print printer = null;
+
+    public static Print getPrinter() {
+        return printer;
+    }
+    public static void setPrinter(Print printer) {
+        Utilidades.printer = printer;
+    }
 
     public boolean verificaConexion(Context ctx) {
         boolean bConectado = false;
@@ -40,47 +62,110 @@ public class Utilidades {
         return bConectado;
     }
 
-    public void creaDirectorio() {
+    public void creaDirectorioArchivos() {
 
         File nomArchivo = null;
+        File nomArchivo2 = null;
+        File nomArchivo3 = null;
+        File nomArchivo4 = null;
         FileWriter lfilewriter = null;
+        FileWriter lfilewriter2 = null;
+        FileWriter lfilewriter3 = null;
+        FileWriter lfilewriter4 = null;
         BufferedWriter lout = null;
         File lroot = Environment.getExternalStorageDirectory();
         Globales.rutaArchivos = lroot.getAbsolutePath();
-        Globales.rutaArchivos2 = Globales.rutaArchivos+"/EntregaCarga/Data/";
-        // CREA DIRECTORIO Y ARCHIVO LOCAL
+        Globales.rutaArchivosFinal = Globales.rutaArchivos+"/EntregaCarga/Data/";
+        // CREA DIRECTORIO Y ARCHIVOS LOCALES
         try {
             if (lroot.canWrite()) {
-                File dir = new File(Globales.rutaArchivos
-                        + "/EntregaCarga/Data/");
+                File dir = new File(Globales.rutaArchivosFinal);
                 if (!dir.exists()) {
                     dir.mkdirs();
                     nomArchivo = new File(dir, "ArchivoDatosEntrega.txt");
+                    nomArchivo2 = new File(dir, "comunas.txt");
+                    nomArchivo3 = new File(dir, "ciudades.txt");
+                    nomArchivo4 = new File(dir, "docElectronico.txt");
                     lfilewriter = new FileWriter(nomArchivo);
+                    lfilewriter2 = new FileWriter(nomArchivo2);
+                    lfilewriter3 = new FileWriter(nomArchivo3);
+                    lfilewriter4 = new FileWriter(nomArchivo4);
                 }
             }
-            Globales.odtsXpatente = Globales.rutaArchivos
-                    + "/EntregaCarga/Data/ArchivoDatosEntrega.txt";
+            Globales.odtsXpatente = Globales.rutaArchivosFinal+"ArchivoDatosEntrega.txt";
+            Globales.Comunas = Globales.rutaArchivosFinal+"comunas.txt";
+            Globales.Ciudades = Globales.rutaArchivosFinal+"ciudades.txt";
+            Globales.docElectronico = Globales.rutaArchivosFinal+"docElectronico.txt";
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public void escribirEnArchivo(ArrayList<ArchivoOdtPorPatenteTO> lista) {
+    public void escribirEnArchivo(Object lista,String tipo) {
         File lfile = null;
         FileWriter lfilewriter = null;
 
         try {
-            lfile = new File(Globales.odtsXpatente);
-            lfilewriter = new FileWriter(lfile, false);
-            BufferedWriter ex = new BufferedWriter(lfilewriter);
-            for (int i = 0; i < lista.size(); i++) {
-                //ex.newLine();
-                ex.write("\n" + lista.get(i).getPlanilla() + "~" + lista.get(i).getNumeroODT() + "~" + lista.get(i).getEstadoODT() + "~" + lista.get(i).getFormaPago() + "~" + String.valueOf(lista.get(i).getNumeroPiezas()) + "~" + lista.get(i).getCodBarra());
+            switch (tipo){
+                case "ODTS":{
+                    ArrayList<ArchivoOdtPorPatenteTO> listODT = (ArrayList<ArchivoOdtPorPatenteTO>)lista;
+                    lfile = new File(Globales.odtsXpatente);
+                    lfilewriter = new FileWriter(lfile, false);
+                    BufferedWriter ex = new BufferedWriter(lfilewriter);
+                    for (int i = 0; i < listODT.size(); i++) {
+                        ex.write("\n" + listODT.get(i).getPlanilla() + "~" + listODT.get(i).getNumeroODT() + "~" + listODT.get(i).getEstadoODT()
+                                + "~" + listODT.get(i).getFormaPago() + "~" + String.valueOf(listODT.get(i).getNumeroPiezas())
+                                + "~" + listODT.get(i).getCodBarra()+"~"+listODT.get(i).getValorOdt());
+                    }
+                    ex.close();
+                    break;
+                }
+                case "COMUNAS":{
+                    ArrayList<ComunaTO> listComunas = (ArrayList<ComunaTO>)lista;
+                    lfile = new File(Globales.Comunas);
+                    lfilewriter = new FileWriter(lfile, false);
+                    BufferedWriter ex = new BufferedWriter(lfilewriter);
+                    for (int i = 0; i < listComunas.size(); i++) {
+                        ex.write("\n" + listComunas.get(i).getCodCiudad() + "~" + listComunas.get(i).getCodComuna() + "~" + listComunas.get(i).getNombreComuna());
+                    }
+                    ex.close();
+                    break;
+                }
+                case "CIUDADES":{
+                    ArrayList<CiudadTO> listCiudades = (ArrayList<CiudadTO>)lista;
+                    lfile = new File(Globales.Ciudades);
+                    lfilewriter = new FileWriter(lfile, false);
+                    BufferedWriter ex = new BufferedWriter(lfilewriter);
+                    for (int i = 0; i < listCiudades.size(); i++) {
+                        ex.write("\n" + listCiudades.get(i).getCodCiudad()
+                                + "~" + listCiudades.get(i).getNombreCiudad());
+                    }
+                    ex.close();
+                    break;
+                }
+                case "FACTURA":{
+                    ArrayList<FacturaTO> listFactura = (ArrayList<FacturaTO>)lista;
+                    lfile = new File(Globales.docElectronico);
+                    lfilewriter = new FileWriter(lfile, false);
+                    BufferedWriter ex = new BufferedWriter(lfilewriter);
+                    for (int i = 0; i < listFactura.size(); i++) {
+                        ex.write("\n" + listFactura.get(i).getRutFactura()
+                                + "~" + listFactura.get(i).getRazonFactura()
+                                + "~" + listFactura.get(i).getDireccionFactura()
+                                + "~" + listFactura.get(i).getFonoFactura()
+                                + "~" + listFactura.get(i).getGiroFactura()
+                                + "~" + listFactura.get(i).getComunaFactura()
+                                + "~" + listFactura.get(i).getCiudadFactura()
+                                + "~" + listFactura.get(i).getTotalFactura());
+                    }
+                    ex.close();
+                    break;
+                }
+                default:
+                    break;
             }
-            ex.close();
         } catch (Exception var17) {
-            Log.e("error", "Error al escribir fichero a memoria interna");
+            Log.e("error", "Error al escribir fichero -"+tipo+"- a memoria interna");
         } finally {
             try {
                 if (lfilewriter != null) {
@@ -185,6 +270,87 @@ public class Utilidades {
 
     }
 
+    public ArrayList<ComunaTO> cargaDesdeArchivoComuna(String codCiudad) throws IOException, ClientProtocolException, JSONException {
+
+        FileReader fr = null;
+        ComunaTO comuna;
+        ArrayList<ComunaTO> listaComunas = new ArrayList<>();
+        String aux = "";
+
+        try {
+            fr = new FileReader(Globales.Comunas);
+            BufferedReader br = new BufferedReader(fr);
+            String s = br.readLine();
+            if (s != null) {
+                do {
+                    if (!s.equalsIgnoreCase("") && !s.equalsIgnoreCase("XXXXXXXXXXXXXXXXXX")) {
+                        this.recibeSplit = s.split("~");
+                        if(recibeSplit[0].toString().equals(codCiudad)){
+                            comuna = new ComunaTO();
+                            //comuna.setCodCiudad(recibeSplit[0]);
+                            comuna.setCodComuna(recibeSplit[1]);
+                            comuna.setNombreComuna(recibeSplit[2]);
+                            listaComunas.add(comuna);
+                        }
+                    }
+                    s = br.readLine();
+                } while (s != null);
+            }
+
+        } catch (Exception ex) {
+            Log.e("error", "Error al leer fichero desde memoria interna");
+            ex.printStackTrace();
+        } finally {
+            try {
+                if (fr != null) {
+                    fr.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        }
+        return listaComunas;
+    }
+
+    public ArrayList<CiudadTO> cargaDesdeArchivoCiudad() throws IOException, ClientProtocolException, JSONException {
+
+        FileReader fr = null;
+        CiudadTO ciudad;
+        ArrayList<CiudadTO> listaCiudades = new ArrayList<>();
+        String aux = "";
+
+        try {
+            fr = new FileReader(Globales.Ciudades);
+            BufferedReader br = new BufferedReader(fr);
+            String s = br.readLine();
+            if (s != null) {
+                do {
+                    if (!s.equalsIgnoreCase("") && !s.equalsIgnoreCase("XXXXXXXXXXXXXXXXXX")) {
+                        this.recibeSplit = s.split("~");
+                        ciudad = new CiudadTO();
+                        ciudad.setCodCiudad(recibeSplit[0]);
+                        ciudad.setNombreCiudad(recibeSplit[1]);
+                        listaCiudades.add(ciudad);
+                    }
+                    s = br.readLine();
+                } while (s != null);
+            }
+        } catch (Exception ex) {
+            Log.e("error", "Error al leer fichero desde memoria interna");
+            ex.printStackTrace();
+        } finally {
+            try {
+                if (fr != null) {
+                    fr.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return listaCiudades;
+    }
+
     public String buscaFormaPagoOdt(String odt) throws IOException, ClientProtocolException, JSONException {
         String formaPago = "";
         FileReader fr = null;
@@ -214,6 +380,32 @@ public class Utilidades {
             e.printStackTrace();
         }
         return formaPago;
+    }
+
+    public int buscaValorOdt(String odt) throws IOException, ClientProtocolException, JSONException {
+        int valor = 0;
+        FileReader fr = null;
+
+        try {
+            fr = new FileReader(Globales.odtsXpatente);
+            BufferedReader br = new BufferedReader(fr);
+            String s = br.readLine();
+            if (s != null) {
+                while (s != null) {
+                    if (!s.equalsIgnoreCase("") && !s.equalsIgnoreCase("XXXXXXXXXXXXXXXXXX")) {
+                        this.recibeSplit = s.split("~");
+                        if (odt.equals(recibeSplit[1].toString())) {
+                            valor = Integer.parseInt(recibeSplit[6].toString());
+                            break;
+                        }
+                    }
+                    s = br.readLine();
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return valor;
     }
 
     public int leeCantidadBultosODT(String odt) throws IOException, ClientProtocolException, JSONException {
@@ -523,5 +715,370 @@ public class Utilidades {
             e.printStackTrace();
         }
         return planilla;
+    }
+
+    public Boolean ConectarEpsonPrueba(Context ctx) throws EposException {
+
+        Boolean retorna = false;
+        int deviceType = Print.DEVTYPE_BLUETOOTH;
+
+        Print printer1 = new Print(ctx.getApplicationContext());
+        int interval = 1000;
+
+        try {
+
+            if (printer != null) {
+                try {
+                    printer.closePrinter();
+                    printer = null;
+                } catch (Exception e) {
+                    printer = null;
+                }
+            }
+
+            if (printer == null) {
+                printer1.openPrinter(deviceType, Globales.Impresora.trim(),
+                        Print.TRUE, interval);
+                setPrinter(printer1);
+            }
+            retorna = true;
+
+        } catch (Exception e) {
+            printer1 = null;
+            retorna = false;
+            throw e;
+        }
+
+        return retorna;
+    }
+
+    public void BoletaPrueba(Activity activity) throws UnsupportedEncodingException {
+        final int SEND_TIMEOUT = 10 * 1000;
+
+        int[] status = new int[1];
+        int[] battery = new int[1];
+        //String ted = archivoDocElectronicoTO.get(0).getTed().replace("�", "ú");
+        /*String tedPrueba = "<TED version=\"1.0\"><DD><RE>89622400-K</RE><TD>39</TD><F>67</F><FE>2015-04-07</FE>" +
+                "<RR>66666666-6</RR><RSR></RSR><MNT>4750</MNT><IT1>Segun venta</IT1><CAF version=\"1.0\"><DA><RE>89622400-K</RE>" +
+                "<RS>PULLMAN CARGO S A</RS><TD>39</TD><RNG><D>1</D><H>100</H></RNG><FA>2014-10-06</FA><RSAPK>" +
+                "<M>oANFuryTpJhE5tQAs5f5zZKACixwtpPHdn/Us6xVzDqCGOuy/MZ6qpTlwnh/4x8zzY6mXjhRrj+uQE1wwTf9xQ==</M>" +
+                "<E>Aw==</E></RSAPK><IDK>100</IDK></DA><FRMA algoritmo=\"SHA1withRSA\">" +
+                "UeGgP6fW8qu+3CXBLNJEqSi47bW661BEudr83dPQ3vs4Em3gluW1EccaCx+EVQsHk00+bEWPL0qeK6mItXKzKA==</FRMA></CAF>" +
+                "<TSTED>2017-06-23T14:53:37</TSTED></DD><FRMT algoritmo=\"SHA1withRSA\">" +
+                "PqMbqJV71RnhomkhgvBF4HhRydUu4J6LhHo6ugfr9nxRjvVNJQu/lny+Z2k2ajvPYUWKL9J+Wej6/VFvWqB45g==</FRMT></TED>";*/
+
+        String tedPrueba = "<TED version=\"1.0\"><DD><RE>89622400-K</RE><TD>33</TD><F>10</F><FE>2017-09-08</FE><RR>17176015-1</RR><RSR>PRUEBA</RSR><MNT>4800</MNT><IT1>Según detalle ODT número 50000002694</IT1><CAF version=\"1.0\"><DA><RE>89622400-K</RE><RS>PULLMAN CARGO S A</RS><TD>33</TD><RNG><D>1</D><H>1000</H></RNG><FA>2014-07-15</FA><RSAPK><M>vjVjJLz3P/ctah5a6BUsPqZoiwasfp9v6lC/Y12jinrHlNvyCBgvinwnS1pWRrdjWO4XnXRfM1ZgYwnGvMG/Rw==</M><E>Aw==</E></RSAPK><IDK>100</IDK></DA><FRMA algoritmo=\"SHA1withRSA\">gwv/6+tNMDHczOVC545zbqJAH6QZNWts6kohJsSD4JLnjs/9yUkXuVZsmBmj7BlqPXy+IsSgklYYJccWtLG+Tw==</FRMA></CAF><TSTED>2017-09-08T15:39:02</TSTED></DD><FRMT algoritmo=\"SHA1withRSA\">LYrW2oDhLj+WNtzpc+Pm+DJUyhhu7CrlfcmAuU57HIzuRVxLFdFnd+Yy2rTX0ijXUTAt553ocYS/giR/ke6YWQ==</FRMT></TED>";
+
+        Boolean retorna = false;
+        Intent intent = new Intent();
+        intent.putExtra("printername", "TM-P80");
+        intent.putExtra("language", Builder.MODEL_ANK);
+        Builder builder = null;
+        intent = activity.getIntent();
+
+        try {
+            Print printer = Utilidades.getPrinter();
+            builder = new Builder("TM-P80", Builder.MODEL_ANK);
+
+            builder.addTextLineSpace(20);
+            builder.addTextFont(builder.FONT_B);
+            builder.addTextSize(1, 1);
+            builder.addText(" prueba \n");
+            builder.addText("GIRO: prueba \n");
+            builder.addTextLineSpace(30);
+
+            builder.addText("RUT :prueba \n\n");
+            printer = Utilidades.getPrinter();
+            builder.addTextAlign(builder.ALIGN_RIGHT);
+            builder.addTextLineSpace(20);
+            builder.addText("SANTIAGO 21 DE OCTUBRE DE 2016\n");
+            printer = Utilidades.getPrinter();
+            builder.addTextAlign(builder.ALIGN_CENTER);
+            builder.addText("................................................................\n");
+            printer = Utilidades.getPrinter();
+            builder.addTextFont(builder.FONT_A);
+            builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.TRUE,Builder.COLOR_1);
+            builder.addText("BOLETA ELECTRONICA N° prueba \n");
+            printer = Utilidades.getPrinter();
+            builder.addTextFont(builder.FONT_B);
+            builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.FALSE,Builder.COLOR_1);
+            builder.addText("................................................................\n");
+            printer = Utilidades.getPrinter();
+            builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.FALSE,Builder.COLOR_1);
+            builder.addText("prueba  \n");
+            builder.addText("................................................................\n");
+            printer = Utilidades.getPrinter();
+            builder.addTextAlign(builder.ALIGN_CENTER);
+            builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.TRUE,Builder.COLOR_1);
+            builder.addText("DETALLES DE PRODUCTOS\n");
+            printer = Utilidades.getPrinter();
+            builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.FALSE,Builder.COLOR_1);
+            builder.addText("................................................................\n");
+            printer = Utilidades.getPrinter();
+
+            //for (int i = 0; i < archivoDocElectronicoTO.size(); i++) {
+
+            builder.addTextAlign(builder.ALIGN_LEFT);
+            builder.addTextFont(builder.FONT_A);
+            builder.addText(" prueba \n"); printer = Utilidades.getPrinter();
+            builder.addTextFont(builder.FONT_B); builder.addText("SEGUN ODT prueba \n");
+            printer = Utilidades.getPrinter();
+            builder.addTextPosition(80);
+            builder.addText(" X prueba                     TOTAL prueba \n");
+            printer = Utilidades.getPrinter();
+
+            //}
+
+
+            builder.addTextLineSpace(20);
+            builder.addTextStyle(Builder.FALSE,Builder.FALSE,Builder.TRUE,Builder.COLOR_1);
+            builder.addTextPosition(300);
+            builder.addText("Neto $ : ");
+            builder.addText(" prueba  \n");
+            printer = Utilidades.getPrinter();
+            builder.addTextPosition(200);
+            builder.addText("Monto I.V.A 19% $ : ");
+            builder.addText(" prueba \n");
+            printer = Utilidades.getPrinter();
+            builder.addTextPosition(290);
+            builder.addText("TOTAL $ : ");
+            builder.addText("prueba  \n"); printer = Utilidades.getPrinter();
+
+
+            // CODIGO TED PDF417
+
+            try {
+
+                //builder.addSymbol(Prueba, builder.SYMBOL_PDF417_STANDARD, builder.LEVEL_DEFAULT, 3, 3, 0);
+                //com.google.zxing.Writer writer = new com.google.zxing.pdf417.encoder.PDF417Writer();
+
+                // Declara variables necesarias
+                Writer writer = new PDF417Writer();
+                com.google.zxing.common.BitMatrix bitMatrix;
+
+                //Formatea TED a PDF417 y asigna a variable BitMatrix
+                bitMatrix = writer.encode(tedPrueba,com.google.zxing.BarcodeFormat.PDF_417,480,160);
+
+                //Transforma BitMatrix en Bitmap
+                Bitmap imagen = net.glxn.qrgen.android.MatrixToImageWriter.toBitmap(bitMatrix);
+
+                // Alinea al centro de la hoja y agrega imagen del TED como Bitmap
+                builder.addTextAlign(builder.ALIGN_CENTER);
+                //builder.addImage(imagen, 0, 0, 500, 100, builder.COLOR_1);
+                builder.addImage(imagen, 0, 0, 480, 160, builder.COLOR_1);
+
+            } catch (WriterException e) {
+                e.printStackTrace();
+            }
+
+            builder.addFeedLine(1);
+            builder.addTextAlign(builder.ALIGN_CENTER);
+            builder.addText("Timbre Electronico S.I.I. Res. 0 del 2013 \n");
+            builder.addText("Verifique documento en: www.portaldte.cl");
+
+            builder.addFeedLine(3);
+
+            builder.addCut(Builder.CUT_FEED);
+            printer = Utilidades.getPrinter();
+
+            printer.sendData(builder, SEND_TIMEOUT, status, battery);
+
+            retorna = true;
+        } catch (EposException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            retorna = false;
+        }
+    }
+
+    public void FacturaPrueba(Activity activity) throws UnsupportedEncodingException, WriterException {
+
+        final int SEND_TIMEOUT = 10 * 1000;
+
+        int[] status = new int[1];
+        int[] battery = new int[1];
+
+        // String empresa;
+        Boolean retorna = false;
+        Intent intent = new Intent();
+
+        intent.putExtra("printername", "TM-P80");
+        intent.putExtra("language", Builder.MODEL_ANK);
+
+        String tedPrueba = "<TED version=\"1.0\"><DD><RE>89622400-K</RE><TD>33</TD><F>10</F><FE>2017-09-08</FE>" +
+                "<RR>17176015-1</RR><RSR>PRUEBA</RSR><MNT>4800</MNT><IT1>Segun detalle ODT numero 50000002694</IT1>" +
+                "<CAF version=\"1.0\"><DA><RE>89622400-K</RE><RS>PULLMAN CARGO S A</RS><TD>33</TD><RNG><D>1</D><H>1000</H>" +
+                "</RNG><FA>2014-07-15</FA><RSAPK>" +
+                "<M>vjVjJLz3P/ctah5a6BUsPqZoiwasfp9v6lC/Y12jinrHlNvyCBgvinwnS1pWRrdjWO4XnXRfM1ZgYwnGvMG/Rw==</M><E>Aw==</E>" +
+                "</RSAPK><IDK>100</IDK></DA><FRMA algoritmo=\"SHA1withRSA\">gwv/6+tNMDHczOVC545zbqJAH6QZNWts6kohJsSD4JLnjs/" +
+                "9yUkXuVZsmBmj7BlqPXy+IsSgklYYJccWtLG+Tw==</FRMA></CAF><TSTED>2017-09-08T15:39:02</TSTED></DD>" +
+                "<FRMT algoritmo=\"SHA1withRSA\">LYrW2oDhLj+WNtzpc+Pm+DJUyhhu7CrlfcmAuU57HIzuRVxLFdFnd+Yy2rTX0ijXUTAt5" +
+                "53ocYS/giR/ke6YWQ==</FRMT></TED>";
+
+        Builder builder = null;
+        intent = activity.getIntent();
+        try {
+
+            builder = new Builder("TM-P80", Builder.MODEL_ANK);
+
+            builder.addTextLineSpace(20);
+            builder.addTextFont(builder.FONT_B);
+            builder.addTextSize(1, 1);
+            //builder.addText(archivoDocElectronicoTO.get(0).getRazonSocial()+ "\n");
+            builder.addText("Razon Social: PRUEBA\n");
+            //builder.addText("GIRO: " + archivoDocElectronicoTO.get(0).getGiro()+ "\n");
+            builder.addText("GIRO: Prueba\n");
+            builder.addTextLineSpace(30);
+            //builder.addText(archivoDocElectronicoTO.get(0).getcMatriz() + "\n");
+            builder.addText("cMatriz\n");
+            //builder.addText("RUT :" + archivoDocElectronicoTO.get(0).getRut()+ "\n\n");
+            builder.addText("RUT :11.111.111-1\n\n");
+            Print printer = Utilidades.getPrinter();
+            builder.addTextAlign(builder.ALIGN_RIGHT);
+            builder.addTextLineSpace(20);
+            builder.addText("SANTIAGO 21 DE OCTUBRE DE 2016\n");
+            printer = Utilidades.getPrinter();
+            builder.addTextAlign(builder.ALIGN_CENTER);
+            builder.addText("................................................................\n");
+            printer = Utilidades.getPrinter();
+            builder.addTextFont(builder.FONT_A);
+            builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.TRUE,Builder.COLOR_1);
+            //builder.addText("FACTURA ELECTRONICA N° "+ archivoDocElectronicoTO.get(0).getFolio() + "\n");
+            builder.addText("FACTURA ELECTRONICA N° 123456\n");
+            printer = Utilidades.getPrinter();
+            builder.addTextFont(builder.FONT_B);
+            builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.FALSE,Builder.COLOR_1);
+            builder.addText("................................................................\n");
+            printer = Utilidades.getPrinter();
+            builder.addTextAlign(builder.ALIGN_LEFT);
+            builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.TRUE,Builder.COLOR_1);
+            builder.addText("SEÑOR(ES)         :");
+            printer = Utilidades.getPrinter();
+            builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.FALSE,Builder.COLOR_1);
+            //builder.addText(archivoDocElectronicoTO.get(0).getcRazonSocial()+ " \n");
+            builder.addText("Razon Social: Prueba \n");
+            printer = Utilidades.getPrinter();
+            builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.TRUE,Builder.COLOR_1);
+            builder.addText("R.U.T             :");
+            printer = Utilidades.getPrinter();
+            builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.FALSE,Builder.COLOR_1);
+            //builder.addText(archivoDocElectronicoTO.get(0).getcRut() + " \n");
+            builder.addText("11.111.111-1 \n");
+            printer = Utilidades.getPrinter();
+            builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.TRUE,Builder.COLOR_1);
+            builder.addText("GIRO              :");
+            printer = Utilidades.getPrinter();
+            builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.FALSE,Builder.COLOR_1);
+            //builder.addText(archivoDocElectronicoTO.get(0).getcGiro() + " \n");
+            builder.addText("Giro: Prueba \n");
+            printer = Utilidades.getPrinter();
+            builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.TRUE,Builder.COLOR_1);
+            builder.addText("DIRECCION         :");
+            printer = Utilidades.getPrinter();
+            builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.FALSE,Builder.COLOR_1);
+            //builder.addText(archivoDocElectronicoTO.get(0).getcDireccion()+ " \n");
+            builder.addText("Direccion Prueba \n");
+            printer = Utilidades.getPrinter();
+            builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.TRUE,Builder.COLOR_1);
+            builder.addText("FECHA             :");
+            printer = Utilidades.getPrinter();
+            builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.FALSE,Builder.COLOR_1);
+            //builder.addText(archivoDocElectronicoTO.get(0).getfCreacion()+ " \n");
+            builder.addText("01/01/9999 \n");
+            printer = Utilidades.getPrinter();
+            builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.TRUE,Builder.COLOR_1);
+            builder.addText("COMUNA/CIUDAD     :");
+            printer = Utilidades.getPrinter();
+            builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.FALSE,Builder.COLOR_1);
+            //builder.addText(archivoDocElectronicoTO.get(0).getcComuna() + " \n");
+            builder.addText("Prueba \n");
+            printer = Utilidades.getPrinter();
+            builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.TRUE,Builder.COLOR_1);
+            builder.addText("TELEFONO          :");
+            printer = Utilidades.getPrinter();
+            builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.FALSE,Builder.COLOR_1);
+            //builder.addText(archivoDocElectronicoTO.get(0).getcContacto()+ " \n");
+            builder.addText("Fono Prueba \n");
+            printer = Utilidades.getPrinter();
+            builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.TRUE,Builder.COLOR_1);
+            builder.addText("FORMA PAGO        :");
+            printer = Utilidades.getPrinter();
+            builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.FALSE,Builder.COLOR_1);
+            //builder.addText(archivoDocElectronicoTO.get(0).getFormaPago()+ " \n");
+            builder.addText("Forma Pago Prueba \n");
+            printer = Utilidades.getPrinter();
+            builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.TRUE,Builder.COLOR_1);
+            builder.addText("F. VENCIMIENTO    :");
+            printer = Utilidades.getPrinter();
+            builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.FALSE,Builder.COLOR_1);
+            //builder.addText(archivoDocElectronicoTO.get(0).getfCreacion()+ " \n");
+            //builder.addText("01/01/9999 \n");
+            builder.addText("................................................................\n");
+            printer = Utilidades.getPrinter();
+            builder.addTextAlign(builder.ALIGN_CENTER);
+            builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.TRUE,Builder.COLOR_1);
+            builder.addText("DETALLES DE PRODUCTOS\n");
+            printer = Utilidades.getPrinter();
+            builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.FALSE,Builder.COLOR_1);
+            builder.addText("................................................................\n");
+            printer = Utilidades.getPrinter();
+
+            builder.addTextLineSpace(20);
+            builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.TRUE,Builder.COLOR_1);
+            builder.addTextPosition(300);
+            builder.addText("Neto $ : ");
+            //builder.addText(archivoDocElectronicoTO.get(0).getNeto() + " \n");
+            builder.addText("NETO \n");
+            printer = Utilidades.getPrinter();
+            builder.addTextPosition(200);
+            builder.addText("Monto I.V.A 19% $ : ");
+            //builder.addText(archivoDocElectronicoTO.get(0).getIva() + " \n");
+            builder.addText("IVA \n");
+            printer = Utilidades.getPrinter();
+            builder.addTextPosition(290);
+            builder.addText("TOTAL $ : ");
+            //builder.addText(archivoDocElectronicoTO.get(0).getTotal() + " \n");
+            builder.addText("Precio total \n");
+
+            // CODIGO TED PDF417
+
+            try {
+
+                // Declara variables necesarias
+                Writer writer = new PDF417Writer();
+                com.google.zxing.common.BitMatrix bitMatrix;
+
+                //Formatea TED a PDF417 y asigna a bariable BitMatrix
+                bitMatrix = writer.encode(tedPrueba,com.google.zxing.BarcodeFormat.PDF_417,500,180);
+
+                //Transforma BitMatrix en Bitmap
+                Bitmap imagen = net.glxn.qrgen.android.MatrixToImageWriter.toBitmap(bitMatrix);
+
+                // Alinea al centro de la hoja y agrega imagen del TED como Bitmap
+                builder.addTextAlign(builder.ALIGN_CENTER);
+                builder.addImage(imagen, 0, 0, 500, 180, builder.COLOR_1);
+
+            } catch (WriterException e) {
+                e.printStackTrace();
+            }
+
+            builder.addFeedLine(1);
+            builder.addTextAlign(builder.ALIGN_CENTER);
+            builder.addText("Timbre Electronico S.I.I. Res. 0 del 2013 \n");
+            builder.addText("Verifique documento en: www.portaldte.cl");
+
+            builder.addFeedLine(3);
+
+            builder.addCut(Builder.CUT_FEED);
+            printer = Utilidades.getPrinter();
+
+            printer.sendData(builder, SEND_TIMEOUT, status, battery);
+
+            retorna = true;
+        } catch (EposException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            retorna = false;
+        }
     }
 }

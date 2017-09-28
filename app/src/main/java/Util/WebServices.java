@@ -16,6 +16,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import To.ArchivoOdtPorPatenteTO;
+import To.CiudadTO;
+import To.ComunaTO;
 import To.ValidaTO;
 
 public class WebServices {
@@ -48,12 +50,13 @@ public class WebServices {
             for (int i = 0; i < respJSON.length(); i++) {
                 archivoOdtPorPatenteTO =  new ArchivoOdtPorPatenteTO();
                 JSONObject obj = respJSON.getJSONObject(i);
-                archivoOdtPorPatenteTO.setCodBarra(obj.getString("Ccodigobarra"));
+                archivoOdtPorPatenteTO.setCodBarra(obj.getString("CcodigoBarra"));
                 archivoOdtPorPatenteTO.setEstadoODT(obj.getString("Ueoestado"));
                 archivoOdtPorPatenteTO.setFormaPago(obj.getString("Doformapago"));
                 archivoOdtPorPatenteTO.setNumeroODT(obj.getString("Ueonumeroot"));
                 archivoOdtPorPatenteTO.setNumeroPiezas(obj.getInt("Donumeropiezas"));
                 archivoOdtPorPatenteTO.setPlanilla(obj.getString("Dinumerodocumento"));
+                archivoOdtPorPatenteTO.setValorOdt(obj.getInt("Dovalorflete"));
                 archivoOdtPorPatenteTOs.add(archivoOdtPorPatenteTO);
             }
         } else {
@@ -65,6 +68,7 @@ public class WebServices {
             archivoOdtPorPatenteTO.setNumeroODT(responseObject1.getString("Ueonumeroot"));
             archivoOdtPorPatenteTO.setNumeroPiezas(responseObject1.getInt("Donumeropiezas"));
             archivoOdtPorPatenteTO.setPlanilla(responseObject1.getString("Dinumerodocumento"));
+            archivoOdtPorPatenteTO.setValorOdt(responseObject1.getInt("Dovalorflete"));
             archivoOdtPorPatenteTOs.add(archivoOdtPorPatenteTO);
         }
 
@@ -195,4 +199,92 @@ public class WebServices {
         }
         return validaTO;
     }
+
+    public ArrayList<CiudadTO> TraeCiudades() throws IOException,ClientProtocolException, JSONException {
+
+        String respStr;
+        HttpClient httpClient;
+        HttpGet del;
+        HttpResponse resp;
+        JSONObject responseObject;
+        httpClient = new DefaultHttpClient();
+        CiudadTO ciudad = null;
+        ArrayList<CiudadTO> ciudades =  new ArrayList<CiudadTO>();
+
+        del = new HttpGet(RUTA_WEB_SERVICE + "/TraeCiudades");
+        del.setHeader("content-type", "application/json");
+        resp = httpClient.execute(del);
+        respStr = EntityUtils.toString(resp.getEntity());
+        responseObject = new JSONObject(respStr);
+
+        JSONArray respJSON = responseObject.getJSONArray("ciudadTO");
+
+        for (int i = 0; i < respJSON.length(); i++) {
+            ciudad =  new CiudadTO();
+            JSONObject obj = respJSON.getJSONObject(i);
+            ciudad.setCodCiudad(obj.getString("Codigo_ciudad"));
+            ciudad.setNombreCiudad(obj.getString("Nombre_ciudad"));
+            ciudades.add(ciudad);
+        }
+        return ciudades;
+    }
+
+    public ArrayList<ComunaTO> TraeComunas() throws IOException,ClientProtocolException, JSONException {
+
+        String respStr;
+        HttpClient httpClient;
+        HttpGet del;
+        HttpResponse resp;
+        JSONObject responseObject;
+        httpClient = new DefaultHttpClient();
+        ComunaTO comuna = null;
+        ArrayList<ComunaTO> comunas =  new ArrayList<ComunaTO>();
+
+        del = new HttpGet(RUTA_WEB_SERVICE + "/TraeComunas");
+        del.setHeader("content-type", "application/json");
+        resp = httpClient.execute(del);
+        respStr = EntityUtils.toString(resp.getEntity());
+        responseObject = new JSONObject(respStr);
+
+        JSONArray respJSON = responseObject.getJSONArray("comunaTO");
+
+        for (int i = 0; i < respJSON.length(); i++) {
+            comuna =  new ComunaTO();
+            JSONObject obj = respJSON.getJSONObject(i);
+            comuna.setCodCiudad(obj.getString("Codigo_ciudad"));
+            comuna.setCodComuna(obj.getString("Codigo_comuna"));
+            comuna.setNombreComuna(obj.getString("Nombre_comuna"));
+            comunas.add(comuna);
+        }
+        return comunas;
+    }
+
+    public ValidaTO retornaImpresoraPrueba(String imei) throws IOException, ClientProtocolException, JSONException {
+
+        String respStr;
+        HttpClient httpClient;
+        HttpGet del;
+        HttpResponse resp;
+        JSONObject responseObject;
+        httpClient = new DefaultHttpClient();
+        ValidaTO validaTO = null;
+
+        del = new HttpGet("http://webservices.pullman.cl/TRA-P-00000002-4/rest/entrega/impresora/imei=" + imei);
+
+        del.setHeader("content-type", "application/json");
+
+        resp = httpClient.execute(del);
+        respStr = EntityUtils.toString(resp.getEntity());
+
+        responseObject = new JSONObject(respStr);
+        validaTO = new ValidaTO();
+        validaTO.setValida(responseObject.getString("Valida"));
+
+        if (!validaTO.getValida().equals("0")) {
+            Globales.Impresora = validaTO.getValida();
+        }
+
+        return validaTO;
+    }
+
 }

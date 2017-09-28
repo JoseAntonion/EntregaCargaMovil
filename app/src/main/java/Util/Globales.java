@@ -10,8 +10,11 @@ import To.EntregaOdtMasivoTO;
 public class Globales extends Application {
 
     public static String odtsXpatente;
+    public static String Ciudades;
+    public static String Comunas;
+    public static String Impresora;
     public static String rutaArchivos;
-    public static String rutaArchivos2;
+    public static String rutaArchivosFinal;
     public static int cantidadOriginalOdts;
     public static int cantidadBultosOriginal;
     public static String imagenCodificada;
@@ -20,5 +23,7 @@ public class Globales extends Application {
     public static ArrayList<EntregaOdtMasivoTO> odtMasiva = new ArrayList<>();
     public static double latitud;
     public static double longitud;
+    public static int totalValoresODT;
+    public static String docElectronico;
 
 }

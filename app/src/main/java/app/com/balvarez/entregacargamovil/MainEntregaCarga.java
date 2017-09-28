@@ -32,6 +32,7 @@ public class MainEntregaCarga extends AppCompatActivity implements View.OnClickL
     private Activity activity;
     //private ArrayList<EntregaOdtMasivoTO> odtMasiva;
     EntregaOdtMasivoTO odtM;
+    private int totalEntrega;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,6 +106,13 @@ public class MainEntregaCarga extends AppCompatActivity implements View.OnClickL
         odtM.setOdt(ODT);
         odtM.setCantidad(Integer.parseInt(txtCantidadBultos.getText().toString()));
         Globales.odtMasiva.add(odtM);
+        try {
+            Globales.totalValoresODT += util.buscaValorOdt(ODT);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
         AlertDialog.Builder downloadDialog = new AlertDialog.Builder(activity);
         downloadDialog.setTitle(DEFAULT_TITLE);
@@ -131,10 +139,12 @@ public class MainEntregaCarga extends AppCompatActivity implements View.OnClickL
                     public void onClick(DialogInterface dialogInterface, int i) {
                         if(OLD.equals("")){
                             Intent intento = new Intent(MainEntregaCarga.this, MainInfoReceptorCarga.class);
+                            //Intent intento = new Intent(MainEntregaCarga.this, MainCancelacionOdt.class);
                             intento.putExtra("odt", ODT);
                             startActivity(intento);
                         }else{
                             Intent intento = new Intent(MainEntregaCarga.this, MainInfoReceptorCarga.class);
+                            //Intent intento = new Intent(MainEntregaCarga.this, MainCancelacionOdt.class);
                             //intento.putExtra("odtses", odtMasiva);
                             startActivity(intento);
                         }

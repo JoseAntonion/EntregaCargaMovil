@@ -20,6 +20,8 @@ import android.widget.Toast;
 import java.util.ArrayList;
 
 import To.ArchivoOdtPorPatenteTO;
+import To.CiudadTO;
+import To.ComunaTO;
 import Util.Globales;
 import Util.Utilidades;
 import Util.WebServices;
@@ -174,6 +176,7 @@ public class MainEntregaCargaMovil extends AppCompatActivity {
         txt_patente = (TextView) findViewById(R.id.txtPatente);
         txt_patente = (TextView) findViewById(R.id.txtPatente);
         patente = txt_patente.getText().toString();
+        Globales.totalValoresODT = 0;
     }
 
 
@@ -220,6 +223,8 @@ public class MainEntregaCargaMovil extends AppCompatActivity {
         //long tiempo = 0;
         ProgressDialog MensajeProgreso;
         Boolean bandera = false;
+        Boolean isComuna = false;
+        Boolean isCiudad = false;
         boolean net = false;
 
         @Override
@@ -237,18 +242,30 @@ public class MainEntregaCargaMovil extends AppCompatActivity {
         protected String doInBackground(Void... params) {
             String respStr = null;
             ArrayList<ArchivoOdtPorPatenteTO> listaOdts = new ArrayList<>();
+            ArrayList<CiudadTO> listaCiudades = new ArrayList<>();
+            ArrayList<ComunaTO> listaComunas = new ArrayList<>();
             Utilidades util = new Utilidades();
-
 
             if(util.verificaConexion(getApplicationContext())){
                 try {
                     net = true;
                     WebServices WS = new WebServices();
                     listaOdts = WS.OdtsXPatente(patente);
+                    listaCiudades = WS.TraeCiudades();
+                    listaComunas = WS.TraeComunas();
+                    util.creaDirectorioArchivos();
+
                     if(!listaOdts.isEmpty()){
-                        util.creaDirectorio();
-                        util.escribirEnArchivo(listaOdts);
+                        util.escribirEnArchivo(listaOdts,"ODTS");
                         bandera = true;
+                        if(!listaCiudades.isEmpty()){
+                            util.escribirEnArchivo(listaCiudades,"CIUDADES");
+                            isCiudad = true;
+                            if(!listaComunas.isEmpty()){
+                                util.escribirEnArchivo(listaComunas,"COMUNAS");
+                                isComuna = true;
+                            }
+                        }
                     }
                 }
                 catch (Exception e){
@@ -266,9 +283,15 @@ public class MainEntregaCargaMovil extends AppCompatActivity {
                 Toast.makeText(activity.getApplicationContext(), "Debe tener conexión a INTERNET para cargar datos de la Patente !!!",
                         Toast.LENGTH_LONG).show();
             }else {
-                if (bandera) {
-                    //Intent intent = new Intent(MainEntregaCargaMovil.this, MainResumenPlanilla.class);
-                    Intent intent = new Intent(MainEntregaCargaMovil.this, MainCancelacionOdt.class);
+                if(!isComuna)
+                    Toast.makeText(activity.getApplicationContext(), "No se cargaron COMUNAS !",
+                            Toast.LENGTH_SHORT).show();
+                if(!isCiudad)
+                    Toast.makeText(activity.getApplicationContext(), "No se cargaron CIUDADES !",
+                            Toast.LENGTH_SHORT).show();
+                if(bandera) {
+                    Intent intent = new Intent(MainEntregaCargaMovil.this, MainResumenPlanilla.class);
+                    //Intent intent = new Intent(MainEntregaCargaMovil.this, MainCancelacionOdt.class);
                     startActivity(intent);
                     System.gc();
                     finish();

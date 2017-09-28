@@ -4,4 +4,8 @@
     <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
     </style>
 
+    <style name="CampoTextoPurpura" parent="Theme.AppCompat.Light">
+        <item name="colorControlActivated">#fc7329</item>
+    </style>
+
 </resources>

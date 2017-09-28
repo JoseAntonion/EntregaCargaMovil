@@ -8,7 +8,15 @@ public class ArchivoOdtPorPatenteTO {
     private String formaPago;
     private String codBarra;
     private int numeroPiezas;
+    private int valorOdt;
 
+    public int getValorOdt() {
+        return valorOdt;
+    }
+
+    public void setValorOdt(int valorOdt) {
+        this.valorOdt = valorOdt;
+    }
 
     public String getPlanilla() {
         return planilla;
