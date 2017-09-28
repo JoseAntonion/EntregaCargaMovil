@@ -19,8 +19,10 @@ import com.nlscan.android.scan.ScanManager;
 import org.json.JSONException;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import To.EstadosOdtTO;
+import Util.Globales;
 import Util.Utilidades;
 
 public class MainODT extends AppCompatActivity implements View.OnClickListener {
@@ -44,6 +46,7 @@ public class MainODT extends AppCompatActivity implements View.OnClickListener {
     private String formaPago = "";
     private String OLD = "";
     private String OLD2 = "";
+    //private String odtAnterior = "";
 
 
     @Override
@@ -70,6 +73,7 @@ public class MainODT extends AppCompatActivity implements View.OnClickListener {
         if(extras != null){
             OLD = (extras.get("old") == null)?"":extras.get("old").toString();
             OLD2 = (extras.get("old2") == null)?"":extras.get("old2").toString();
+            //odtAnterior = (extras.get("odtAnterior") == null)?"":extras.get("odtAnterior").toString();
         }
         if(!OLD.equals("") || !OLD2.equals("")){
             btn_finreparto.setEnabled(false);
@@ -105,35 +109,66 @@ public class MainODT extends AppCompatActivity implements View.OnClickListener {
                 break;
             }
             case R.id.btnOdtManual: {
-                try {
-                    if (!util.validaEstadoOdt(txtOdtManual.getText().toString()).equals("99")) {
-                        formaPago = util.buscaFormaPagoOdt(txtOdtManual.getText().toString());
-                        if (formaPago != "" || formaPago != null) {
-                            if (formaPago.equals("CTA")) {
-                                Intent intento = new Intent(MainODT.this, MainEntregaCarga.class);
-                                intento.putExtra("odt", txtOdtManual.getText().toString());
-                                intento.putExtra("aux", 1);
-                                intento.putExtra("old", OLD);
-                                startActivity(intento);
-                            } else if (formaPago.equals("PED") || formaPago.equals("EFE")) {
-                                Intent intento = new Intent(MainODT.this, MainEscanerBulto.class);
-                                intento.putExtra("odt", txtOdtManual.getText().toString());
-                                startActivity(intento);
-                            } else {
-                                Toast.makeText(activity.getApplicationContext(),
-                                        "No se encontro FORMA DE PAGO para la ODT escaneada", Toast.LENGTH_LONG).show();
-                            }
-                        } else
-                            Toast.makeText(activity.getApplicationContext(), "ERROR!! Forma de Pago VACIA o NULA", Toast.LENGTH_LONG).show();
-                    } else
-                        Toast.makeText(activity.getApplicationContext(), "La ODT se encuentra ENTREGADA", Toast.LENGTH_LONG).show();
-                } catch (IOException e) {
-                    Toast.makeText(activity.getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
-                    e.printStackTrace();
-                } catch (JSONException e) {
-                    Toast.makeText(activity.getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
-                    e.printStackTrace();
+                if(!txtOdtManual.getText().toString().equals("")){
+                    validaNumeroODTtipoPago(txtOdtManual.getText().toString());
+                }else{
+                    Toast.makeText(activity.getApplicationContext(), "Debe ingresar numero de ODT", Toast.LENGTH_LONG).show();
                 }
+
+                    /*if(!odtAnterior.equals("")){
+                        if(util.buscaFormaPagoOdt(odtAnterior).equals(util.buscaFormaPagoOdt(txtOdtManual.getText().toString()))){
+                            if(!odtAnterior.equals(txtOdtManual.getText().toString())){
+                                if (!util.validaEstadoOdt(txtOdtManual.getText().toString()).equals("99")) {
+                                    formaPago = util.buscaFormaPagoOdt(txtOdtManual.getText().toString());
+                                    if (formaPago != "" || formaPago != null) {
+                                        if (formaPago.equals("CTA")) {
+                                            Intent intento = new Intent(MainODT.this, MainEntregaCarga.class);
+                                            intento.putExtra("odt", txtOdtManual.getText().toString());
+                                            intento.putExtra("aux", 1);
+                                            intento.putExtra("old", OLD);
+                                            startActivity(intento);
+                                        } else if (formaPago.equals("PED") || formaPago.equals("EFE")) {
+                                            Intent intento = new Intent(MainODT.this, MainEscanerBulto.class);
+                                            intento.putExtra("odt", txtOdtManual.getText().toString());
+                                            startActivity(intento);
+                                        } else {
+                                            Toast.makeText(activity.getApplicationContext(),
+                                                    "No se encontro FORMA DE PAGO para la ODT escaneada", Toast.LENGTH_LONG).show();
+                                        }
+                                    } else
+                                        Toast.makeText(activity.getApplicationContext(), "ERROR!! Forma de Pago VACIA o NULA", Toast.LENGTH_LONG).show();
+                                } else
+                                    Toast.makeText(activity.getApplicationContext(), "La ODT se encuentra ENTREGADA", Toast.LENGTH_LONG).show();
+                            }else{
+                                Toast.makeText(activity.getApplicationContext(), "La ODT ya se ingreso", Toast.LENGTH_LONG).show();
+                            }
+                        }else{
+                            Toast.makeText(activity.getApplicationContext(), "Debe ingresar ODT con el mismo tipo de pago", Toast.LENGTH_LONG).show();
+                        }
+
+                    }else{
+                        if (!util.validaEstadoOdt(txtOdtManual.getText().toString()).equals("99")) {
+                            formaPago = util.buscaFormaPagoOdt(txtOdtManual.getText().toString());
+                            if (formaPago != "" || formaPago != null) {
+                                if (formaPago.equals("CTA")) {
+                                    Intent intento = new Intent(MainODT.this, MainEntregaCarga.class);
+                                    intento.putExtra("odt", txtOdtManual.getText().toString());
+                                    intento.putExtra("aux", 1);
+                                    intento.putExtra("old", OLD);
+                                    startActivity(intento);
+                                } else if (formaPago.equals("PED") || formaPago.equals("EFE")) {
+                                    Intent intento = new Intent(MainODT.this, MainEscanerBulto.class);
+                                    intento.putExtra("odt", txtOdtManual.getText().toString());
+                                    startActivity(intento);
+                                } else {
+                                    Toast.makeText(activity.getApplicationContext(),
+                                            "No se encontro FORMA DE PAGO para la ODT escaneada", Toast.LENGTH_LONG).show();
+                                }
+                            } else
+                                Toast.makeText(activity.getApplicationContext(), "ERROR!! Forma de Pago VACIA o NULA", Toast.LENGTH_LONG).show();
+                        } else
+                            Toast.makeText(activity.getApplicationContext(), "La ODT se encuentra ENTREGADA", Toast.LENGTH_LONG).show();
+                    }*/
                 break;
             }
 
@@ -193,36 +228,7 @@ public class MainODT extends AppCompatActivity implements View.OnClickListener {
                     svalue1=svalue1==null?"":svalue1;
                     svalue2=svalue2==null?"":svalue2;
                     if (svalue1.length()>0) {
-                        if(util.BuscaODT(svalue1.replace("*",""))) {
-                            if (!util.validaEstadoOdt(svalue1.replace("*", "")).equals("99")) {
-                                formaPago = util.buscaFormaPagoOdt(svalue1.replace("*", ""));
-                                if (formaPago != "" || formaPago != null) {
-                                    if (formaPago.equals("CTA")) {
-                                        Intent intento = new Intent(MainODT.this, MainEntregaCarga.class);
-                                        intento.putExtra("odt", svalue1);
-                                        intento.putExtra("aux", 1);
-                                        intento.putExtra("old", OLD);
-                                        startActivity(intento);
-                                        System.gc();
-                                    } else if (formaPago.equals("PED") || formaPago.equals("EFE")) {
-                                        Intent intento = new Intent(MainODT.this, MainEscanerBulto.class);
-                                        intento.putExtra("odt", svalue1);
-                                        intento.putExtra("old2", OLD2);
-                                        startActivity(intento);
-                                        System.gc();
-                                    } else {
-                                        Toast.makeText(activity.getApplicationContext(),
-                                                "No se encontro FORMA DE PAGO para la ODT escaneada", Toast.LENGTH_LONG).show();
-                                    }
-                                } else
-                                    Toast.makeText(activity.getApplicationContext(), "ERROR Forma de Pago !!!!", Toast.LENGTH_LONG).show();
-                            } else
-                                Toast.makeText(activity.getApplicationContext(), "La ODT se encuentra ENTREGADA", Toast.LENGTH_LONG).show();
-                        }else{
-                            Toast.makeText(activity.getApplicationContext(), "ODT no encontrada", Toast.LENGTH_LONG).show();
-                            Intent intento = new Intent(MainODT.this, MainODT.class);
-                            startActivity(intento);
-                        }
+                        validaNumeroODTtipoPago(svalue1.replace("*",""));
                     }
 
                 } catch (Exception e) {
@@ -235,6 +241,65 @@ public class MainODT extends AppCompatActivity implements View.OnClickListener {
             }
         }
     };
+
+    public void validaNumeroODTtipoPago(String odt){
+        boolean odtRepetida = false;
+        String formaPago;
+        try {
+            if(!Globales.primera){
+                Globales.banderaTipoPago = (util.buscaFormaPagoOdt(odt).equals("CTA"))?"1":"0";
+                Globales.primera = true;
+                Globales.registroOdtMultiples = new ArrayList<>();
+            }
+
+            for(int i=0;i<Globales.registroOdtMultiples.size();i++){
+                if(odt.equals(Globales.registroOdtMultiples.get(i).toString())){
+                    odtRepetida = true;
+                    break;
+                }
+            }
+
+            if(odtRepetida){
+                Toast.makeText(activity.getApplicationContext(), "La ODT ya se ingreso", Toast.LENGTH_LONG).show();
+            }else {
+                formaPago = (util.buscaFormaPagoOdt(odt).equals("CTA"))?"1":"0";
+                if(formaPago.equals(Globales.banderaTipoPago)){
+                    if(util.BuscaODT(odt)){
+                        if (!util.validaEstadoOdt(odt).equals("99")){
+                            if (Globales.banderaTipoPago.equals("1")) {
+                                Intent intento = new Intent(MainODT.this, MainEntregaCarga.class);
+                                intento.putExtra("odt", odt);
+                                intento.putExtra("aux", 1);
+                                intento.putExtra("old", OLD);
+                                startActivity(intento);
+                                System.gc();
+                            }else{
+                                Intent intento = new Intent(MainODT.this, MainEscanerBulto.class);
+                                intento.putExtra("odt", odt);
+                                intento.putExtra("old2", OLD2);
+                                startActivity(intento);
+                                System.gc();
+                            }
+                        }else{
+                            Toast.makeText(activity.getApplicationContext(), "La ODT se encuentra ENTREGADA", Toast.LENGTH_LONG).show();
+                        }
+                    }else{
+                        Toast.makeText(activity.getApplicationContext(), "ODT no encontrada", Toast.LENGTH_LONG).show();
+                        Intent intento = new Intent(MainODT.this, MainODT.class);
+                        startActivity(intento);
+                    }
+                }else{
+                    Toast.makeText(activity.getApplicationContext(), "Debe ingresar ODT con el mismo tipo de pago", Toast.LENGTH_LONG).show();
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+
+    }
 
 }
 

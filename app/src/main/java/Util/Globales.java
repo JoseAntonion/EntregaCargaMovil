@@ -25,5 +25,10 @@ public class Globales extends Application {
     public static double longitud;
     public static int totalValoresODT;
     public static String docElectronico;
+    public static String esCTACTE;
+    public static String banderaTipoPago;
+    public static ArrayList<String> registroOdtMultiples;
+    public static boolean primera;
+
 
 }

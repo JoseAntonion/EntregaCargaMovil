@@ -178,11 +178,13 @@ public class MainFirma extends AppCompatActivity implements View.OnClickListener
             Globales.Impresora = "00:01:90:C2:C4:C6";
             try {
                 //ws.retornaImpresoraPrueba(imei);
-                if(util.ConectarEpsonPrueba(activity.getApplicationContext())) {
-                    if (tipoDoc.equals("factura"))
-                        util.FacturaPrueba(activity);
-                    else
-                        util.BoletaPrueba(activity);
+                if(!Globales.esCTACTE.equals("si")){
+                    if(util.ConectarEpsonPrueba(activity.getApplicationContext())) {
+                        if (tipoDoc.equals("factura"))
+                            util.FacturaPrueba(activity);
+                        else
+                            util.BoletaPrueba(activity);
+                    }
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -235,6 +237,10 @@ public class MainFirma extends AppCompatActivity implements View.OnClickListener
         final String DEFAULT_YES = "Aceptar";
 
         Globales.totalValoresODT = 0;
+        Globales.banderaTipoPago = "";
+        Globales.registroOdtMultiples = null;
+        Globales.primera = false;
+        Globales.esCTACTE = "";
 
         AlertDialog.Builder downloadDialog = new AlertDialog.Builder(activity);
         downloadDialog.setTitle(DEFAULT_TITLE);
@@ -257,6 +263,11 @@ public class MainFirma extends AppCompatActivity implements View.OnClickListener
         final String DEFAULT_MESSAGE = "Problemas en el proceso - MainFirma";
         final String DEFAULT_YES = "Aceptar";
 
+        Globales.totalValoresODT = 0;
+        Globales.banderaTipoPago = "";
+        Globales.registroOdtMultiples = null;
+        Globales.primera = false;
+        Globales.esCTACTE = "";
 
         AlertDialog.Builder downloadDialog = new AlertDialog.Builder(activity);
         downloadDialog.setTitle(DEFAULT_TITLE);

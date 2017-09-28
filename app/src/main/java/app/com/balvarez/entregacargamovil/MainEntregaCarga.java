@@ -126,9 +126,11 @@ public class MainEntregaCarga extends AppCompatActivity implements View.OnClickL
                         odtM.setOdt(ODT);
                         odtM.setCantidad(Integer.parseInt(txtCantidadBultos.getText().toString()));
                         Globales.odtMasiva.add(odtM);*/
+                        Globales.registroOdtMultiples.add(ODT);
                         Intent intent = new Intent(MainEntregaCarga.this, MainODT.class);
                         //intent.putExtra("masivo", 1);
                         intent.putExtra("old", "1");
+                        intent.putExtra("odtAnterior", ODT);
                         startActivity(intent);
                     }
                 });
@@ -137,6 +139,7 @@ public class MainEntregaCarga extends AppCompatActivity implements View.OnClickL
 
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
+                        Globales.esCTACTE = "si";
                         if(OLD.equals("")){
                             Intent intento = new Intent(MainEntregaCarga.this, MainInfoReceptorCarga.class);
                             //Intent intento = new Intent(MainEntregaCarga.this, MainCancelacionOdt.class);

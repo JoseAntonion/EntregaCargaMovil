@@ -316,7 +316,9 @@ public class MainEscanerBulto extends AppCompatActivity implements View.OnClickL
         odtM.setCantidad(Integer.parseInt(lblBultosLeidos.getText().toString()));
         Globales.odtMasiva.add(odtM);
         try {
-            Globales.totalValoresODT += util.buscaValorOdt(ODT);
+            if(util.buscaFormaPagoOdt(ODT).equals("PED")){
+                Globales.totalValoresODT += util.buscaValorOdt(ODT);
+            }
         } catch (IOException e) {
             e.printStackTrace();
         } catch (JSONException e) {
@@ -335,6 +337,7 @@ public class MainEscanerBulto extends AppCompatActivity implements View.OnClickL
                         odtM.setOdt(ODT);
                         odtM.setCantidad(Integer.parseInt(txtCantidadBultos.getText().toString()));
                         Globales.odtMasiva.add(odtM);*/
+                        Globales.registroOdtMultiples.add(ODT);
                         Intent intent = new Intent(MainEscanerBulto.this, MainODT.class);
                         //intent.putExtra("masivo", 1);
                         intent.putExtra("old2", "1");

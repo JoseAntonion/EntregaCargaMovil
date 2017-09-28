@@ -51,6 +51,11 @@ public class MainResumenPlanilla extends AppCompatActivity implements View.OnCli
         }catch (Exception e) {
             e.printStackTrace();
         }
+        Globales.totalValoresODT = 0;
+        Globales.banderaTipoPago = "";
+        Globales.registroOdtMultiples = null;
+        Globales.primera = false;
+        Globales.esCTACTE = "";
     }
 
     @Override
