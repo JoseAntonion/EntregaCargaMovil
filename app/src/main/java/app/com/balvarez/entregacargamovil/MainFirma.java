@@ -7,9 +7,12 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.provider.Settings;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.telephony.TelephonyManager;
@@ -22,14 +25,19 @@ import com.coatedmoose.customviews.SignatureView;
 import com.epson.eposprint.EposException;
 import com.google.zxing.WriterException;
 
+import org.json.JSONException;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
 
+import To.ArchivoDocElectronicoTO;
 import To.ValidaTO;
+import Util.GPSTraker;
 import Util.Globales;
 import Util.Utilidades;
 import Util.WebServices;
@@ -47,6 +55,9 @@ public class MainFirma extends AppCompatActivity implements View.OnClickListener
     private String tipoDoc;
     private Utilidades util;
     private BluetoothAdapter bAdapter;
+    private Handler mHandler;
+    private static final int ACTIVAR_GPS = 1;
+    private AlertDialog alert;
 
     //private ArrayList<EntregaOdtMasivoTO> listaOdt = new ArrayList<>();
 
@@ -82,6 +93,14 @@ public class MainFirma extends AppCompatActivity implements View.OnClickListener
         switch (v.getId()) {
 
             case R.id.btn_Finalizar: {
+                if (VerificarGPS()) {
+                    GPSTraker gps = new GPSTraker(activity.getApplicationContext());
+                    Location l = gps.getLocation();
+                    if (l != null) {
+                        Globales.latitud = l.getLatitude();
+                        Globales.longitud = l.getLongitude();
+                    }
+                }
                 new CapturaImagen().execute();
             }
             case R.id.btnLimpiar: {
@@ -117,7 +136,131 @@ public class MainFirma extends AppCompatActivity implements View.OnClickListener
 
         @Override
         protected String doInBackground(Void... params) {
+            //////////////////////////////////////////////////////////////////////////////////////
+            WebServices webservices = new WebServices();
+            Utilidades utilidades = new Utilidades();
+            TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+            String imei = telephonyManager.getDeviceId();
+            try {
+                webservices.retornaImpresoraPrueba(imei);
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            } catch (JSONException e1) {
+                e1.printStackTrace();
+            }
+            //ArrayList<DatosRepartoTO> datosRepartoTOs = new ArrayList<DatosRepartoTO>();
+            //datosRepartoTOs = new ArrayList<DatosRepartoTO>();
+            //datosRepartoTOs = utilidades.TraeOdtEntregadasNOconfirmadas();
+            String tipoPago ="";
+            String odt ="";
+            double total =0;
+            double neto =0;
+            double iva =0;
+            int i = 0;
+            if(Globales.registroOdtMultiples.size()>1){
+                for (i = 0; i < Globales.registroOdtMultiples.size(); i++) {
 
+                    try {
+                        webservices.GuardarEntrega(Globales.registroOdtMultiples.get(i).getPlanilla(),Globales.registroOdtMultiples.get(i).getOdt(),Globales.datosReceptor.getRut(),Globales.datosReceptor.getNombre(),
+                                Globales.datosReceptor.getTelefono(),imei,"EntregaCargaMovil",Globales.version,String.valueOf(Globales.longitud),String.valueOf( Globales.latitud),Globales.datosReceptor.getNombre(),
+                                Globales.datosReceptor.getApPaterno(),Globales.datosReceptor.getApMaterno(),"%20","%20","%20");
+                        tipoPago = tipoPago + util.buscaFormaPagoOdt(Globales.registroOdtMultiples.get(i).getOdt()) + "~";
+                        odt = odt + Globales.registroOdtMultiples.get(i).getOdt()+"~";
+                        total = total + util.buscaValorOdt(Globales.registroOdtMultiples.get(i).getOdt());
+                    } catch (IOException e1) {
+                        e1.printStackTrace();
+                    } catch (JSONException e1) {
+                        e1.printStackTrace();
+                    }
+                }
+            }else{
+                try {
+                    webservices.GuardarEntrega(Globales.odtSingle.getPlanilla(),Globales.odtSingle.getOdt(),Globales.datosReceptor.getRut(),Globales.datosReceptor.getNombre(),
+                            Globales.datosReceptor.getTelefono(),imei,"EntregaCargaMovil",Globales.version,String.valueOf(Globales.longitud),String.valueOf( Globales.latitud),Globales.datosReceptor.getNombre(),
+                            Globales.datosReceptor.getApPaterno(),Globales.datosReceptor.getApMaterno(),"%20","%20","%20");
+                    tipoPago = tipoPago + util.buscaFormaPagoOdt(Globales.odtSingle.getOdt()) + "~";
+                    odt = odt + Globales.odtSingle.getOdt() +"~";
+                    total = total + util.buscaValorOdt(Globales.odtSingle.getOdt());
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                } catch (JSONException e1) {
+                    e1.printStackTrace();
+                }
+            }
+
+
+
+            if(total > 0){
+                neto = total * 0.81;
+                iva = total * 0.19;
+            }
+
+            /*if(ResumenEntrega.listaFotos != null){
+                for (int i = 0; i < ResumenEntrega.listaFotos.size(); i++) {
+                    webservices.GuardaImagenODT(ResumenEntrega.listaFotos.get(i).getId(), ResumenEntrega.listaFotos.get(i).getImagen(), Globales.usuario, imei, "", "ENTREGA MOVIL", "CANCELACION FACTURA", Globales.VERSION_APLICACION, "800");
+                }
+            }*/
+
+            /*utilidades.ModificaTipoPago("EFE");// "EFE" = PAGO CON EFECTIVO
+            utilidades.ModificaEstadoXUnaEntrega("1");
+            utilidades.ModificaEstadoConfirmado();*/
+
+            //DocumentoElectronico documentoElectronico = new DocumentoElectronico();
+            ArrayList<ArchivoDocElectronicoTO> archivoDocElectronicoTOs  = new ArrayList<ArchivoDocElectronicoTO>();
+
+            if (tipoDoc.equals("boleta")) {
+                try {
+                    archivoDocElectronicoTOs = webservices.RetornaDocContable("39", "02", "", "", "",
+                            "",  "", tipoPago, "0", Integer.toString((int) neto),Integer.toString((int) iva),Integer.toString((int) total), "", "", "000000000000000",
+                            "03", "61", imei, imei, imei, "EntregaCargaMovil", "CancelacionBoleta", Globales.version, "", "1", "-1", "", "", "",
+                            "", "", odt);
+                    if (util.ConectarEpsonPrueba(activity.getApplicationContext())) {
+                        //Llama a la creacion e impresion de la BOLETA
+                        // Desarrollo
+                        //util.BoletaPrueba(activity);
+                        // Prueba real 1
+                        util.Boleta(activity,archivoDocElectronicoTOs);
+                    }
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                } catch (JSONException e1) {
+                    e1.printStackTrace();
+                } catch (EposException e1) {
+                    e1.printStackTrace();
+                }
+            }else{
+
+                try {
+                    archivoDocElectronicoTOs = webservices.RetornaDocContable("33", "02", "", Globales.factura.getRutFactura(), Globales.factura.getRazonFactura(),Globales.factura.getDireccionFactura(),
+                            Globales.factura.getDescComuna(), tipoPago, "0", Integer.toString((int) neto),Integer.toString((int) iva),Integer.toString((int) total), "", "", "000000000000000",
+                            "03", "61", imei, imei, imei, "EntregaCargaMovil", "CancelacionFactura", Globales.version, "", "1", "-1", Globales.factura.getGiroFactura(), "", "",
+                            Globales.factura.getFonoFactura(),"", odt);
+                    if (utilidades.ConectarEpsonPrueba(activity.getApplicationContext())) {
+                            //Llama a la creacion e imprecion de la FACTURA
+                            //Desarrollo
+                            //util.FacturaPrueba(activity);
+                            // Prueba real 1
+                            util.Factura(activity,archivoDocElectronicoTOs);
+                    }
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                } catch (JSONException e1) {
+                    e1.printStackTrace();
+                } catch (EposException e1) {
+                    e1.printStackTrace();
+                } catch (WriterException e1) {
+                    e1.printStackTrace();
+                }
+            }
+
+            /*Intent intento = new Intent(MainFirma.this, MenuUsuario.class);
+            startActivity(intento);
+            finish();
+            System.gc();
+            respStr = "1";
+
+			return respStr;*/
+            //////////////////////////////////////////////////////////////////////////////////////
             resp = new ValidaTO();
             resp2 = new ValidaTO();
 
@@ -132,13 +275,13 @@ public class MainFirma extends AppCompatActivity implements View.OnClickListener
                     imagen.compress(Bitmap.CompressFormat.JPEG, 90, os);
                     os.close();
 
-                    TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-                    String imei = telephonyManager.getDeviceId();
+                    /*TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+                    String imei = telephonyManager.getDeviceId();*/
                     if(Globales.odtMasiva != null){
-                        for (int i=0;i<Globales.odtMasiva.size();i++){
-                            resp = ws.GrabaImagen(RUT,encodedFirma,"ACT",RUT,imei,Globales.odtMasiva.get(i).getOdt(),"ENTREGA");
-                            resp2 = ws.CambiaEstadoODT(Globales.odtMasiva.get(i).getOdt(),"99",RUT,"MainFirma", Globales.version,"EntregaCargaMovil",imei);
-                            util.cambiaEstadoOdtArchivoENTREGADO(Globales.odtMasiva.get(i).getOdt());
+                        for (int o=0;o<Globales.odtMasiva.size();o++){
+                            resp = ws.GrabaImagen(RUT,encodedFirma,"ACT",RUT,imei,Globales.odtMasiva.get(o).getOdt(),"ENTREGA");
+                            resp2 = ws.CambiaEstadoODT(Globales.odtMasiva.get(o).getOdt(),"99",RUT,"MainFirma", Globales.version,"EntregaCargaMovil",imei);
+                            util.cambiaEstadoOdtArchivoENTREGADO(Globales.odtMasiva.get(o).getOdt());
                         }
                     }else{
                         resp = ws.GrabaImagen(RUT,encodedFirma,"ACT",RUT,imei,ODT,"ENTREGA");
@@ -171,11 +314,11 @@ public class MainFirma extends AppCompatActivity implements View.OnClickListener
                 e.printStackTrace();
             }
             // PRUEBAS IMPRESION ----------------------------------------------------------------
-            TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-            String imei = telephonyManager.getDeviceId();
+            /*TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+            String imei = telephonyManager.getDeviceId();*/
 
             //WebServices ws = new WebServices();
-            Globales.Impresora = "00:01:90:C2:C4:C6";
+            /*Globales.Impresora = "00:01:90:C2:C4:C6";
             try {
                 //ws.retornaImpresoraPrueba(imei);
                 if(!Globales.esCTACTE.equals("si")){
@@ -192,7 +335,7 @@ public class MainFirma extends AppCompatActivity implements View.OnClickListener
                 e.printStackTrace();
             } catch (WriterException e) {
                 e.printStackTrace();
-            }
+            }*/
             // ----------------------------------------------------------------------------------
             return null;
         }
@@ -286,6 +429,33 @@ public class MainFirma extends AppCompatActivity implements View.OnClickListener
                 });
 
         return downloadDialog.show();
+    }
+
+    private boolean VerificarGPS(){
+        boolean retorna = false;
+        String provider = Settings.Secure.getString(getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
+
+        if(!provider.contains("gps")){ //if gps is disabled
+            final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setMessage("El sistema GPS esta desactivado, ¿Desea activarlo?")
+                    .setCancelable(false)
+                    .setPositiveButton("Si", new DialogInterface.OnClickListener() {
+                        public void onClick(@SuppressWarnings("unused") final DialogInterface dialog, @SuppressWarnings("unused") final int id) {
+                            startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+                        }
+                    })
+                    .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                        public void onClick(final DialogInterface dialog, @SuppressWarnings("unused") final int id) {
+                            mHandler.sendEmptyMessage(ACTIVAR_GPS);
+                            dialog.cancel();
+                        }
+                    });
+            alert = builder.create();
+            alert.show();
+        }else{
+            retorna = true;
+        }
+        return retorna;
     }
 
     }

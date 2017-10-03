@@ -9,6 +9,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import To.DatosReceptorTO;
 import Util.Globales;
 
 public class MainInfoReceptorCarga extends AppCompatActivity implements View.OnClickListener, View.OnFocusChangeListener {
@@ -16,15 +17,16 @@ public class MainInfoReceptorCarga extends AppCompatActivity implements View.OnC
     private Activity activity;
     private EditText txt_RutReceptor;
     private EditText txtNombreReceptor;
-    private EditText txtApellidoReceptor;
+    private EditText txtApPaternoReceptor;
+    private EditText txtApMaternoReceptor;
     private Button btn_siguiente;
     private Button btn_limpiar;
     private Intent recibir;
     private String ODT = "";
     private String tipoDoc = "";
-    private String rutReceptor = "";
-    private String nombreReceptor = "";
+    private EditText txtFonoReceptor;
     private String RUT = "";
+    private DatosReceptorTO datosReceptor;
     //private ArrayList<EntregaOdtMasivoTO> listaOdt = new ArrayList<>();
 
     @Override
@@ -36,7 +38,9 @@ public class MainInfoReceptorCarga extends AppCompatActivity implements View.OnC
         txt_RutReceptor = (EditText) findViewById(R.id.txtRutReceptor);
         //RUT = txtRutReceptor.getText().toString();
         txtNombreReceptor = (EditText) findViewById(R.id.txtNombreReceptor);
-        txtApellidoReceptor = (EditText) findViewById(R.id.txtApellidoReceptor);
+        txtApPaternoReceptor = (EditText) findViewById(R.id.txtApellidoPaterno);
+        txtApMaternoReceptor = (EditText) findViewById(R.id.txtApellidoMaterno);
+        txtFonoReceptor = (EditText) findViewById(R.id.txtFonoReceptor);
         btn_limpiar = (Button) findViewById(R.id.btnLimpiarInfoReceptor);
         btn_limpiar.setOnClickListener(this);
         btn_siguiente = (Button) findViewById(R.id.btnSiguienteInfoReceptor);
@@ -62,6 +66,13 @@ public class MainInfoReceptorCarga extends AppCompatActivity implements View.OnC
             }
             case R.id.btnSiguienteInfoReceptor: {
                 if(validarRut(txt_RutReceptor.getText().toString())) {
+                    datosReceptor = new DatosReceptorTO();
+                    datosReceptor.setNombre(txtNombreReceptor.getText().toString());
+                    datosReceptor.setApPaterno(txtApPaternoReceptor.getText().toString());
+                    datosReceptor.setApMaterno(txtApMaternoReceptor.getText().toString());
+                    datosReceptor.setTelefono(txtFonoReceptor.getText().toString());
+                    datosReceptor.setRut(txt_RutReceptor.getText().toString());
+                    Globales.datosReceptor = datosReceptor;
                     if(Globales.odtMasiva == null){
                         Intent intento = new Intent(MainInfoReceptorCarga.this, MainFirma.class);
                         intento.putExtra("odt", ODT);
@@ -103,7 +114,9 @@ public class MainInfoReceptorCarga extends AppCompatActivity implements View.OnC
     public void limpiar(){
         txt_RutReceptor.setText("");
         txtNombreReceptor.setText("");
-        txtApellidoReceptor.setText("");
+        txtApMaternoReceptor.setText("");
+        txtApPaternoReceptor.setText("");
+        txtFonoReceptor.setText("");
     }
 
     public static boolean validarRut(String rut) {

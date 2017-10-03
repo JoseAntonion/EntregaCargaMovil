@@ -12,17 +12,22 @@ public class FacturaTO {
     private String fonoFactura;
     private String giroFactura;
     private int comunaFactura;
+    private String descComuna;
     private int ciudadFactura;
+    private String descCiudad;
     private int totalFactura;
 
-    public FacturaTO(String rutFactura, String razonFactura, String direccionFactura, String fonoFactura, String giroFactura, int comunaFactura, int ciudadFactura, int totalFactura) {
+    public FacturaTO(String rutFactura, String razonFactura, String direccionFactura, String fonoFactura, String giroFactura, int comunaFactura, String descComuna, int ciudadFactura,
+                     String descCiudad, int totalFactura) {
         this.rutFactura = rutFactura;
         this.razonFactura = razonFactura;
         this.direccionFactura = direccionFactura;
         this.fonoFactura = fonoFactura;
         this.giroFactura = giroFactura;
         this.comunaFactura = comunaFactura;
+        this.descComuna = descComuna;
         this.ciudadFactura = ciudadFactura;
+        this.descCiudad = descCiudad;
         this.totalFactura = totalFactura;
     }
 
@@ -91,5 +96,21 @@ public class FacturaTO {
 
     public void setTotalFactura(int totalFactura) {
         this.totalFactura = totalFactura;
+    }
+
+    public String getDescComuna() {
+        return descComuna;
+    }
+
+    public void setDescComuna(String descComuna) {
+        this.descComuna = descComuna;
+    }
+
+    public String getDescCiudad() {
+        return descCiudad;
+    }
+
+    public void setDescCiudad(String descCiudad) {
+        this.descCiudad = descCiudad;
     }
 }

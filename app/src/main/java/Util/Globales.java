@@ -4,7 +4,11 @@ import android.app.Application;
 
 import java.util.ArrayList;
 
+import To.BoletaTO;
+import To.DatosReceptorTO;
 import To.EntregaOdtMasivoTO;
+import To.FacturaTO;
+import To.OdtMasivoTO;
 
 
 public class Globales extends Application {
@@ -27,8 +31,12 @@ public class Globales extends Application {
     public static String docElectronico;
     public static String esCTACTE;
     public static String banderaTipoPago;
-    public static ArrayList<String> registroOdtMultiples;
+    public static ArrayList<OdtMasivoTO> registroOdtMultiples;
     public static boolean primera;
-
-
+    public static DatosReceptorTO datosReceptor;
+    public static ArrayList<FacturaTO> listaFacturas;
+    public static ArrayList<BoletaTO> listaBoletas;
+    public static FacturaTO factura;
+    public static BoletaTO boleta;
+    public static OdtMasivoTO odtSingle;
 }

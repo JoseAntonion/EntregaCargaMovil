@@ -16,6 +16,7 @@ import org.json.JSONException;
 import java.io.IOException;
 
 import To.EntregaOdtMasivoTO;
+import To.OdtMasivoTO;
 import Util.Globales;
 import Util.Utilidades;
 
@@ -47,7 +48,7 @@ public class MainEntregaCarga extends AppCompatActivity implements View.OnClickL
         btn_no_entrega_carga.setOnClickListener(this);
         txtCantidadBultos = (EditText) findViewById(R.id.txtCantBultos);
         Bundle extras = recibir.getExtras();
-        ODT = (extras.isEmpty())?"":extras.get("odt").toString();
+        ODT = (extras.get("odt") == null)?"":extras.get("odt").toString();
         OLD = (extras.get("old") == null)?"":extras.get("old").toString();
         odtAentregar = (EditText) findViewById(R.id.txtODT);
         odtAentregar.setText(ODT);
@@ -126,7 +127,23 @@ public class MainEntregaCarga extends AppCompatActivity implements View.OnClickL
                         odtM.setOdt(ODT);
                         odtM.setCantidad(Integer.parseInt(txtCantidadBultos.getText().toString()));
                         Globales.odtMasiva.add(odtM);*/
-                        Globales.registroOdtMultiples.add(ODT);
+                        OdtMasivoTO odt = new OdtMasivoTO();
+                        odt.setOdt(ODT);
+                        try {
+                            odt.setPlanilla(util.buscaPlanillaOdt(ODT));
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        try {
+                            odt.setValor(util.buscaValorOdt(ODT));
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        Globales.registroOdtMultiples.add(odt);
                         Intent intent = new Intent(MainEntregaCarga.this, MainODT.class);
                         //intent.putExtra("masivo", 1);
                         intent.putExtra("old", "1");

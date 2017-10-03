@@ -54,6 +54,7 @@ public class MainCancelacionOdt extends AppCompatActivity implements View.OnClic
     private String tipoDoc = "";
     private ArrayList<FacturaTO> listaFacturas = new ArrayList<>();
     ArrayList<BoletaTO> listaBoletas = new ArrayList<>();
+    private String ODT = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,6 +88,10 @@ public class MainCancelacionOdt extends AppCompatActivity implements View.OnClic
         btnLimpiarCancelacion.setOnClickListener(this);
         lblTotalOdt = (TextView) findViewById(R.id.lblValorTotFacturaBoleta);
         lblTotalOdt.setText(String.valueOf(Globales.totalValoresODT));
+        Bundle extras = recibir.getExtras();
+        if(extras != null){
+            ODT = (extras.get("odt") == null)?"":extras.get("odt").toString();
+        }
     }
 
     @Override
@@ -96,17 +101,25 @@ public class MainCancelacionOdt extends AppCompatActivity implements View.OnClic
             case R.id.btnAceptarCancelacionOdt: {
                 tipoDoc = (radioBoleta.isChecked())?"boleta":"factura";
                 if(tipoDoc.equals("factura")) {
-                    FacturaTO factura = new FacturaTO(txtRutFactura.getText().toString(), txtRazonFactura.getText().toString(), txtDireccionFactura.getText().toString(),
-                            txtTelefonoFactura.getText().toString(), txtGiroFactura.getText().toString(), Integer.parseInt(spn_comuna.getSelectedItem().toString()),
-                            Integer.parseInt(spn_ciudad.getSelectedItem().toString()), Integer.parseInt(lblTotalOdt.getText().toString()));
-                    listaFacturas = new ArrayList<>();
-                    listaFacturas.add(factura);
-                    ValidaInfoPago();
+                    if(ValidaInfoPago()){
+                        ComunaTO comunaSeleccionada = new ComunaTO();
+                        comunaSeleccionada = (ComunaTO) spn_comuna.getSelectedItem();
+                        CiudadTO ciudadSeleccionada = new CiudadTO();
+                        ciudadSeleccionada = (CiudadTO) spn_ciudad.getSelectedItem();
+                        FacturaTO factura = new FacturaTO(txtRutFactura.getText().toString(), txtRazonFactura.getText().toString(), txtDireccionFactura.getText().toString(),
+                                txtTelefonoFactura.getText().toString(), txtGiroFactura.getText().toString(), Integer.parseInt(comunaSeleccionada.getCodComuna()),comunaSeleccionada.getNombreComuna(),
+                                Integer.parseInt(ciudadSeleccionada.getCodCiudad()),ciudadSeleccionada.getNombreCiudad(),Integer.parseInt(lblTotalOdt.getText().toString()));
+                        listaFacturas = new ArrayList<>();
+                        listaFacturas.add(factura);
+                        Globales.factura = factura;
+                        new GuardaPago().execute();
+                    }
                 }else{
                     BoletaTO boleta = new BoletaTO();
                     boleta.setTotalBoleta(Integer.parseInt(lblTotalOdt.getText().toString()));
                     listaBoletas = new ArrayList<>();
                     listaBoletas.add(boleta);
+                    Globales.boleta = boleta;
                     new GuardaPago().execute();
                 }
                 break;
@@ -142,7 +155,8 @@ public class MainCancelacionOdt extends AppCompatActivity implements View.OnClic
 
     }
 
-    public void ValidaInfoPago() {
+    public boolean ValidaInfoPago() {
+
         txtRutFactura.setError(null);
         txtRazonFactura.setError(null);
         txtDireccionFactura.setError(null);
@@ -152,45 +166,46 @@ public class MainCancelacionOdt extends AppCompatActivity implements View.OnClic
         if(!validarRut(txtRutFactura.getText().toString())){
             txtRutFactura.setError(getString(R.string.error_campo_rut));
             txtRutFactura.requestFocus();
-            return;
+            return false;
         }
         if(TextUtils.isEmpty(txtRutFactura.getText().toString())){
             txtRutFactura.setError(getString(R.string.error_campo_obligatorio));
             txtRutFactura.requestFocus();
-            return;
+            return false;
         }
         if(TextUtils.isEmpty(txtRazonFactura.getText().toString())){
             txtRazonFactura.setError(getString(R.string.error_campo_obligatorio));
             txtRazonFactura.requestFocus();
-            return;
+            return false;
         }
         if(TextUtils.isEmpty(txtDireccionFactura.getText().toString())){
             txtDireccionFactura.setError(getString(R.string.error_campo_obligatorio));
             txtDireccionFactura.requestFocus();
-            return;
+            return false;
         }
         if(spn_ciudad.getSelectedItemPosition() == 0){
             Toast.makeText(activity.getApplicationContext(),
                     "Debe Seleccionar CIUDAD", Toast.LENGTH_LONG).show();
-            return;
+            return false;
         }
         if(spn_comuna.getSelectedItemPosition() == 0){
             Toast.makeText(activity.getApplicationContext(),
                     "Debe Seleccionar COMUNA", Toast.LENGTH_LONG).show();
-            return;
+            return false;
         }
         if(TextUtils.isEmpty(txtTelefonoFactura.getText().toString())){
             txtTelefonoFactura.setError(getString(R.string.error_campo_obligatorio));
             txtTelefonoFactura.requestFocus();
-            return;
+            return false;
         }
         if(TextUtils.isEmpty(txtGiroFactura.getText().toString())){
             txtGiroFactura.setError(getString(R.string.error_campo_obligatorio));
             txtGiroFactura.requestFocus();
-            return;
+            return false;
         }
 
-        new GuardaPago().execute();
+        return true;
+        //new GuardaPago().execute();
     }
 
     public void mostrar(){
@@ -314,6 +329,7 @@ public class MainCancelacionOdt extends AppCompatActivity implements View.OnClic
 
         @Override
         protected String doInBackground(Void... params) {
+
                 if(tipoDoc.equals("factura")){
                     util.escribirEnArchivo(listaFacturas,"FACTURA");
                 }else{

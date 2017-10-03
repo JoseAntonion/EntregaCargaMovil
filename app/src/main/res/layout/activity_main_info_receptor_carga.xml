@@ -35,6 +35,129 @@
             android:layout_alignParentStart="true"
             android:layout_alignParentBottom="true">
 
+            <ImageView
+                android:id="@+id/imageView11"
+                android:layout_width="match_parent"
+                android:layout_height="30dp"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
+                app:srcCompat="@drawable/pullman_cargo" />
+
+            <TextView
+                android:id="@+id/rut"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_below="@+id/imageView11"
+                android:layout_marginTop="22dp"
+                android:layout_weight="1"
+                android:text="Ingrese Rut"
+                android:textSize="18sp"
+                android:textStyle="normal|bold" />
+
+            <EditText
+                android:id="@+id/txtRutReceptor"
+                android:layout_width="wrap_content"
+                android:layout_height="50px"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_below="@+id/rut"
+                android:ems="10"
+                android:inputType="textPersonName"
+                android:maxLength="12"
+                android:singleLine="true" />
+
+            <TextView
+                android:id="@+id/nombre"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_below="@+id/txtRutReceptor"
+                android:layout_weight="1"
+                android:text="Nombre"
+                android:textSize="18sp"
+                android:textStyle="normal|bold" />
+
+            <EditText
+                android:id="@+id/txtNombreReceptor"
+                android:layout_width="wrap_content"
+                android:layout_height="50px"
+                android:ems="10"
+                android:inputType="textPersonName"
+                android:singleLine="true"
+                android:layout_below="@+id/nombre"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true" />
+
+            <TextView
+                android:id="@+id/appaterno"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_below="@+id/txtNombreReceptor"
+                android:layout_weight="1"
+                android:text="Apellido Paterno"
+                android:textSize="18sp"
+                android:textStyle="normal|bold" />
+
+            <EditText
+                android:id="@+id/txtApellidoPaterno"
+                android:layout_width="wrap_content"
+                android:layout_height="50px"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_below="@+id/appaterno"
+                android:ems="10"
+                android:inputType="textPersonName" />
+
+            <TextView
+                android:id="@+id/apmaterno"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Apellido Materno"
+                android:textSize="18sp"
+                android:textStyle="normal|bold"
+                android:layout_below="@+id/txtApellidoPaterno"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true" />
+
+            <EditText
+                android:id="@+id/txtApellidoMaterno"
+                android:layout_width="wrap_content"
+                android:layout_height="50px"
+                android:ems="10"
+                android:inputType="textPersonName"
+                android:layout_below="@+id/apmaterno"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true" />
+
+            <TextView
+                android:id="@+id/telefono"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Telefono"
+                android:textSize="18sp"
+                android:textStyle="normal|bold"
+                android:layout_below="@+id/txtApellidoMaterno"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true" />
+
+            <EditText
+                android:id="@+id/txtFonoReceptor"
+                android:layout_width="wrap_content"
+                android:layout_height="50px"
+                android:ems="10"
+                android:inputType="textPersonName"
+                android:layout_below="@+id/telefono"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true" />
+
             <Button
                 android:id="@+id/btnLimpiarInfoReceptor"
                 style="@style/Botton"
@@ -56,89 +179,6 @@
                 android:layout_alignParentRight="true"
                 android:layout_marginBottom="58dp"
                 android:text="siguiente" />
-
-            <EditText
-                android:id="@+id/txtNombreReceptor"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentStart="true"
-                android:layout_below="@+id/textView22"
-                android:ems="10"
-                android:inputType="textPersonName"
-                android:singleLine="true" />
-
-            <EditText
-                android:id="@+id/txtRutReceptor"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentStart="true"
-                android:layout_alignParentTop="true"
-                android:layout_marginTop="82dp"
-                android:maxLength="12"
-                android:ems="10"
-                android:inputType="textPersonName"
-                android:singleLine="true" />
-
-            <EditText
-                android:id="@+id/txtApellidoReceptor"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentStart="true"
-                android:layout_below="@+id/textView18"
-                android:layout_marginTop="24dp"
-                android:ems="10"
-                android:inputType="textPersonName" />
-
-            <ImageView
-                android:id="@+id/imageView11"
-                android:layout_width="match_parent"
-                android:layout_height="30dp"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentStart="true"
-                android:layout_alignParentTop="true"
-                app:srcCompat="@drawable/pullman_cargo" />
-
-            <TextView
-                android:id="@+id/textView22"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentStart="true"
-                android:layout_below="@+id/textView14"
-                android:layout_marginTop="66dp"
-                android:layout_weight="1"
-                android:text="Nombre"
-                android:textSize="18sp"
-                android:textStyle="normal|bold" />
-
-            <TextView
-                android:id="@+id/textView18"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentStart="true"
-                android:layout_below="@+id/textView22"
-                android:layout_marginTop="51dp"
-                android:layout_weight="1"
-                android:text="Apellido"
-                android:textSize="18sp"
-                android:textStyle="normal|bold" />
-
-            <TextView
-                android:id="@+id/textView14"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentStart="true"
-                android:layout_below="@+id/imageView11"
-                android:layout_marginTop="22dp"
-                android:layout_weight="1"
-                android:text="Ingrese Rut"
-                android:textSize="18sp"
-                android:textStyle="normal|bold" />
 
         </RelativeLayout>
 

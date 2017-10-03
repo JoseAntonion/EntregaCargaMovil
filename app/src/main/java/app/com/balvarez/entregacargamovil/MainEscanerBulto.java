@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.util.Random;
 
 import To.EntregaOdtMasivoTO;
+import To.OdtMasivoTO;
 import Util.Globales;
 import Util.Utilidades;
 
@@ -49,6 +50,7 @@ public class MainEscanerBulto extends AppCompatActivity implements View.OnClickL
     Context mContext;
     Intent recibir;
     EntregaOdtMasivoTO odtM;
+    OdtMasivoTO odtSingle;
     private int totalEntrega;
 
 
@@ -65,11 +67,18 @@ public class MainEscanerBulto extends AppCompatActivity implements View.OnClickL
         btn_bulto_manual = (ImageButton) findViewById(R.id.btnBultoManual);
         btn_bulto_manual.setOnClickListener(this);
         btn_entrega_carga = (Button) findViewById(R.id.btnEntregaCarga2);
+        btn_entrega_carga.setEnabled(false);
         btn_entrega_carga.setOnClickListener(new View.OnClickListener(){
 
             @Override
             public void onClick(View v) {
-                new ValidaEntrega().execute();
+                if(Globales.cantidadBultosOriginal == leidos){
+                    new ValidaEntrega().execute();
+                }else{
+                    Toast.makeText(activity.getApplicationContext(),
+                            "Aun hay bultos faltantes !!!", Toast.LENGTH_LONG).show();
+                }
+
             }
         });
         //btn_entrega_carga.setOnClickListener(this);
@@ -113,6 +122,9 @@ public class MainEscanerBulto extends AppCompatActivity implements View.OnClickL
             leidos = recibir.getExtras().getInt("leidos",0);
             lblBultosFaltantes.setText(String.valueOf(faltantes));
             lblBultosLeidos.setText(String.valueOf(leidos));
+            if(faltantes == 0){
+                btn_entrega_carga.setEnabled(true);
+            }
         }
     }
 
@@ -324,6 +336,17 @@ public class MainEscanerBulto extends AppCompatActivity implements View.OnClickL
         } catch (JSONException e) {
             e.printStackTrace();
         }
+        OdtMasivoTO Odt = new OdtMasivoTO();
+        Odt.setOdt(ODT);
+        try {
+            Odt.setValor(util.buscaValorOdt(ODT));
+            Odt.setPlanilla(util.buscaPlanillaOdt(ODT));
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        Globales.registroOdtMultiples.add(Odt);
 
         AlertDialog.Builder downloadDialog = new AlertDialog.Builder(activity);
         downloadDialog.setTitle(DEFAULT_TITLE);
@@ -333,11 +356,17 @@ public class MainEscanerBulto extends AppCompatActivity implements View.OnClickL
 
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        /*odtM = new EntregaOdtMasivoTO();
-                        odtM.setOdt(ODT);
-                        odtM.setCantidad(Integer.parseInt(txtCantidadBultos.getText().toString()));
-                        Globales.odtMasiva.add(odtM);*/
-                        Globales.registroOdtMultiples.add(ODT);
+                        /*OdtMasivoTO Odt = new OdtMasivoTO();
+                        Odt.setOdt(ODT);
+                        try {
+                            Odt.setValor(util.buscaValorOdt(ODT));
+                            Odt.setPlanilla(util.buscaPlanillaOdt(ODT));
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        Globales.registroOdtMultiples.add(Odt);*/
                         Intent intent = new Intent(MainEscanerBulto.this, MainODT.class);
                         //intent.putExtra("masivo", 1);
                         intent.putExtra("old2", "1");
@@ -349,6 +378,16 @@ public class MainEscanerBulto extends AppCompatActivity implements View.OnClickL
 
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
+                        odtSingle = new OdtMasivoTO();
+                        try {
+                            odtSingle.setPlanilla(util.buscaPlanillaOdt(ODT));
+                            odtSingle.setOdt(ODT);
+                            Globales.odtSingle = odtSingle;
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
                         if(OLD2.equals("")){
                             //Intent intento = new Intent(MainEscanerBulto.this, MainInfoReceptorCarga.class);
                             Intent intento = new Intent(MainEscanerBulto.this, MainCancelacionOdt.class);
