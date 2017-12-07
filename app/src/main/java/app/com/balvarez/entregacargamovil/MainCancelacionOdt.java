@@ -47,6 +47,7 @@ public class MainCancelacionOdt extends AppCompatActivity implements View.OnClic
     private Spinner spn_ciudad;
     private RadioButton radioBoleta;
     private RadioButton radioFactura;
+    private RadioButton radioTrasCTA;
     private Button btnLimpiarCancelacion;
     private Button btnAceptarCancelacion;
     private TextView lblTotalOdt;
@@ -80,6 +81,8 @@ public class MainCancelacionOdt extends AppCompatActivity implements View.OnClic
         spn_ciudad.setOnItemSelectedListener(this);
         radioBoleta = (RadioButton) findViewById(R.id.rbBoleta);
         radioBoleta.setOnClickListener(this);
+        radioTrasCTA = (RadioButton) findViewById(R.id.rbTraspaso);
+        radioTrasCTA.setOnClickListener(this);
         radioFactura = (RadioButton) findViewById(R.id.rbFactura);
         radioFactura.setOnClickListener(this);
         btnAceptarCancelacion = (Button) findViewById(R.id.btnAceptarCancelacionOdt);
@@ -114,6 +117,8 @@ public class MainCancelacionOdt extends AppCompatActivity implements View.OnClic
                         Globales.factura = factura;
                         new GuardaPago().execute();
                     }
+                }else if(radioTrasCTA.isChecked()) {
+
                 }else{
                     BoletaTO boleta = new BoletaTO();
                     boleta.setTotalBoleta(Integer.parseInt(lblTotalOdt.getText().toString()));
@@ -134,6 +139,10 @@ public class MainCancelacionOdt extends AppCompatActivity implements View.OnClic
             }
             case R.id.rbFactura: {
                 mostrar();
+                break;
+            }
+            case R.id.rbTraspaso:{
+                esconder();
                 break;
             }
             default:

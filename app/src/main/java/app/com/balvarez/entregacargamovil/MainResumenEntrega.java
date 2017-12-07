@@ -32,7 +32,7 @@ public class MainResumenEntrega extends AppCompatActivity implements View.OnClic
         util = new Utilidades();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_resumen_entrega);
-        btn_finalizar = (Button) findViewById(R.id.btnLimpiar);
+        btn_finalizar = (Button) findViewById(R.id.btnFinalizarResumenEntrega);
         btn_finalizar.setOnClickListener(this);
         lst_resumen_entrega = (ListView) findViewById(R.id.lstResumenEntrega);
         try {
@@ -65,7 +65,7 @@ public class MainResumenEntrega extends AppCompatActivity implements View.OnClic
     public void onClick(View v) {
         switch (v.getId()) {
 
-            case R.id.btnLimpiar: {
+            case R.id.btnFinalizarResumenEntrega: {
                 MensajeFinReparto();
                 break;
             }
@@ -76,7 +76,7 @@ public class MainResumenEntrega extends AppCompatActivity implements View.OnClic
 
     private AlertDialog MensajeFinReparto() {
         final String DEFAULT_TITLE = "Entrega Carga Movil";
-        final String DEFAULT_MESSAGE = "Desea entregar otra ODT ?";
+        final String DEFAULT_MESSAGE = "Desea Finalizar el Reparto ?";
         final String DEFAULT_YES = "Si";
         final String DEFAULT_NO = "No";
 
@@ -89,7 +89,7 @@ public class MainResumenEntrega extends AppCompatActivity implements View.OnClic
 
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        Intent intent = new Intent(MainResumenEntrega.this, MainODT.class);
+                        Intent intent = new Intent(MainResumenEntrega.this, MainEntregaCargaMovil.class);
                         startActivity(intent);
                         finish();
                         System.gc();
@@ -101,7 +101,7 @@ public class MainResumenEntrega extends AppCompatActivity implements View.OnClic
 
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        Intent intent = new Intent(MainResumenEntrega.this, MainEntregaCargaMovil.class);
+                        Intent intent = new Intent(MainResumenEntrega.this, MainODT.class);
                         startActivity(intent);
                         finish();
                         System.gc();

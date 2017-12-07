@@ -39,4 +39,5 @@ public class Globales extends Application {
     public static FacturaTO factura;
     public static BoletaTO boleta;
     public static OdtMasivoTO odtSingle;
+    public static ArrayList<String> bultosMultiples;
 }

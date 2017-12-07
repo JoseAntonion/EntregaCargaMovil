@@ -63,7 +63,7 @@ public class WebServices {
         } else {
             archivoOdtPorPatenteTO =  new ArchivoOdtPorPatenteTO();
             responseObject1 = responseObject.getJSONObject("DocumentoInterno");
-            archivoOdtPorPatenteTO.setCodBarra(responseObject1.getString("Ccodigobarra"));
+            archivoOdtPorPatenteTO.setCodBarra(responseObject1.getString("CcodigoBarra"));
             archivoOdtPorPatenteTO.setEstadoODT(responseObject1.getString("Ueoestado"));
             archivoOdtPorPatenteTO.setFormaPago(responseObject1.getString("Doformapago"));
             archivoOdtPorPatenteTO.setNumeroODT(responseObject1.getString("Ueonumeroot"));
@@ -291,7 +291,7 @@ public class WebServices {
     public ValidaTO GuardarEntrega(String NroPlanilla, String NumeroOdt,
                                        String RecepcionRut, String RecepcionNombre,
                                        String UsuarioTelefono, String Imei, String Aplicacion,
-                                       String Version, String Longitud, String Latitud,
+                                       String Version,
                                        String ReceptorNombres, String ReceptorAPaterno,
                                        String ReceptorAMaterno, String concepto, String motivoReingreso,
                                        String observacionReingreso) throws IOException, ClientProtocolException, JSONException {
@@ -302,6 +302,9 @@ public class WebServices {
         JSONObject responseObject;
         httpClient = new DefaultHttpClient();
         ValidaTO validaTO = null;
+        String Latitud = String.valueOf(Globales.latitud);
+        String Longitud = String.valueOf(Globales.longitud);
+
 
         if (Longitud.equals("")) {
             Longitud = "%20";
@@ -360,13 +363,13 @@ public class WebServices {
         if(rut.equals("")){rut = "%20";}else{rut=rut.replace(" ", "%20");}
         if(razonSocial.equals("")){razonSocial = "%20";}else{razonSocial=razonSocial.replace(" ", "%20");}
         if(direccion.equals("")){direccion = "%20";}else{direccion=direccion.replace(" ", "%20");}
-        if(comuna.equals("")){comuna = "%20";}else{comuna=comuna.replace(" ", "%20");}
+        if(comuna.equals("")){comuna = "SANTIAGO";}else{comuna=comuna.replace(" ", "%20");}
         if(tipoPago.equals("")){tipoPago = "%20";}else{tipoPago=tipoPago.replace(" ", "%20");}
         if(excento.equals("")){excento = "%20";}else{excento=excento.replace(" ", "%20");}
         if(neto.equals("")){neto = "%20";}else{neto=neto.replace(" ", "%20");}
         if(iva.equals("")){iva = "%20";}else{iva=iva.replace(" ", "%20");}
         if(total.equals("")){total = "%20";}else{total=total.replace(" ", "%20");}
-        if(agencia.equals("")){agencia = "%20";}else{agencia=agencia.replace(" ", "%20");}
+        if(agencia.equals("")){agencia = "001253";}else{agencia=agencia.replace(" ", "%20");}// Se deja en duro agencia LONQUEN, hasta implementacion en todas las agencias.
         if(punto.equals("")){punto = "%20";}else{punto=punto.replace(" ", "%20");}
         if(arqueo.equals("")){arqueo = "%20";}else{arqueo=arqueo.replace(" ", "%20");}
         if(estado.equals("")){estado = "%20";}else{estado=estado.replace(" ", "%20");}
@@ -405,6 +408,7 @@ public class WebServices {
         responseObject1 = new JSONObject(respStr);
 
         responseObject1 = responseObject.getJSONObject("ValidacionTO");
+        String fechaActuals = responseObject.getString("fecha");
         String filas = responseObject1.getString("Filas");
 
         if(Integer.parseInt(filas) == 1){
@@ -414,6 +418,9 @@ public class WebServices {
             if(!tipoDoc.equals("0")){
 
                 archivoDocElectronicoTO =  new ArchivoDocElectronicoTO();
+                //////////////////////////////////////////////////
+                archivoDocElectronicoTO.setFechaActual(fechaActuals);
+                //////////////////////////////////////////////////
                 archivoDocElectronicoTO.setTipoDoc(responseObject.getString("TipoDoc"));
                 archivoDocElectronicoTO.setFolio(responseObject.getString("Folio"));
                 archivoDocElectronicoTO.setfCreacion(responseObject.getString("FCreacion"));
@@ -507,6 +514,7 @@ public class WebServices {
 
                 archivoDocElectronicoTO =  new ArchivoDocElectronicoTO();
                 JSONObject obj = respJSON.getJSONObject(i);
+                archivoDocElectronicoTO.setFechaActual(fechaActuals);
                 archivoDocElectronicoTO.setTipoDoc(obj.getString("TipoDoc"));
                 archivoDocElectronicoTO.setFolio(obj.getString("Folio"));
                 archivoDocElectronicoTO.setfCreacion(obj.getString("FCreacion"));
@@ -593,6 +601,7 @@ public class WebServices {
                     }
                 }
                 archivoDocElectronicoTOs.add(archivoDocElectronicoTO);
+
             }
         }
         return archivoDocElectronicoTOs;

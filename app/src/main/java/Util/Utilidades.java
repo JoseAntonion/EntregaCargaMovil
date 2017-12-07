@@ -5,6 +5,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Environment;
@@ -29,7 +31,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 import To.ArchivoDocElectronicoTO;
 import To.ArchivoOdtPorPatenteTO;
@@ -43,6 +47,7 @@ public class Utilidades {
 
     private String[] recibeSplit;
     private String[] recibeSplitAux;
+
     static Print printer = null;
 
     public static Print getPrinter() {
@@ -110,6 +115,7 @@ public class Utilidades {
         try {
             switch (tipo){
                 case "ODTS":{
+
                     ArrayList<ArchivoOdtPorPatenteTO> listODT = (ArrayList<ArchivoOdtPorPatenteTO>)lista;
                     lfile = new File(Globales.odtsXpatente);
                     lfilewriter = new FileWriter(lfile, false);
@@ -447,6 +453,31 @@ public class Utilidades {
             e.printStackTrace();
         }
         return cantidadBultos;
+    }
+
+    public ArrayList<String> leeBultosMultiples(String odt) throws IOException, ClientProtocolException, JSONException {
+        ArrayList<String> bultos = new ArrayList<>();
+        FileReader fr = null;
+
+        try {
+            fr = new FileReader(Globales.odtsXpatente);
+            BufferedReader br = new BufferedReader(fr);
+            String s = br.readLine();
+            if (s != null) {
+                while (s != null) {
+                    if (!s.equalsIgnoreCase("") && !s.equalsIgnoreCase("XXXXXXXXXXXXXXXXXX")) {
+                        this.recibeSplit = s.split("~");
+                        if (odt.equals(recibeSplit[1].toString())) {
+                            bultos.add(recibeSplit[5]);
+                        }
+                    }
+                    s = br.readLine();
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return bultos;
     }
 
     public Boolean validaBulto(String codBarra) throws IOException, ClientProtocolException, JSONException {
@@ -906,8 +937,7 @@ public class Utilidades {
         }
     }
 
-    public Boolean Boleta(Activity activity,ArrayList<ArchivoDocElectronicoTO> docElec)
-            throws UnsupportedEncodingException {
+    public Boolean Boleta(Activity activity,ArrayList<ArchivoDocElectronicoTO> docElec) throws UnsupportedEncodingException {
         final int SEND_TIMEOUT = 10 * 1000;
 
         int[] status = new int[1];
@@ -920,6 +950,9 @@ public class Utilidades {
 
         intent.putExtra("printername", "TM-P80");
         intent.putExtra("language", Builder.MODEL_ANK);
+
+        // INVERTIR FECHA a DD-MM-AA
+        String fechaInvertida = convierteFecha(docElec.get(0).getfCreacion(),"yyyy-MM-dd","dd-MM-yyyy");
 
         Builder builder = null;
         intent = activity.getIntent();
@@ -939,8 +972,9 @@ public class Utilidades {
             printer = Utilidades.getPrinter();
             builder.addTextAlign(builder.ALIGN_RIGHT);
             builder.addTextLineSpace(20);
-            builder.addText("SANTIAGO 21 DE OCTUBRE DE 2016\n"); printer =
-                    Utilidades.getPrinter();
+            builder.addText(docElec.get(0).getFechaActual()+"\n");
+            //builder.addText("SANTIAGO 11 DE OCTUBRE DE 2017\n");
+            printer = Utilidades.getPrinter();
             builder.addTextAlign(builder.ALIGN_CENTER); builder.addText(
                     "................................................................\n"
             ); printer = Utilidades.getPrinter();
@@ -955,9 +989,8 @@ public class Utilidades {
             ); printer = Utilidades.getPrinter();
             builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.FALSE,
                     Builder.COLOR_1);
-            builder.addText(docElec.get(0).getfCreacion() +
-                    " \n"); builder.addText(
-                    "................................................................\n"
+            builder.addText(fechaInvertida +" \n");
+            builder.addText("................................................................\n"
             ); printer = Utilidades.getPrinter();
             builder.addTextAlign(builder.ALIGN_CENTER);
             builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.TRUE,
@@ -1053,8 +1086,8 @@ public class Utilidades {
             retorna = true;
         } catch (EposException e) {
             // TODO Auto-generated catch block
-            e.printStackTrace();
             retorna = false;
+            e.printStackTrace();
         }
 
         return retorna;
@@ -1278,8 +1311,7 @@ public class Utilidades {
         return planilla;
     }
 
-    public Boolean Factura(Activity activity,ArrayList<ArchivoDocElectronicoTO> archivoDocElectronicoTO)
-            throws UnsupportedEncodingException, WriterException {
+    public Boolean Factura(Activity activity,ArrayList<ArchivoDocElectronicoTO> archivoDocElectronicoTO) throws UnsupportedEncodingException, WriterException {
         final int SEND_TIMEOUT = 10 * 1000;
 
         String ted = archivoDocElectronicoTO.get(0).getTed().replace("�", "ú");
@@ -1292,6 +1324,12 @@ public class Utilidades {
 
         intent.putExtra("printername", "TM-P80");
         intent.putExtra("language", Builder.MODEL_ANK);
+
+        // INVERTIR FECHA a DD-MM-AA
+        String fechaInvertida = convierteFecha(archivoDocElectronicoTO.get(0).getfCreacion(),"yyyy-MM-dd","dd-MM-yyyy");
+
+        //Descripcion de forma de pago
+        String formaPago = (archivoDocElectronicoTO.get(0).getFormaPago().equals("1"))?"CONTADO":"CRÉDITO";
 
         Builder builder = null;
         intent = activity.getIntent();
@@ -1310,7 +1348,8 @@ public class Utilidades {
             Print printer = Utilidades.getPrinter();
             builder.addTextAlign(builder.ALIGN_RIGHT);
             builder.addTextLineSpace(20);
-            builder.addText("SANTIAGO 21 DE OCTUBRE DE 2016\n");
+            builder.addText(archivoDocElectronicoTO.get(0).getFechaActual()+"\n");
+            //builder.addText("SANTIAGO 21 DE OCTUBRE DE 2016\n");
             printer = Utilidades.getPrinter();
             builder.addTextAlign(builder.ALIGN_CENTER);
             builder.addText("................................................................\n");
@@ -1352,7 +1391,8 @@ public class Utilidades {
             builder.addText("FECHA             :");
             printer = Utilidades.getPrinter();
             builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.FALSE,Builder.COLOR_1);
-            builder.addText(archivoDocElectronicoTO.get(0).getfCreacion()+ " \n");
+            //builder.addText(archivoDocElectronicoTO.get(0).getfCreacion()+ " \n");
+            builder.addText(fechaInvertida+ " \n");
             printer = Utilidades.getPrinter();
             builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.TRUE,Builder.COLOR_1);
             builder.addText("COMUNA/CIUDAD     :");
@@ -1370,13 +1410,15 @@ public class Utilidades {
             builder.addText("FORMA PAGO        :");
             printer = Utilidades.getPrinter();
             builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.FALSE,Builder.COLOR_1);
-            builder.addText(archivoDocElectronicoTO.get(0).getFormaPago()+ " \n");
+            //builder.addText(archivoDocElectronicoTO.get(0).getFormaPago()+ " \n");
+            builder.addText(formaPago+ " \n");
             printer = Utilidades.getPrinter();
             builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.TRUE,Builder.COLOR_1);
             builder.addText("F. VENCIMIENTO    :");
             printer = Utilidades.getPrinter();
             builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.FALSE,Builder.COLOR_1);
-            builder.addText(archivoDocElectronicoTO.get(0).getfCreacion()+ " \n");
+            //builder.addText(archivoDocElectronicoTO.get(0).getfCreacion()+ " \n");
+            builder.addText(fechaInvertida+ " \n");
             builder.addText("................................................................\n");
             printer = Utilidades.getPrinter();
             builder.addTextAlign(builder.ALIGN_CENTER);
@@ -1473,6 +1515,25 @@ public class Utilidades {
         }
 
         return retorna;
+    }
+
+    private static String convierteFecha(String stringFechaEntrada, String formatoEntrada, String formatoSalida){
+        Log.i("TAG", "stringFechaEntrada :" +  stringFechaEntrada);
+        //Definimos formato del string que ingresamos.
+        SimpleDateFormat sdf = new SimpleDateFormat(formatoEntrada);
+        try {
+            Date date = sdf.parse(stringFechaEntrada);
+            //Definimos formato del string que deseamos obtener.
+            sdf = new SimpleDateFormat(formatoSalida);
+            String stringFechaSalida = sdf.format(date);
+            Log.i("TAG", "stringFechaSalida :" +  stringFechaSalida);
+            Date dateSalida = sdf.parse(stringFechaSalida);
+            //Log.i("TAG", "dateSalida :" +  dateSalida);
+            return stringFechaSalida;
+        }catch (Exception e) {
+            e.printStackTrace();
+            return "";
+        }
     }
 
 }

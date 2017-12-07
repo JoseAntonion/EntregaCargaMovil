@@ -124,9 +124,10 @@ public class MainODT extends AppCompatActivity implements View.OnClickListener {
     //Procesos de lectura de codigo barra
     private void registerReceiver()
     {
+        //mScanMgr = ScanManager.getInstance();
         IntentFilter intFilter=new IntentFilter(ScanManager.ACTION_SEND_SCAN_RESULT);
         registerReceiver(this.mResultReceiver, intFilter);
-        mScanMgr.startScan();
+        //mScanMgr.startScan();
     }
 
     private void unRegisterReceiver()
@@ -155,6 +156,7 @@ public class MainODT extends AppCompatActivity implements View.OnClickListener {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action=intent.getAction();
+            //mContext = getApplicationContext();
 
             if(ScanManager.ACTION_SEND_SCAN_RESULT.equals(action)){
                 byte[] bvalue1=intent.getByteArrayExtra(ScanManager.EXTRA_SCAN_RESULT_ONE_BYTES);
@@ -196,7 +198,7 @@ public class MainODT extends AppCompatActivity implements View.OnClickListener {
             }
 
             for(int i=0;i<Globales.registroOdtMultiples.size();i++){
-                if(odt.equals(Globales.registroOdtMultiples.get(i).toString())){
+                if(odt.equals(Globales.registroOdtMultiples.get(i).getOdt().toString())){
                     odtRepetida = true;
                     break;
                 }
@@ -208,23 +210,21 @@ public class MainODT extends AppCompatActivity implements View.OnClickListener {
                 formaPago = (util.buscaFormaPagoOdt(odt).equals("CTA"))?"1":"0";
                 if(formaPago.equals(Globales.banderaTipoPago)){
                     if(util.BuscaODT(odt)){
-                        if (!util.validaEstadoOdt(odt).equals("99")){
+                        if (!util.validaEstadoOdt(odt).equals("99") || !util.validaEstadoOdt(odt).equals("57")){
                             if (Globales.banderaTipoPago.equals("1")) {
                                 Intent intento = new Intent(MainODT.this, MainEntregaCarga.class);
                                 intento.putExtra("odt", odt);
                                 intento.putExtra("aux", 1);
                                 intento.putExtra("old", OLD);
                                 startActivity(intento);
-                                System.gc();
                             }else{
                                 Intent intento = new Intent(MainODT.this, MainEscanerBulto.class);
                                 intento.putExtra("odt", odt);
                                 intento.putExtra("old2", OLD2);
                                 startActivity(intento);
-                                System.gc();
                             }
                         }else{
-                            Toast.makeText(activity.getApplicationContext(), "La ODT se encuentra ENTREGADA", Toast.LENGTH_LONG).show();
+                            Toast.makeText(activity.getApplicationContext(), "La ODT se fue procesada", Toast.LENGTH_LONG).show();
                         }
                     }else{
                         Toast.makeText(activity.getApplicationContext(), "ODT no encontrada", Toast.LENGTH_LONG).show();

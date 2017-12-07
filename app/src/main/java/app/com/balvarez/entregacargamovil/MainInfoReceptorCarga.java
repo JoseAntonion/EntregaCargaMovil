@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -12,7 +13,7 @@ import android.widget.Toast;
 import To.DatosReceptorTO;
 import Util.Globales;
 
-public class MainInfoReceptorCarga extends AppCompatActivity implements View.OnClickListener, View.OnFocusChangeListener {
+public class MainInfoReceptorCarga extends AppCompatActivity implements View.OnClickListener{//, View.OnFocusChangeListener {
 
     private Activity activity;
     private EditText txt_RutReceptor;
@@ -52,7 +53,7 @@ public class MainInfoReceptorCarga extends AppCompatActivity implements View.OnC
             tipoDoc = (extras.get("tipoDoc") == null)?"":extras.get("tipoDoc").toString();
         }
 
-        txt_RutReceptor.setOnFocusChangeListener(this);
+        //txt_RutReceptor.setOnFocusChangeListener(this);
         txt_RutReceptor.requestFocus();
     }
 
@@ -65,40 +66,45 @@ public class MainInfoReceptorCarga extends AppCompatActivity implements View.OnC
                 break;
             }
             case R.id.btnSiguienteInfoReceptor: {
-                if(validarRut(txt_RutReceptor.getText().toString())) {
-                    datosReceptor = new DatosReceptorTO();
-                    datosReceptor.setNombre(txtNombreReceptor.getText().toString());
-                    datosReceptor.setApPaterno(txtApPaternoReceptor.getText().toString());
-                    datosReceptor.setApMaterno(txtApMaternoReceptor.getText().toString());
-                    datosReceptor.setTelefono(txtFonoReceptor.getText().toString());
-                    datosReceptor.setRut(txt_RutReceptor.getText().toString());
-                    Globales.datosReceptor = datosReceptor;
-                    if(Globales.odtMasiva == null){
-                        Intent intento = new Intent(MainInfoReceptorCarga.this, MainFirma.class);
-                        intento.putExtra("odt", ODT);
-                        intento.putExtra("tipoDoc", tipoDoc);
-                        intento.putExtra("rut", txt_RutReceptor.getText().toString());
-                        startActivity(intento);
+                try{
+                    if(!txt_RutReceptor.getText().toString().equals("")){
+                        if(ValidaInfoReceptor()) {
+                            datosReceptor = new DatosReceptorTO();
+                            datosReceptor.setNombre(txtNombreReceptor.getText().toString());
+                            datosReceptor.setApPaterno(txtApPaternoReceptor.getText().toString());
+                            datosReceptor.setApMaterno(txtApMaternoReceptor.getText().toString());
+                            datosReceptor.setTelefono(txtFonoReceptor.getText().toString());
+                            datosReceptor.setRut(txt_RutReceptor.getText().toString());
+                            Globales.datosReceptor = datosReceptor;
+                            if(Globales.odtMasiva == null){
+                                Intent intento = new Intent(MainInfoReceptorCarga.this, MainFirma.class);
+                                intento.putExtra("odt", ODT);
+                                intento.putExtra("tipoDoc", tipoDoc);
+                                intento.putExtra("rut", txt_RutReceptor.getText().toString());
+                                startActivity(intento);
+                            }else{
+                                Intent intento = new Intent(MainInfoReceptorCarga.this, MainFirma.class);
+                                intento.putExtra("rut", txt_RutReceptor.getText().toString());
+                                intento.putExtra("tipoDoc", tipoDoc);
+                                startActivity(intento);
+                            }
+                        }
                     }else{
-                        Intent intento = new Intent(MainInfoReceptorCarga.this, MainFirma.class);
-                        //intento.putExtra("odtses", listaOdt);
-                        intento.putExtra("rut", txt_RutReceptor.getText().toString());
-                        intento.putExtra("tipoDoc", tipoDoc);
-                        startActivity(intento);
+                        Toast.makeText(activity.getApplicationContext(),
+                                "Rut vacio", Toast.LENGTH_LONG).show();
                     }
-
-                    break;
-                }else{
+                }catch (Exception e){
                     Toast.makeText(activity.getApplicationContext(),
-                            "Debe ingresa un RUT VALIDO !!", Toast.LENGTH_LONG).show();
+                            "Error en MainInfoReceptorCarga: "+e.getMessage(), Toast.LENGTH_LONG).show();
                 }
+                break;
             }
             default:
                 break;
         }
     }
 
-    public void onFocusChange(View v, boolean hasFocus) {
+    /*public void onFocusChange(View v, boolean hasFocus) {
         if (!hasFocus) {
             // CODIGO A EJECUTAR CUANDO EL EDITTEXT PIERDA EL FOCO
             if(!validarRut(txt_RutReceptor.getText().toString())){
@@ -109,7 +115,7 @@ public class MainInfoReceptorCarga extends AppCompatActivity implements View.OnC
             }
         }
 
-    }
+    }*/
 
     public void limpiar(){
         txt_RutReceptor.setText("");
@@ -144,5 +150,43 @@ public class MainInfoReceptorCarga extends AppCompatActivity implements View.OnC
         return validacion;
     }
 
+    public boolean ValidaInfoReceptor() {
+
+        txt_RutReceptor.setError(null);
+        txtNombreReceptor.setError(null);
+        txtApPaternoReceptor.setError(null);
+        txtApMaternoReceptor.setError(null);
+        txtFonoReceptor.setError(null);
+
+        if(!validarRut(txt_RutReceptor.getText().toString())){
+            txt_RutReceptor.setError(getString(R.string.error_campo_rut));
+            txt_RutReceptor.requestFocus();
+            return false;
+        }
+        if(TextUtils.isEmpty(txtNombreReceptor.getText().toString())){
+            txtNombreReceptor.setError(getString(R.string.error_campo_obligatorio));
+            txtNombreReceptor.requestFocus();
+            return false;
+        }
+        if(TextUtils.isEmpty(txtApPaternoReceptor.getText().toString())){
+            txtApPaternoReceptor.setError(getString(R.string.error_campo_obligatorio));
+            txtApPaternoReceptor.requestFocus();
+            return false;
+        }
+        if(TextUtils.isEmpty(txtApMaternoReceptor.getText().toString())){
+            txtApMaternoReceptor.setError(getString(R.string.error_campo_obligatorio));
+            txtApMaternoReceptor.requestFocus();
+            return false;
+        }
+        if(TextUtils.isEmpty(txtFonoReceptor.getText().toString())){
+            txtFonoReceptor.setError(getString(R.string.error_campo_obligatorio));
+            txtFonoReceptor.requestFocus();
+            return false;
+        }
+
+
+        return true;
+        //new GuardaPago().execute();
+    }
 
 }

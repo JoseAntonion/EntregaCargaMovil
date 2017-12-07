@@ -59,13 +59,20 @@ public class MainResumenPlanilla extends AppCompatActivity implements View.OnCli
     }
 
     @Override
+    public void onBackPressed() {
+        Intent intento = new Intent(MainResumenPlanilla.this, MainEntregaCargaMovil.class);
+        startActivity(intento);
+        finish();
+    }
+
+    @Override
     public void onClick(View v) {
 
             switch (v.getId()) {
 
                 case R.id.btnSiguienteOdt: {
                     // PRUEBAS IMPRESION ----------------------------------------------------------------
-                    /*TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+                   /* TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
                     String imei = telephonyManager.getDeviceId();
 
                     //WebServices ws = new WebServices();

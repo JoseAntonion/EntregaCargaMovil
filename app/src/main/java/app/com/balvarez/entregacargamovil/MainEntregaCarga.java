@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -54,6 +55,8 @@ public class MainEntregaCarga extends AppCompatActivity implements View.OnClickL
         odtAentregar.setText(ODT);
         odtAentregar.setEnabled(false);
         //odtMasiva = new ArrayList<EntregaOdtMasivoTO>();
+        txtCantidadBultos.requestFocus();
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
     }
 
 
@@ -115,6 +118,19 @@ public class MainEntregaCarga extends AppCompatActivity implements View.OnClickL
             e.printStackTrace();
         }
 
+        OdtMasivoTO odt = new OdtMasivoTO();
+        odt.setOdt(ODT);
+        try {
+            odt.setPlanilla(util.buscaPlanillaOdt(ODT));
+            odt.setValor(util.buscaValorOdt(ODT));
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        Globales.registroOdtMultiples.add(odt);
+
         AlertDialog.Builder downloadDialog = new AlertDialog.Builder(activity);
         downloadDialog.setTitle(DEFAULT_TITLE);
         downloadDialog.setMessage(DEFAULT_MESSAGE);
@@ -127,23 +143,6 @@ public class MainEntregaCarga extends AppCompatActivity implements View.OnClickL
                         odtM.setOdt(ODT);
                         odtM.setCantidad(Integer.parseInt(txtCantidadBultos.getText().toString()));
                         Globales.odtMasiva.add(odtM);*/
-                        OdtMasivoTO odt = new OdtMasivoTO();
-                        odt.setOdt(ODT);
-                        try {
-                            odt.setPlanilla(util.buscaPlanillaOdt(ODT));
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                        try {
-                            odt.setValor(util.buscaValorOdt(ODT));
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                        Globales.registroOdtMultiples.add(odt);
                         Intent intent = new Intent(MainEntregaCarga.this, MainODT.class);
                         //intent.putExtra("masivo", 1);
                         intent.putExtra("old", "1");
@@ -159,13 +158,10 @@ public class MainEntregaCarga extends AppCompatActivity implements View.OnClickL
                         Globales.esCTACTE = "si";
                         if(OLD.equals("")){
                             Intent intento = new Intent(MainEntregaCarga.this, MainInfoReceptorCarga.class);
-                            //Intent intento = new Intent(MainEntregaCarga.this, MainCancelacionOdt.class);
                             intento.putExtra("odt", ODT);
                             startActivity(intento);
                         }else{
                             Intent intento = new Intent(MainEntregaCarga.this, MainInfoReceptorCarga.class);
-                            //Intent intento = new Intent(MainEntregaCarga.this, MainCancelacionOdt.class);
-                            //intento.putExtra("odtses", odtMasiva);
                             startActivity(intento);
                         }
                     }

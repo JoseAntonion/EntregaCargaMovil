@@ -107,6 +107,7 @@ public class MainEscanerBulto extends AppCompatActivity implements View.OnClickL
 
         if(aux == 0){
             try {
+                Globales.bultosMultiples = util.leeBultosMultiples(ODT);
                 Globales.cantidadBultosOriginal = util.leeCantidadBultosODT(ODT);
                 faltantes = Globales.cantidadBultosOriginal;
                 lblBultosFaltantes.setText(String.valueOf(faltantes));
@@ -143,23 +144,32 @@ public class MainEscanerBulto extends AppCompatActivity implements View.OnClickL
                 try {
                     if(!txtBultoManual.getText().toString().equals("")){
                         if(util.validaBulto(txtBultoManual.getText().toString())){
-                            if(Globales.cantidadBultosOriginal > leidos){
-                                faltantes--;
-                                leidos++;
-                                Intent intento = new Intent(MainEscanerBulto.this, MainEscanerBulto.class);
-                                intento.putExtra("odt",ODT);
-                                intento.putExtra("faltantes",faltantes);
-                                intento.putExtra("leidos",leidos);
-                                intento.putExtra("aux",1);
-                                startActivity(intento);
-                                finish();
+                            if(validaNumeroCodigoBarraRepetido(txtBultoManual.getText().toString())){
+                                if(Globales.cantidadBultosOriginal > leidos){
+                                    faltantes--;
+                                    leidos++;
+                                    Intent intento = new Intent(MainEscanerBulto.this, MainEscanerBulto.class);
+                                    intento.putExtra("odt",ODT);
+                                    intento.putExtra("faltantes",faltantes);
+                                    intento.putExtra("leidos",leidos);
+                                    intento.putExtra("aux",1);
+                                    startActivity(intento);
+                                    finish();
+                                }else{
+                                    Toast.makeText(activity.getApplicationContext(),
+                                            "Ya se leyeron todos los bultos asociados !!!", Toast.LENGTH_LONG).show();
+                                }
                             }else{
                                 Toast.makeText(activity.getApplicationContext(),
-                                        "Ya se leyeron todos los bultos asociados !!!", Toast.LENGTH_LONG).show();
+                                        "Ya fue leido el bulto !!!", Toast.LENGTH_LONG).show();
+                                txtBultoManual.setText("");
+                                txtBultoManual.requestFocus();
                             }
                         }else{
                             Toast.makeText(activity.getApplicationContext(),
-                                    "No se encontro bulto leido !!!", Toast.LENGTH_LONG).show();
+                                    "Bulto invalido", Toast.LENGTH_LONG).show();
+                            txtBultoManual.setText("");
+                            txtBultoManual.requestFocus();
                         }
                     } else {
                         Toast.makeText(activity.getApplicationContext(),
@@ -190,7 +200,7 @@ public class MainEscanerBulto extends AppCompatActivity implements View.OnClickL
     private void registerReceiver(){
         IntentFilter intFilter=new IntentFilter(ScanManager.ACTION_SEND_SCAN_RESULT);
         registerReceiver(this.mResultReceiver, intFilter);
-        mScanMgr.startScan();
+        //mScanMgr.startScan();
     }
 
     private void unRegisterReceiver(){
@@ -234,19 +244,24 @@ public class MainEscanerBulto extends AppCompatActivity implements View.OnClickL
                     svalue2=svalue2==null?"":svalue2;
                     if (svalue1.length()>0) {
                         if(util.validaBulto(svalue1)){
-                            if(Globales.cantidadBultosOriginal > leidos){
-                                faltantes--;
-                                leidos++;
-                                Intent intento = new Intent(MainEscanerBulto.this, MainEscanerBulto.class);
-                                intento.putExtra("odt",ODT);
-                                intento.putExtra("faltantes",faltantes);
-                                intento.putExtra("leidos",leidos);
-                                intento.putExtra("aux",1);
-                                startActivity(intento);
-                                finish();
+                            if(validaNumeroCodigoBarraRepetido(svalue1)){
+                                if(Globales.cantidadBultosOriginal > leidos){
+                                    faltantes--;
+                                    leidos++;
+                                    Intent intento = new Intent(MainEscanerBulto.this, MainEscanerBulto.class);
+                                    intento.putExtra("odt",ODT);
+                                    intento.putExtra("faltantes",faltantes);
+                                    intento.putExtra("leidos",leidos);
+                                    intento.putExtra("aux",1);
+                                    startActivity(intento);
+                                    finish();
+                                }else{
+                                    Toast.makeText(activity.getApplicationContext(),
+                                            "Ya se leyeron todos los bultos asociados !!!", Toast.LENGTH_LONG).show();
+                                }
                             }else{
                                 Toast.makeText(activity.getApplicationContext(),
-                                        "Ya se leyeron todos los bultos asociados !!!", Toast.LENGTH_LONG).show();
+                                        "El bulto ya fue escaneado", Toast.LENGTH_LONG).show();
                             }
                         }else{
                             Toast.makeText(activity.getApplicationContext(),
@@ -289,7 +304,7 @@ public class MainEscanerBulto extends AppCompatActivity implements View.OnClickL
         @Override
         protected String doInBackground(Void... params) {
             String respStr = null;
-            bultosLeidos = 1;
+            //bultosLeidos = 1;
             try {
                 bultosTotales = util.leeCantidadBultosODT(ODT);
                 if (bultosLeidos == bultosTotales) {
@@ -389,19 +404,56 @@ public class MainEscanerBulto extends AppCompatActivity implements View.OnClickL
                             e.printStackTrace();
                         }
                         if(OLD2.equals("")){
-                            //Intent intento = new Intent(MainEscanerBulto.this, MainInfoReceptorCarga.class);
-                            Intent intento = new Intent(MainEscanerBulto.this, MainCancelacionOdt.class);
-                            intento.putExtra("odt", ODT);
-                            startActivity(intento);
+                            try {
+                                if(util.buscaFormaPagoOdt(ODT).equals("EFE")){
+                                    Intent intento = new Intent(MainEscanerBulto.this, MainInfoReceptorCarga.class);
+                                    //Intent intento = new Intent(MainEscanerBulto.this, MainCancelacionOdt.class);
+                                    intento.putExtra("odt", ODT);
+                                    startActivity(intento);
+                                }else{
+                                    //Intent intento = new Intent(MainEscanerBulto.this, MainInfoReceptorCarga.class);
+                                    Intent intento = new Intent(MainEscanerBulto.this, MainCancelacionOdt.class);
+                                    intento.putExtra("odt", ODT);
+                                    startActivity(intento);
+                                }
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
                         }else{
-                            //Intent intento = new Intent(MainEscanerBulto.this, MainInfoReceptorCarga.class);
-                            Intent intento = new Intent(MainEscanerBulto.this, MainCancelacionOdt.class);
-                            //intento.putExtra("odtses", odtMasiva);
-                            startActivity(intento);
+                            try {
+                                if(util.buscaFormaPagoOdt(ODT).equals("EFE")){
+                                    Intent intento = new Intent(MainEscanerBulto.this, MainInfoReceptorCarga.class);
+                                    //Intent intento = new Intent(MainEscanerBulto.this, MainCancelacionOdt.class);
+                                    //intento.putExtra("odtses", odtMasiva);
+                                    startActivity(intento);
+                                }else{
+                                    //Intent intento = new Intent(MainEscanerBulto.this, MainInfoReceptorCarga.class);
+                                    Intent intento = new Intent(MainEscanerBulto.this, MainCancelacionOdt.class);
+                                    //intento.putExtra("odtses", odtMasiva);
+                                    startActivity(intento);
+                                }
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
                         }
                     }
                 });
 
         return downloadDialog.show();
+    }
+
+    public boolean validaNumeroCodigoBarraRepetido(String bulto){
+        boolean encontro = false;
+        for(int i=0;i<Globales.bultosMultiples.size();i++){
+            if(Globales.bultosMultiples.get(i).toString().equals(bulto)){
+                Globales.bultosMultiples.remove(i);
+                encontro = true;
+            }
+        }
+        return encontro;
     }
 }

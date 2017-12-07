@@ -100,6 +100,7 @@ public class MainMotivoNoEntrega extends AppCompatActivity implements View.OnCli
             case R.id.btnFinalizarNoEntrega: {
                 // GEO-REFERENCIA
                 if (VerificarGPS()) {
+
                     GPSTraker gps = new GPSTraker(activity.getApplicationContext());
                     Location l = gps.getLocation();
                     if (l != null) {
@@ -235,6 +236,7 @@ public class MainMotivoNoEntrega extends AppCompatActivity implements View.OnCli
                 if (MensajeProgreso.isShowing())
                     MensajeProgreso.dismiss();
                 MensajeFinRepartoCORRECTO();
+
             }else if(!guardoImagen && reingreso){
                 Toast.makeText(activity.getApplicationContext(),
                         "La firma no fue guardada: "+resp.getMensaje(), Toast.LENGTH_LONG).show();
@@ -243,6 +245,7 @@ public class MainMotivoNoEntrega extends AppCompatActivity implements View.OnCli
                 if (MensajeProgreso.isShowing())
                     MensajeProgreso.dismiss();
                 MensajeFinRepartoCORRECTO();
+
             }else if(guardoImagen && !reingreso) {
                 Toast.makeText(activity.getApplicationContext(),
                         "Firma Guardada", Toast.LENGTH_LONG).show();
@@ -251,6 +254,7 @@ public class MainMotivoNoEntrega extends AppCompatActivity implements View.OnCli
                 if (MensajeProgreso.isShowing())
                     MensajeProgreso.dismiss();
                 MensajeFinRepartoINCORRECTO(resp2.getMensaje());
+
             }else if(!guardoImagen && !reingreso){
                 Toast.makeText(activity.getApplicationContext(),
                         "La firma no fue guardada: "+resp.getMensaje(), Toast.LENGTH_LONG).show();

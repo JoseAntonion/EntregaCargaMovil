@@ -59,14 +59,14 @@
             android:layout_below="@+id/textView9">
 
             <Button
-                android:text="finalizar"
+                android:id="@+id/btnFinalizarResumenEntrega"
+                style="@style/Botton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
                 android:layout_centerHorizontal="true"
                 android:layout_marginBottom="38dp"
-                android:id="@+id/btnLimpiar"
-                style="@style/Botton"/>
+                android:text="finalizar" />
 
             <ListView
                 android:layout_width="match_parent"

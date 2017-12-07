@@ -170,7 +170,28 @@ public class MainEntregaCargaMovil extends AppCompatActivity {
 
             @Override
             public void onClick(View v) {
-                txt_patente.setText("");
+                //txt_patente.setText("");
+                // PRUEBAS IMPRESION ----------------------------------------------------------------
+                /*Utilidades util = new Utilidades();
+                TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+                String imei = telephonyManager.getDeviceId();
+
+                //WebServices ws = new WebServices();
+                Globales.Impresora = "00:01:90:C2:C4:C6";
+                try {
+                    //ws.retornaImpresoraPrueba(imei);
+                    if(util.ConectarEpsonPrueba(this.getApplicationContext())){
+                        //util.BoletaPrueba(this);
+                        util.FacturaPrueba(this);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (EposException e) {
+                    e.printStackTrace();
+                } catch (WriterException e) {
+                    e.printStackTrace();
+                }*/
+                // ----------------------------------------------------------------------------------
             }
         });
         txt_patente = (TextView) findViewById(R.id.txtPatente);
@@ -283,12 +304,12 @@ public class MainEntregaCargaMovil extends AppCompatActivity {
                 Toast.makeText(activity.getApplicationContext(), "Debe tener conexión a INTERNET para cargar datos de la Patente !!!",
                         Toast.LENGTH_LONG).show();
             }else {
-                if(!isComuna)
+                /*if(!isComuna)
                     Toast.makeText(activity.getApplicationContext(), "No se cargaron COMUNAS !",
                             Toast.LENGTH_SHORT).show();
                 if(!isCiudad)
                     Toast.makeText(activity.getApplicationContext(), "No se cargaron CIUDADES !",
-                            Toast.LENGTH_SHORT).show();
+                            Toast.LENGTH_SHORT).show();*/
                 if(bandera) {
                     Intent intent = new Intent(MainEntregaCargaMovil.this, MainResumenPlanilla.class);
                     //Intent intent = new Intent(MainEntregaCargaMovil.this, MainCancelacionOdt.class);

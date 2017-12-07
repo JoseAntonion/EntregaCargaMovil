@@ -88,6 +88,7 @@ public class ArchivoDocElectronicoTO {
         private String  sucursal;
         private String  impresora;
         private String 	ted;
+        private String  fechaActual;
 
         public String getTipoDoc() {
             return tipoDoc;
@@ -581,5 +582,10 @@ public class ArchivoDocElectronicoTO {
         public void setTed(String ted) {
             this.ted = ted;
         }
-
+        public String getFechaActual() {
+        return fechaActual;
     }
+        public void setFechaActual(String fechaActual) {
+        this.fechaActual = fechaActual;
+    }
+}
