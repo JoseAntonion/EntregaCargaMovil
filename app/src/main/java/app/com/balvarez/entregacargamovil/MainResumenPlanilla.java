@@ -92,6 +92,11 @@ public class MainResumenPlanilla extends AppCompatActivity implements View.OnCli
                     }*/
                     // ----------------------------------------------------------------------------------
 
+                    // PRUEBA DE PANTALLAS------------------------------------------------------------------
+                    /*Intent intento = new Intent(MainResumenPlanilla.this, MainSeleccionaCtaCte.class);
+                    startActivity(intento);
+                    break;*/
+                    //--------------------------------------------------------------------------------------
 
 
                     Intent intento = new Intent(MainResumenPlanilla.this, MainODT.class);

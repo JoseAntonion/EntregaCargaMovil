@@ -607,4 +607,75 @@ public class WebServices {
         return archivoDocElectronicoTOs;
     }
 
+
+    public String buscaDatosCtaCte(String cta) throws IOException, ClientProtocolException, JSONException {
+
+        String respStr;
+        String respuesta = "";
+        HttpClient httpClient;
+        HttpGet del;
+        HttpResponse resp;
+        JSONObject responseObject;
+        JSONObject responseObject1;
+        httpClient = new DefaultHttpClient();
+        ValidaTO validaTO = null;
+
+        del = new HttpGet(RUTA_WEB_SERVICE + "/TraeDatosCuenta/ctacte="+cta);
+        del.setHeader("content-type", "application/json");
+
+        try {
+            resp = httpClient.execute(del);
+            respStr = EntityUtils.toString(resp.getEntity());
+
+            responseObject = new JSONObject(respStr);
+            responseObject1 = responseObject.getJSONObject("datosCuentaTO");
+            respuesta = responseObject1.getString("Cta_descripcion");
+        }catch (Exception e){
+            //e.printStackTrace();
+            respuesta = "Error: "+e.getMessage();
+            return respuesta;
+        }
+
+
+        return respuesta;
+    }
+
+    public String RealizaTraspaso(String cta,String odt) throws IOException, ClientProtocolException, JSONException {
+        ValidaTO validaTO = new ValidaTO();
+        String respuesta = "";
+
+        try {
+
+            HttpClient httpclient = new DefaultHttpClient();
+            JSONObject responseObject;
+            HttpPost httppost = new HttpPost(RUTA_WEB_SERVICE+ "/TraspasoCtaCte");
+            httppost.setHeader("Content-Type", "application/json");
+
+            // forma el JSON y tipo de contenido
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("odt", odt);
+            jsonObject.put("cta", cta);
+            //
+            StringEntity stringEntity = new StringEntity(jsonObject.toString());
+            stringEntity.setContentType("application/json");
+            httppost.setEntity(stringEntity);
+            // ejecuta
+            HttpResponse response = httpclient.execute(httppost);
+            String respStr = EntityUtils.toString(response.getEntity());
+
+            responseObject = new JSONObject(respStr);
+            validaTO.setValida(responseObject.getString("Valida"));
+            validaTO.setError(responseObject.getString("Error"));
+            validaTO.setMensaje(responseObject.getString("Mensaje"));
+            // return true;
+            respuesta = validaTO.getMensaje();
+
+        } catch (Exception e) {
+
+            respuesta = e.getMessage();
+            return respuesta;
+        }
+        return respuesta;
+    }
+
 }

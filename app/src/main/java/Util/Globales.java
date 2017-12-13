@@ -40,4 +40,6 @@ public class Globales extends Application {
     public static BoletaTO boleta;
     public static OdtMasivoTO odtSingle;
     public static ArrayList<String> bultosMultiples;
+    public static String cuentaDesc;
+    public static String odtPrincipal;
 }

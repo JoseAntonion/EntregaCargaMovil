@@ -40,6 +40,7 @@ import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.List;
 
 import To.ArchivoDocElectronicoTO;
 import To.ValidaTO;
@@ -66,6 +67,7 @@ public class MainFirma extends AppCompatActivity implements View.OnClickListener
     boolean impresionValida = false;
     private LocationManager locManager;
     private LocationListener locListener;
+    LocationManager mLocationManager;
 
     //private ArrayList<EntregaOdtMasivoTO> listaOdt = new ArrayList<>();
 
@@ -103,21 +105,18 @@ public class MainFirma extends AppCompatActivity implements View.OnClickListener
             case R.id.btn_Finalizar: {
                 // GEO-REFERENCIA
                 if (VerificarGPS()) {
-                    locManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-                    if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                        // TODO: Consider calling
-                        //    ActivityCompat#requestPermissions
-                        // here to request the missing permissions, and then overriding
-                        //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                        //                                          int[] grantResults)
-                        // to handle the case where the user grants the permission. See the documentation
-                        // for ActivityCompat#requestPermissions for more details.
-                        return;
-                    }
-                    Location loc = locManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                    // Geo-LOCALIZACION ISOTO
+                    /*Location loc = locManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
                     Globales.latitud = loc.getLatitude();
-                    Globales.longitud = loc.getLongitude();
+                    Globales.longitud = loc.getLongitude();*/
                     //comenzarLocalizacion();
+
+                    // NUEVA GEO-LOCALIZACION
+                    Location myLocation = comenzarLocalizacion2();
+                    Globales.latitud = myLocation.getLatitude();
+                    Globales.longitud = myLocation.getLongitude();
+
+                    // Geo-LOCALIZACION JOSE
                     /*GPSTraker gps = new GPSTraker(activity.getApplicationContext());
                     Location l = gps.getLocation();
                     if (l != null) {
@@ -172,9 +171,40 @@ public class MainFirma extends AppCompatActivity implements View.OnClickListener
             } catch (JSONException e1) {
                 e1.printStackTrace();
             }
-            //ArrayList<DatosRepartoTO> datosRepartoTOs = new ArrayList<DatosRepartoTO>();
-            //datosRepartoTOs = new ArrayList<DatosRepartoTO>();
-            //datosRepartoTOs = utilidades.TraeOdtEntregadasNOconfirmadas();
+
+
+            // GEO-REFERENCIA
+            /*if (VerificarGPS()) {
+                locManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+
+                // Geo-LOCALIZACION ISOTO
+                if (ActivityCompat.checkSelfPermission(activity.getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                        && ActivityCompat.checkSelfPermission(activity.getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    // TODO: Consider calling
+                    //    ActivityCompat#requestPermissions
+                    // here to request the missing permissions, and then overriding
+                    //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                    //                                          int[] grantResults)
+                    // to handle the case where the user grants the permission. See the documentation
+                    // for ActivityCompat#requestPermissions for more details.
+                    //comenzarLocalizacion();
+                    return null;
+                }
+                //Location loc = locManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                //Globales.latitud = loc.getLatitude();
+                //Globales.longitud = loc.getLongitude();
+                //comenzarLocalizacion();
+
+                // Geo-LOCALIZACION JOSE
+                *//*GPSTraker gps = new GPSTraker(activity.getApplicationContext());
+                Location l = gps.getLocation();
+                if (l != null) {
+                    Globales.latitud = l.getLatitude();
+                    Globales.longitud = l.getLongitude();
+                }*//*
+            }*/
+
+
             String tipoPago = "";
             String odt = "";
             int total = 0;
@@ -295,7 +325,7 @@ public class MainFirma extends AppCompatActivity implements View.OnClickListener
                 } catch (EposException e1) {
                     e1.printStackTrace();
                 }
-            }
+            }//else if (tipoDoc.equals("CTA")) {
 
             /*Intent intento = new Intent(MainFirma.this, MenuUsuario.class);
             startActivity(intento);
@@ -510,10 +540,12 @@ public class MainFirma extends AppCompatActivity implements View.OnClickListener
 
     private void comenzarLocalizacion() {
         // Obtenemos una referencia al LocationManager
-        locManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+
+        locManager = (LocationManager) activity.getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
 
         // Obtenemos la ultima posicion conocida
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
             //    ActivityCompat#requestPermissions
             // here to request the missing permissions, and then overriding
@@ -523,6 +555,8 @@ public class MainFirma extends AppCompatActivity implements View.OnClickListener
             // for ActivityCompat#requestPermissions for more details.
             return;
         }
+
+
         Location loc = locManager
                 .getLastKnownLocation(LocationManager.GPS_PROVIDER);
 
@@ -558,6 +592,33 @@ public class MainFirma extends AppCompatActivity implements View.OnClickListener
 
         Globales.latitud = loc.getLatitude();
         Globales.longitud = loc.getLongitude();
+    }
+
+    private Location comenzarLocalizacion2() {
+        mLocationManager = (LocationManager) getApplicationContext().getSystemService(LOCATION_SERVICE);
+        List<String> providers = mLocationManager.getProviders(true);
+        Location bestLocation = null;
+        for (String provider : providers) {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                // TODO: Consider calling
+                //    ActivityCompat#requestPermissions
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for ActivityCompat#requestPermissions for more details.
+                return null;
+            }
+            Location l = mLocationManager.getLastKnownLocation(provider);
+            if (l == null) {
+                continue;
+            }
+            if (bestLocation == null || l.getAccuracy() < bestLocation.getAccuracy()) {
+                // Found best last known location: %s", l);
+                bestLocation = l;
+            }
+        }
+        return bestLocation;
     }
 
     }

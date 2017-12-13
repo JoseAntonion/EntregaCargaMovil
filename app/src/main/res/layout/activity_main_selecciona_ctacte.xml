@@ -1,15 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:weightSum="1">
+    android:weightSum="1"
+    android:id="@+id/activity_main_selecciona_ctacte"
+    tools:context="app.com.balvarez.entregacargamovil.MainSeleccionaCtaCte">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="48dp"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:layout_weight="0.60">
 
+        <ImageView
+            android:id="@+id/imageView10"
+            android:layout_width="match_parent"
+            android:layout_height="70dp"
+            android:layout_weight="1"
+            app:srcCompat="@drawable/pullman_cargo" />
     </LinearLayout>
 
     <TextView
@@ -24,33 +34,54 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="31dp"
-        android:orientation="horizontal"></LinearLayout>
-
-    <EditText
-        android:id="@+id/txtNumeroCtaCte"
-        android:layout_width="264dp"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="30dp"
-        android:background="@drawable/fondo_txt"
-        android:ems="10"
-        android:hint="  Cuenta Corriente"
-        android:inputType="textPersonName"
-        android:singleLine="true" />
+        android:orientation="horizontal"
+        android:layout_weight="0.13"></LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="40dp"
+        android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_weight="0.05">
+        android:weightSum="1">
+
+        <EditText
+            android:id="@+id/txtNumeroCtaCte"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="30dp"
+            android:background="@drawable/fondo_txt"
+            android:ems="10"
+            android:hint="  Cuenta Corriente"
+            android:inputType="textPersonName"
+            android:singleLine="true" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:layout_weight="0.14"></LinearLayout>
+
+        <ImageButton
+            android:id="@+id/btnBuscaCtaCte"
+            style="@style/Botton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:srcCompat="?android:attr/actionModeWebSearchDrawable" />
 
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="193dp"
+        android:layout_height="40dp"
         android:orientation="horizontal"
-        android:weightSum="1"
-        android:layout_weight="0.54">
+        android:layout_weight="0.03">
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="150dp"
+        android:orientation="horizontal"
+        android:weightSum="1">
 
         <LinearLayout
             android:layout_width="32dp"
@@ -62,7 +93,7 @@
             android:layout_width="223dp"
             android:layout_height="match_parent"
             android:textAlignment="viewStart"
-            android:layout_weight="1.46" />
+            android:layout_weight="1.30" />
 
         <LinearLayout
             android:layout_width="40dp"
@@ -101,9 +132,10 @@
             android:text="SIGUIENTE" />
 
         <LinearLayout
-            android:layout_width="21dp"
+            android:layout_width="13dp"
             android:layout_height="match_parent"
-            android:orientation="vertical"></LinearLayout>
+            android:orientation="vertical"
+            android:layout_weight="0.07"></LinearLayout>
     </LinearLayout>
 
 </LinearLayout>

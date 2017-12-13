@@ -102,6 +102,13 @@ public class MainCancelacionOdt extends AppCompatActivity implements View.OnClic
         switch (v.getId()) {
 
             case R.id.btnAceptarCancelacionOdt: {
+                if(radioTrasCTA.isChecked()) {
+                    Intent intent = new Intent(MainCancelacionOdt.this, MainSeleccionaCtaCte.class);
+                    //intent.putExtra("ODT", ODT);
+                    Globales.odtPrincipal = ODT;
+                    startActivity(intent);
+                    break;
+                }
                 tipoDoc = (radioBoleta.isChecked())?"boleta":"factura";
                 if(tipoDoc.equals("factura")) {
                     if(ValidaInfoPago()){
@@ -117,8 +124,6 @@ public class MainCancelacionOdt extends AppCompatActivity implements View.OnClic
                         Globales.factura = factura;
                         new GuardaPago().execute();
                     }
-                }else if(radioTrasCTA.isChecked()) {
-
                 }else{
                     BoletaTO boleta = new BoletaTO();
                     boleta.setTotalBoleta(Integer.parseInt(lblTotalOdt.getText().toString()));
