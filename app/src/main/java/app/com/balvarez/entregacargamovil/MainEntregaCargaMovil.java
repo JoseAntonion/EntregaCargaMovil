@@ -3,21 +3,33 @@ package app.com.balvarez.entregacargamovil;
 import android.Manifest;
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.telephony.TelephonyManager;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.json.JSONException;
+
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import To.ArchivoOdtPorPatenteTO;
 import To.CiudadTO;
@@ -41,7 +53,10 @@ public class MainEntregaCargaMovil extends AppCompatActivity {
     private static final int MY_PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION = 1;
     private static final int MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     private static final int MY_ACCESS_LOCATION_EXTRA_COMMANDS = 1;
-
+    private Handler mHandler;
+    private static final int ACTIVAR_GPS = 1;
+    private AlertDialog alert;
+    LocationManager mLocationManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -267,6 +282,20 @@ public class MainEntregaCargaMovil extends AppCompatActivity {
             ArrayList<ComunaTO> listaComunas = new ArrayList<>();
             Utilidades util = new Utilidades();
 
+            //PARA IMRESION INICIAL DE PRUEBA
+            WebServices webservices = new WebServices();
+            Utilidades utilidades = new Utilidades();
+            TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+            String imei = telephonyManager.getDeviceId();
+            try {
+                webservices.retornaImpresoraPrueba(imei);
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            } catch (JSONException e1) {
+                e1.printStackTrace();
+            }
+            ////////////////////////////////////
+
             if(util.verificaConexion(getApplicationContext())){
                 try {
                     net = true;
@@ -288,6 +317,20 @@ public class MainEntregaCargaMovil extends AppCompatActivity {
                             }
                         }
                     }
+
+
+                        if (util.ConectarEpsonPrueba(activity.getApplicationContext())) {
+                            try {
+                                util.impresionPrueba(activity);
+                            } catch (Exception e) {
+                                Toast.makeText(activity.getApplicationContext(),
+                                        "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            }
+                        }
+
+
+
+
                 }
                 catch (Exception e){
                     e.printStackTrace();
@@ -325,4 +368,60 @@ public class MainEntregaCargaMovil extends AppCompatActivity {
 
         }
     }
+
+    private boolean VerificarGPS(){
+        boolean retorna = false;
+        String provider = Settings.Secure.getString(getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
+
+        if(!provider.contains("gps")){ //if gps is disabled
+            final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setMessage("El sistema GPS esta desactivado, ¿Desea activarlo?")
+                    .setCancelable(false)
+                    .setPositiveButton("Si", new DialogInterface.OnClickListener() {
+                        public void onClick(@SuppressWarnings("unused") final DialogInterface dialog, @SuppressWarnings("unused") final int id) {
+                            startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+                        }
+                    })
+                    .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                        public void onClick(final DialogInterface dialog, @SuppressWarnings("unused") final int id) {
+                            mHandler.sendEmptyMessage(ACTIVAR_GPS);
+                            dialog.cancel();
+                        }
+                    });
+            alert = builder.create();
+            alert.show();
+        }else{
+            retorna = true;
+        }
+        return retorna;
+    }
+
+    private Location comenzarLocalizacion2() {
+        mLocationManager = (LocationManager) getApplicationContext().getSystemService(LOCATION_SERVICE);
+        List<String> providers = mLocationManager.getProviders(true);
+        Location bestLocation = null;
+        for (String provider : providers) {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                    && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                // TODO: Consider calling
+                //    ActivityCompat#requestPermissions
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for ActivityCompat#requestPermissions for more details.
+                return null;
+            }
+            Location l = mLocationManager.getLastKnownLocation(provider);
+            if (l == null && l.getLatitude() != 0.0) {
+                continue;
+            }
+            if (bestLocation == null || l.getAccuracy() < bestLocation.getAccuracy()) {
+                // Found best last known location: %s", l);
+                bestLocation = l;
+            }
+        }
+        return bestLocation;
+    }
+
 }

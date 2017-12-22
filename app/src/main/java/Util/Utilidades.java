@@ -5,8 +5,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Environment;
@@ -47,6 +45,7 @@ public class Utilidades {
 
     private String[] recibeSplit;
     private String[] recibeSplitAux;
+    //private int cont = 0;
 
     static Print printer = null;
 
@@ -937,86 +936,109 @@ public class Utilidades {
         }
     }
 
-    public Boolean Boleta(Activity activity,ArrayList<ArchivoDocElectronicoTO> docElec) throws UnsupportedEncodingException {
-        final int SEND_TIMEOUT = 10 * 1000;
+    public Boolean Boleta(Activity activity,ArrayList<ArchivoDocElectronicoTO> docElec) throws UnsupportedEncodingException, InterruptedException {
 
-        int[] status = new int[1];
-        int[] battery = new int[1];
-
-        String ted = docElec.get(0).getTed().replace("�", "ú");
-        String empresa;
         Boolean retorna = false;
-        Intent intent = new Intent();
+        int cont = 0;
+        do {
 
-        intent.putExtra("printername", "TM-P80");
-        intent.putExtra("language", Builder.MODEL_ANK);
+            final int SEND_TIMEOUT = 10 * 10000;
 
-        // INVERTIR FECHA a DD-MM-AA
-        String fechaInvertida = convierteFecha(docElec.get(0).getfCreacion(),"yyyy-MM-dd","dd-MM-yyyy");
+            int[] status = new int[1];
+            int[] battery = new int[1];
 
-        Builder builder = null;
-        intent = activity.getIntent();
-        try {
-            Print printer = Utilidades.getPrinter();
-            builder = new Builder("TM-P80", Builder.MODEL_ANK);
+            String ted = docElec.get(0).getTed().replace("�", "ú");
+            String empresa;
+            Intent intent = new Intent();
 
-            builder.addTextLineSpace(20);
-            builder.addTextFont(builder.FONT_B); builder.addTextSize(1, 1);
-            builder.addText(docElec.get(0).getRazonSocial() +
-                    "\n"); builder.addText("GIRO: " +
-                    docElec.get(0).getGiro() + "\n");
-            builder.addTextLineSpace(30);
-            builder.addText(docElec.get(0).getcMatriz() +
-                    "\n"); builder.addText("RUT :" +
-                    docElec.get(0).getRut() + "\n\n");
-            printer = Utilidades.getPrinter();
-            builder.addTextAlign(builder.ALIGN_RIGHT);
-            builder.addTextLineSpace(20);
-            builder.addText(docElec.get(0).getFechaActual()+"\n");
-            //builder.addText("SANTIAGO 11 DE OCTUBRE DE 2017\n");
-            printer = Utilidades.getPrinter();
-            builder.addTextAlign(builder.ALIGN_CENTER); builder.addText(
-                    "................................................................\n"
-            ); printer = Utilidades.getPrinter();
-            builder.addTextFont(builder.FONT_A);
-            builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.TRUE,
-                    Builder.COLOR_1); builder.addText("BOLETA ELECTRONICA N° " +
-                    docElec.get(0).getFolio() + "\n"); printer =
-                    Utilidades.getPrinter(); builder.addTextFont(builder.FONT_B);
-            builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.FALSE,
-                    Builder.COLOR_1); builder.addText(
-                    "................................................................\n"
-            ); printer = Utilidades.getPrinter();
-            builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.FALSE,
-                    Builder.COLOR_1);
-            builder.addText(fechaInvertida +" \n");
-            builder.addText("................................................................\n"
-            ); printer = Utilidades.getPrinter();
-            builder.addTextAlign(builder.ALIGN_CENTER);
-            builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.TRUE,
-                    Builder.COLOR_1); builder.addText("DETALLES DE PRODUCTOS\n");
-            printer = Utilidades.getPrinter();
-            builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.FALSE,
-                    Builder.COLOR_1); builder.addText(
-                    "................................................................\n"
-            ); printer = Utilidades.getPrinter();
+            intent.putExtra("printername", "TM-P80");
+            intent.putExtra("language", Builder.MODEL_ANK);
 
-            for (int i = 0; i < docElec.size(); i++) {
+            // INVERTIR FECHA a DD-MM-AA
+            String fechaInvertida = convierteFecha(docElec.get(0).getfCreacion(), "yyyy-MM-dd", "dd-MM-yyyy");
 
-                builder.addTextAlign(builder.ALIGN_LEFT);
+            Builder builder = null;
+            intent = activity.getIntent();
+            try {
+                Print printer = Utilidades.getPrinter();
+                builder = new Builder("TM-P80", Builder.MODEL_ANK);
+
+                builder.addTextLineSpace(20);
+                builder.addTextFont(builder.FONT_B);
+                builder.addTextSize(1, 1);
+                builder.addText(docElec.get(0).getRazonSocial() +
+                        "\n");
+                builder.addText("GIRO: " +
+                        docElec.get(0).getGiro() + "\n");
+                builder.addTextLineSpace(30);
+                builder.addText(docElec.get(0).getcMatriz() +
+                        "\n");
+                builder.addText("RUT :" +
+                        docElec.get(0).getRut() + "\n\n");
+                printer = Utilidades.getPrinter();
+                builder.addTextAlign(builder.ALIGN_RIGHT);
+                builder.addTextLineSpace(20);
+                builder.addText(docElec.get(0).getFechaActual() + "\n");
+                //builder.addText("SANTIAGO 11 DE OCTUBRE DE 2017\n");
+                printer = Utilidades.getPrinter();
+                builder.addTextAlign(builder.ALIGN_CENTER);
+                builder.addText(
+                        "................................................................\n"
+                );
+                printer = Utilidades.getPrinter();
                 builder.addTextFont(builder.FONT_A);
-                builder.addText(docElec.get(i).getDescAdi() +
-                        "\n"); printer = Utilidades.getPrinter();
-                builder.addTextFont(builder.FONT_B); builder.addText("SEGUN ODT "
-                        + docElec.get(i).getoDT() + "\n"); printer =
-                        Utilidades.getPrinter(); builder.addTextPosition(80);
-                builder.addText(docElec.get(i).getCantItem() +
-                        " X " + docElec.get(i).getPrecioUnit() +
-                        "                    TOTAL " +
-                        docElec.get(i).getMontoItem() + "\n"); printer =
+                builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.TRUE,
+                        Builder.COLOR_1);
+                builder.addText("BOLETA ELECTRONICA N° " +
+                        docElec.get(0).getFolio() + "\n");
+                printer =
                         Utilidades.getPrinter();
+                builder.addTextFont(builder.FONT_B);
+                builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.FALSE,
+                        Builder.COLOR_1);
+                builder.addText(
+                        "................................................................\n"
+                );
+                printer = Utilidades.getPrinter();
+                builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.FALSE,
+                        Builder.COLOR_1);
+                builder.addText(fechaInvertida + " \n");
+                builder.addText("................................................................\n"
+                );
+                printer = Utilidades.getPrinter();
+                builder.addTextAlign(builder.ALIGN_CENTER);
+                builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.TRUE,
+                        Builder.COLOR_1);
+                builder.addText("DETALLES DE PRODUCTOS\n");
+                printer = Utilidades.getPrinter();
+                builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.FALSE,
+                        Builder.COLOR_1);
+                builder.addText(
+                        "................................................................\n"
+                );
+                printer = Utilidades.getPrinter();
 
-            }
+                for (int i = 0; i < docElec.size(); i++) {
+
+                    builder.addTextAlign(builder.ALIGN_LEFT);
+                    builder.addTextFont(builder.FONT_A);
+                    builder.addText(docElec.get(i).getDescAdi() +
+                            "\n");
+                    printer = Utilidades.getPrinter();
+                    builder.addTextFont(builder.FONT_B);
+                    builder.addText("SEGUN ODT "
+                            + docElec.get(i).getoDT() + "\n");
+                    printer =
+                            Utilidades.getPrinter();
+                    builder.addTextPosition(80);
+                    builder.addText(docElec.get(i).getCantItem() +
+                            " X " + docElec.get(i).getPrecioUnit() +
+                            "                    TOTAL " +
+                            docElec.get(i).getMontoItem() + "\n");
+                    printer =
+                            Utilidades.getPrinter();
+
+                }
 
 			  /*
 			  builder.addTextFont(builder.FONT_A);
@@ -1030,70 +1052,89 @@ public class Utilidades {
 			  builder.addText("10 X 200                    TOTAL 2000\n");
 			  printer = Utilidades.getPrinter();
 			  */
-            builder.addTextLineSpace(20);
-            builder.addTextStyle(Builder.FALSE,Builder.FALSE,Builder.TRUE,Builder.COLOR_1);
-            builder.addTextPosition(300);
-            builder.addText("Neto $ : ");
-            builder.addText(docElec.get(0).getNeto() +" \n");
-            printer = Utilidades.getPrinter();
-            builder.addTextPosition(200);
-            builder.addText("Monto I.V.A 19% $ : ");
-            builder.addText(docElec.get(0).getIva() + " \n");
-            printer = Utilidades.getPrinter();
-            builder.addTextPosition(290);
-            builder.addText("TOTAL $ : ");
-            builder.addText(docElec.get(0).getTotal() +" \n"); printer = Utilidades.getPrinter();
+                builder.addTextLineSpace(20);
+                builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.TRUE, Builder.COLOR_1);
+                builder.addTextPosition(300);
+                builder.addText("Neto $ : ");
+                builder.addText(docElec.get(0).getNeto() + " \n");
+                printer = Utilidades.getPrinter();
+                builder.addTextPosition(200);
+                builder.addText("Monto I.V.A 19% $ : ");
+                builder.addText(docElec.get(0).getIva() + " \n");
+                printer = Utilidades.getPrinter();
+                builder.addTextPosition(290);
+                builder.addText("TOTAL $ : ");
+                builder.addText(docElec.get(0).getTotal() + " \n");
+                printer = Utilidades.getPrinter();
 
 
-            // CODIGO TED PDF417
+                // CODIGO TED PDF417
 
-            try {
+                try {
 
-                //builder.addSymbol(Prueba, builder.SYMBOL_PDF417_STANDARD, builder.LEVEL_DEFAULT, 3, 3, 0);
-                //com.google.zxing.Writer writer = new com.google.zxing.pdf417.encoder.PDF417Writer();
+                    //builder.addSymbol(Prueba, builder.SYMBOL_PDF417_STANDARD, builder.LEVEL_DEFAULT, 3, 3, 0);
+                    //com.google.zxing.Writer writer = new com.google.zxing.pdf417.encoder.PDF417Writer();
 
-                // Declara variables necesarias
-                Writer writer = new PDF417Writer();
-                com.google.zxing.common.BitMatrix bitMatrix;
+                    // Declara variables necesarias
+                    Writer writer = new PDF417Writer();
+                    com.google.zxing.common.BitMatrix bitMatrix;
 
-                //Formatea TED a PDF417 y asigna a variable BitMatrix
-                bitMatrix = writer.encode(ted,com.google.zxing.BarcodeFormat.PDF_417,480,160);
+                    //Formatea TED a PDF417 y asigna a variable BitMatrix
+                    bitMatrix = writer.encode(ted, com.google.zxing.BarcodeFormat.PDF_417, 480, 160);
 
-                //Transforma BitMatrix en Bitmap
-                Bitmap imagen = net.glxn.qrgen.android.MatrixToImageWriter.toBitmap(bitMatrix);
+                    //Transforma BitMatrix en Bitmap
+                    Bitmap imagen = net.glxn.qrgen.android.MatrixToImageWriter.toBitmap(bitMatrix);
 
-                // Alinea al centro de la hoja y agrega imagen del TED como Bitmap
+                    // Alinea al centro de la hoja y agrega imagen del TED como Bitmap
+                    builder.addTextAlign(builder.ALIGN_CENTER);
+                    //builder.addImage(imagen, 0, 0, 500, 100, builder.COLOR_1);
+                    builder.addImage(imagen, 0, 0, 480, 160, builder.COLOR_1);
+
+                } catch (WriterException e) {
+                    e.printStackTrace();
+                }
+
+                builder.addFeedLine(1);
                 builder.addTextAlign(builder.ALIGN_CENTER);
-                //builder.addImage(imagen, 0, 0, 500, 100, builder.COLOR_1);
-                builder.addImage(imagen, 0, 0, 480, 160, builder.COLOR_1);
+                builder.addText("Timbre Electronico S.I.I. Res. 0 del 2013 \n");
+                builder.addText("Verifique documento en: www.portaldte.cl");
+                builder.addFeedLine(3);
+                if(cont == 0){
+                    builder.addTextAlign(builder.ALIGN_RIGHT);
+                    builder.addText("COPIA CLIENTE\n");
+                    builder.addTextAlign(builder.ALIGN_CENTER);
+                    builder.addText("________________________________________________________________");
+                }else{
+                    builder.addTextAlign(builder.ALIGN_RIGHT);
+                    builder.addText("COPIA COMERCIO\n");
+                    builder.addTextAlign(builder.ALIGN_CENTER);
+                    builder.addText("________________________________________________________________");
+                }
+                builder.addFeedLine(2);
+                builder.addCut(Builder.CUT_FEED);
+                printer = Utilidades.getPrinter();
 
-            } catch (WriterException e) {
+                printer.sendData(builder, SEND_TIMEOUT, status, battery);
+
+                retorna = true;
+            } catch (EposException e) {
+                // TODO Auto-generated catch block
+                retorna = false;
                 e.printStackTrace();
             }
 
-            builder.addFeedLine(1);
-            builder.addTextAlign(builder.ALIGN_CENTER);
-            builder.addText("Timbre Electronico S.I.I. Res. 0 del 2013 \n");
-            builder.addText("Verifique documento en: www.portaldte.cl");
+            if(cont==0)
+                Thread.sleep(9000);
+            cont++;
 
-            builder.addFeedLine(3);
-
-            builder.addCut(Builder.CUT_FEED);
-            printer = Utilidades.getPrinter();
-
-            printer.sendData(builder, SEND_TIMEOUT, status, battery);
-
-            retorna = true;
-        } catch (EposException e) {
-            // TODO Auto-generated catch block
-            retorna = false;
-            e.printStackTrace();
-        }
+        }while (cont < 2);
 
         return retorna;
     }
 
     public void FacturaPrueba(Activity activity) throws UnsupportedEncodingException, WriterException {
+
+
 
         final int SEND_TIMEOUT = 10 * 1000;
 
@@ -1311,208 +1352,224 @@ public class Utilidades {
         return planilla;
     }
 
-    public Boolean Factura(Activity activity,ArrayList<ArchivoDocElectronicoTO> archivoDocElectronicoTO) throws UnsupportedEncodingException, WriterException {
-        final int SEND_TIMEOUT = 10 * 1000;
+    public Boolean Factura(Activity activity,ArrayList<ArchivoDocElectronicoTO> archivoDocElectronicoTO) throws UnsupportedEncodingException, WriterException, InterruptedException {
 
-        String ted = archivoDocElectronicoTO.get(0).getTed().replace("�", "ú");
-        int[] status = new int[1];
-        int[] battery = new int[1];
-
-        // String empresa;
         Boolean retorna = false;
-        Intent intent = new Intent();
+        int cont = 0;
 
-        intent.putExtra("printername", "TM-P80");
-        intent.putExtra("language", Builder.MODEL_ANK);
+        do {
 
-        // INVERTIR FECHA a DD-MM-AA
-        String fechaInvertida = convierteFecha(archivoDocElectronicoTO.get(0).getfCreacion(),"yyyy-MM-dd","dd-MM-yyyy");
+            final int SEND_TIMEOUT = 10 * 10000;
 
-        //Descripcion de forma de pago
-        String formaPago = (archivoDocElectronicoTO.get(0).getFormaPago().equals("1"))?"CONTADO":"CRÉDITO";
+            String ted = archivoDocElectronicoTO.get(0).getTed().replace("�", "ú");
+            int[] status = new int[1];
+            int[] battery = new int[1];
 
-        Builder builder = null;
-        intent = activity.getIntent();
-        try {
+            // String empresa;
+            Intent intent = new Intent();
 
-            builder = new Builder("TM-P80", Builder.MODEL_ANK);
+            intent.putExtra("printername", "TM-P80");
+            intent.putExtra("language", Builder.MODEL_ANK);
 
-            builder.addTextLineSpace(20);
-            builder.addTextFont(builder.FONT_B);
-            builder.addTextSize(1, 1);
-            builder.addText("Razon Social: "+archivoDocElectronicoTO.get(0).getRazonSocial()+ "\n");
-            builder.addText("GIRO: " + archivoDocElectronicoTO.get(0).getGiro()+ "\n");
-            builder.addTextLineSpace(30);
-            builder.addText(archivoDocElectronicoTO.get(0).getcMatriz() + "\n");
-            builder.addText("RUT :" + archivoDocElectronicoTO.get(0).getRut()+ "\n\n");
-            Print printer = Utilidades.getPrinter();
-            builder.addTextAlign(builder.ALIGN_RIGHT);
-            builder.addTextLineSpace(20);
-            builder.addText(archivoDocElectronicoTO.get(0).getFechaActual()+"\n");
-            //builder.addText("SANTIAGO 21 DE OCTUBRE DE 2016\n");
-            printer = Utilidades.getPrinter();
-            builder.addTextAlign(builder.ALIGN_CENTER);
-            builder.addText("................................................................\n");
-            printer = Utilidades.getPrinter();
-            builder.addTextFont(builder.FONT_A);
-            builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.TRUE,Builder.COLOR_1);
-            builder.addText("FACTURA ELECTRONICA N° "+ archivoDocElectronicoTO.get(0).getFolio() + "\n");
-            printer = Utilidades.getPrinter();
-            builder.addTextFont(builder.FONT_B);
-            builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.FALSE,Builder.COLOR_1);
-            builder.addText("................................................................\n");
-            printer = Utilidades.getPrinter();
-            builder.addTextAlign(builder.ALIGN_LEFT);
-            builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.TRUE,Builder.COLOR_1);
-            builder.addText("SEÑOR(ES)         :");
-            printer = Utilidades.getPrinter();
-            builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.FALSE,Builder.COLOR_1);
-            builder.addText(archivoDocElectronicoTO.get(0).getcRazonSocial()+ " \n");
-            printer = Utilidades.getPrinter();
-            builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.TRUE,Builder.COLOR_1);
-            builder.addText("R.U.T             :");
-            printer = Utilidades.getPrinter();
-            builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.FALSE,Builder.COLOR_1);
-            builder.addText(archivoDocElectronicoTO.get(0).getcRut() + " \n");
-            printer = Utilidades.getPrinter();
-            builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.TRUE,Builder.COLOR_1);
-            builder.addText("GIRO              :");
-            printer = Utilidades.getPrinter();
-            builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.FALSE,Builder.COLOR_1);
-            builder.addText(archivoDocElectronicoTO.get(0).getcGiro() + " \n");
-            printer = Utilidades.getPrinter();
-            builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.TRUE,Builder.COLOR_1);
-            builder.addText("DIRECCION         :");
-            printer = Utilidades.getPrinter();
-            builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.FALSE,Builder.COLOR_1);
-            builder.addText(archivoDocElectronicoTO.get(0).getcDireccion()+ " \n");
-            printer = Utilidades.getPrinter();
-            builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.TRUE,Builder.COLOR_1);
-            builder.addText("FECHA             :");
-            printer = Utilidades.getPrinter();
-            builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.FALSE,Builder.COLOR_1);
-            //builder.addText(archivoDocElectronicoTO.get(0).getfCreacion()+ " \n");
-            builder.addText(fechaInvertida+ " \n");
-            printer = Utilidades.getPrinter();
-            builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.TRUE,Builder.COLOR_1);
-            builder.addText("COMUNA/CIUDAD     :");
-            printer = Utilidades.getPrinter();
-            builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.FALSE,Builder.COLOR_1);
-            builder.addText(archivoDocElectronicoTO.get(0).getcComuna() + " \n");
-            printer = Utilidades.getPrinter();
-            builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.TRUE,Builder.COLOR_1);
-            builder.addText("TELEFONO          :");
-            printer = Utilidades.getPrinter();
-            builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.FALSE,Builder.COLOR_1);
-            builder.addText(archivoDocElectronicoTO.get(0).getcContacto()+ " \n");
-            printer = Utilidades.getPrinter();
-            builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.TRUE,Builder.COLOR_1);
-            builder.addText("FORMA PAGO        :");
-            printer = Utilidades.getPrinter();
-            builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.FALSE,Builder.COLOR_1);
-            //builder.addText(archivoDocElectronicoTO.get(0).getFormaPago()+ " \n");
-            builder.addText(formaPago+ " \n");
-            printer = Utilidades.getPrinter();
-            builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.TRUE,Builder.COLOR_1);
-            builder.addText("F. VENCIMIENTO    :");
-            printer = Utilidades.getPrinter();
-            builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.FALSE,Builder.COLOR_1);
-            //builder.addText(archivoDocElectronicoTO.get(0).getfCreacion()+ " \n");
-            builder.addText(fechaInvertida+ " \n");
-            builder.addText("................................................................\n");
-            printer = Utilidades.getPrinter();
-            builder.addTextAlign(builder.ALIGN_CENTER);
-            builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.TRUE,Builder.COLOR_1);
-            builder.addText("DETALLES DE PRODUCTOS\n");
-            printer = Utilidades.getPrinter();
-            builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.FALSE,Builder.COLOR_1);
-            builder.addText("................................................................\n");
-            printer = Utilidades.getPrinter();
+            // INVERTIR FECHA a DD-MM-AA
+            String fechaInvertida = convierteFecha(archivoDocElectronicoTO.get(0).getfCreacion(), "yyyy-MM-dd", "dd-MM-yyyy");
 
-            for (int i = 0; i < archivoDocElectronicoTO.size(); i++) {
+            //Descripcion de forma de pago
+            String formaPago = (archivoDocElectronicoTO.get(0).getFormaPago().equals("1")) ? "CONTADO" : "CRÉDITO";
 
-                builder.addTextAlign(builder.ALIGN_LEFT);
-                builder.addTextFont(builder.FONT_A);
-                builder.addText(archivoDocElectronicoTO.get(i).getDescAdi()
-                        + "\n");
-                printer = Utilidades.getPrinter();
-                builder.addTextFont(builder.FONT_B);
-                builder.addText("SEGUN ODT "
-                        + archivoDocElectronicoTO.get(i).getoDT() + "\n");
-                printer = Utilidades.getPrinter();
-                builder.addTextPosition(80);
-                builder.addText(archivoDocElectronicoTO.get(i).getCantItem()
-                        + " X "
-                        + archivoDocElectronicoTO.get(i).getPrecioUnit()
-                        + "                    TOTAL "
-                        + archivoDocElectronicoTO.get(i).getMontoItem() + "\n");
-                printer = Utilidades.getPrinter();
-
-            }
-            builder.addTextAlign(builder.ALIGN_LEFT);
-            builder.addTextFont(builder.FONT_A);
-           /* builder.addText("Descripcion prueba\n");
-            printer = Utilidades.getPrinter();
-            builder.addTextFont(builder.FONT_B);
-            builder.addText("SEGUN ODT 000000000000\n");
-            printer = Utilidades.getPrinter();
-            builder.addTextPosition(80);
-            builder.addText("1 X precio                    TOTAL \n");*/
-            printer = Utilidades.getPrinter();
-            builder.addTextLineSpace(20);
-            builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.TRUE,Builder.COLOR_1);
-            builder.addTextPosition(300);
-            builder.addText("Neto $ : ");
-            builder.addText(archivoDocElectronicoTO.get(0).getNeto() + " \n");
-            printer = Utilidades.getPrinter();
-            builder.addTextPosition(200);
-            builder.addText("Monto I.V.A 19% $ : ");
-            builder.addText(archivoDocElectronicoTO.get(0).getIva() + " \n");
-            printer = Utilidades.getPrinter();
-            builder.addTextPosition(290);
-            builder.addText("TOTAL $ : ");
-            builder.addText(archivoDocElectronicoTO.get(0).getTotal() + " \n");
-
-            // CODIGO TED PDF417
-
+            Builder builder = null;
+            intent = activity.getIntent();
             try {
 
-                // Declara variables necesarias
-                Writer writer = new PDF417Writer();
-                com.google.zxing.common.BitMatrix bitMatrix;
+                builder = new Builder("TM-P80", Builder.MODEL_ANK);
 
-                //Formatea TED a PDF417 y asigna a bariable BitMatrix
-                bitMatrix = writer.encode(ted,com.google.zxing.BarcodeFormat.PDF_417,480,160);
-
-                //Transforma BitMatrix en Bitmap
-                Bitmap imagen = net.glxn.qrgen.android.MatrixToImageWriter.toBitmap(bitMatrix);
-
-                // Alinea al centro de la hoja y agrega imagen del TED como Bitmap
+                builder.addTextLineSpace(20);
+                builder.addTextFont(builder.FONT_B);
+                builder.addTextSize(1, 1);
+                builder.addText("Razon Social: " + archivoDocElectronicoTO.get(0).getRazonSocial() + "\n");
+                builder.addText("GIRO: " + archivoDocElectronicoTO.get(0).getGiro() + "\n");
+                builder.addTextLineSpace(30);
+                builder.addText(archivoDocElectronicoTO.get(0).getcMatriz() + "\n");
+                builder.addText("RUT :" + archivoDocElectronicoTO.get(0).getRut() + "\n\n");
+                Print printer = Utilidades.getPrinter();
+                builder.addTextAlign(builder.ALIGN_RIGHT);
+                builder.addTextLineSpace(20);
+                builder.addText(archivoDocElectronicoTO.get(0).getFechaActual() + "\n");
+                //builder.addText("SANTIAGO 21 DE OCTUBRE DE 2016\n");
+                printer = Utilidades.getPrinter();
                 builder.addTextAlign(builder.ALIGN_CENTER);
-                builder.addImage(imagen, 0, 0, 480, 160, builder.COLOR_1);
+                builder.addText("................................................................\n");
+                printer = Utilidades.getPrinter();
+                builder.addTextFont(builder.FONT_A);
+                builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.TRUE, Builder.COLOR_1);
+                builder.addText("FACTURA ELECTRONICA N° " + archivoDocElectronicoTO.get(0).getFolio() + "\n");
+                printer = Utilidades.getPrinter();
+                builder.addTextFont(builder.FONT_B);
+                builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.FALSE, Builder.COLOR_1);
+                builder.addText("................................................................\n");
+                printer = Utilidades.getPrinter();
+                builder.addTextAlign(builder.ALIGN_LEFT);
+                builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.TRUE, Builder.COLOR_1);
+                builder.addText("SEÑOR(ES)         :");
+                printer = Utilidades.getPrinter();
+                builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.FALSE, Builder.COLOR_1);
+                builder.addText(archivoDocElectronicoTO.get(0).getcRazonSocial() + " \n");
+                printer = Utilidades.getPrinter();
+                builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.TRUE, Builder.COLOR_1);
+                builder.addText("R.U.T             :");
+                printer = Utilidades.getPrinter();
+                builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.FALSE, Builder.COLOR_1);
+                builder.addText(archivoDocElectronicoTO.get(0).getcRut() + " \n");
+                printer = Utilidades.getPrinter();
+                builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.TRUE, Builder.COLOR_1);
+                builder.addText("GIRO              :");
+                printer = Utilidades.getPrinter();
+                builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.FALSE, Builder.COLOR_1);
+                builder.addText(archivoDocElectronicoTO.get(0).getcGiro() + " \n");
+                printer = Utilidades.getPrinter();
+                builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.TRUE, Builder.COLOR_1);
+                builder.addText("DIRECCION         :");
+                printer = Utilidades.getPrinter();
+                builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.FALSE, Builder.COLOR_1);
+                builder.addText(archivoDocElectronicoTO.get(0).getcDireccion() + " \n");
+                printer = Utilidades.getPrinter();
+                builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.TRUE, Builder.COLOR_1);
+                builder.addText("FECHA             :");
+                printer = Utilidades.getPrinter();
+                builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.FALSE, Builder.COLOR_1);
+                //builder.addText(archivoDocElectronicoTO.get(0).getfCreacion()+ " \n");
+                builder.addText(fechaInvertida + " \n");
+                printer = Utilidades.getPrinter();
+                builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.TRUE, Builder.COLOR_1);
+                builder.addText("COMUNA/CIUDAD     :");
+                printer = Utilidades.getPrinter();
+                builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.FALSE, Builder.COLOR_1);
+                builder.addText(archivoDocElectronicoTO.get(0).getcComuna() + " \n");
+                printer = Utilidades.getPrinter();
+                builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.TRUE, Builder.COLOR_1);
+                builder.addText("TELEFONO          :");
+                printer = Utilidades.getPrinter();
+                builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.FALSE, Builder.COLOR_1);
+                builder.addText(archivoDocElectronicoTO.get(0).getcContacto() + " \n");
+                printer = Utilidades.getPrinter();
+                builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.TRUE, Builder.COLOR_1);
+                builder.addText("FORMA PAGO        :");
+                printer = Utilidades.getPrinter();
+                builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.FALSE, Builder.COLOR_1);
+                //builder.addText(archivoDocElectronicoTO.get(0).getFormaPago()+ " \n");
+                builder.addText(formaPago + " \n");
+                printer = Utilidades.getPrinter();
+                builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.TRUE, Builder.COLOR_1);
+                builder.addText("F. VENCIMIENTO    :");
+                printer = Utilidades.getPrinter();
+                builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.FALSE, Builder.COLOR_1);
+                //builder.addText(archivoDocElectronicoTO.get(0).getfCreacion()+ " \n");
+                builder.addText(fechaInvertida + " \n");
+                builder.addText("................................................................\n");
+                printer = Utilidades.getPrinter();
+                builder.addTextAlign(builder.ALIGN_CENTER);
+                builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.TRUE, Builder.COLOR_1);
+                builder.addText("DETALLES DE PRODUCTOS\n");
+                printer = Utilidades.getPrinter();
+                builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.FALSE, Builder.COLOR_1);
+                builder.addText("................................................................\n");
+                printer = Utilidades.getPrinter();
 
-            } catch (WriterException e) {
+                for (int i = 0; i < archivoDocElectronicoTO.size(); i++) {
+
+                    builder.addTextAlign(builder.ALIGN_LEFT);
+                    builder.addTextFont(builder.FONT_A);
+                    builder.addText(archivoDocElectronicoTO.get(i).getDescAdi()
+                            + "\n");
+                    printer = Utilidades.getPrinter();
+                    builder.addTextFont(builder.FONT_B);
+                    builder.addText("SEGUN ODT "
+                            + archivoDocElectronicoTO.get(i).getoDT() + "\n");
+                    printer = Utilidades.getPrinter();
+                    builder.addTextPosition(80);
+                    builder.addText(archivoDocElectronicoTO.get(i).getCantItem()
+                            + " X "
+                            + archivoDocElectronicoTO.get(i).getPrecioUnit()
+                            + "                    TOTAL "
+                            + archivoDocElectronicoTO.get(i).getMontoItem() + "\n");
+                    printer = Utilidades.getPrinter();
+
+                }
+                builder.addTextAlign(builder.ALIGN_LEFT);
+                builder.addTextFont(builder.FONT_A);
+
+                printer = Utilidades.getPrinter();
+                builder.addTextLineSpace(20);
+                builder.addTextStyle(Builder.FALSE, Builder.FALSE, Builder.TRUE, Builder.COLOR_1);
+                builder.addTextPosition(300);
+                builder.addText("Neto $ : ");
+                builder.addText(archivoDocElectronicoTO.get(0).getNeto() + " \n");
+                printer = Utilidades.getPrinter();
+                builder.addTextPosition(200);
+                builder.addText("Monto I.V.A 19% $ : ");
+                builder.addText(archivoDocElectronicoTO.get(0).getIva() + " \n");
+                printer = Utilidades.getPrinter();
+                builder.addTextPosition(290);
+                builder.addText("TOTAL $ : ");
+                builder.addText(archivoDocElectronicoTO.get(0).getTotal() + " \n");
+
+                // CODIGO TED PDF417
+
+                try {
+
+                    // Declara variables necesarias
+                    Writer writer = new PDF417Writer();
+                    com.google.zxing.common.BitMatrix bitMatrix;
+
+                    //Formatea TED a PDF417 y asigna a bariable BitMatrix
+                    bitMatrix = writer.encode(ted, com.google.zxing.BarcodeFormat.PDF_417, 480, 160);
+
+                    //Transforma BitMatrix en Bitmap
+                    Bitmap imagen = net.glxn.qrgen.android.MatrixToImageWriter.toBitmap(bitMatrix);
+
+                    // Alinea al centro de la hoja y agrega imagen del TED como Bitmap
+                    builder.addTextAlign(builder.ALIGN_CENTER);
+                    builder.addImage(imagen, 0, 0, 480, 160, builder.COLOR_1);
+
+                } catch (WriterException e) {
+                    e.printStackTrace();
+                }
+
+                builder.addFeedLine(1);
+                builder.addTextAlign(builder.ALIGN_CENTER);
+                builder.addTextSize(1,1);
+                builder.addText("Timbre Electronico S.I.I. Res. 0 del 2013 \n");
+                builder.addText("Verifique documento en: www.portaldte.cl");
+                builder.addFeedLine(3);
+                if(cont == 0){
+                    builder.addTextAlign(builder.ALIGN_RIGHT);
+                    builder.addText("COPIA CLIENTE\n");
+                    builder.addTextAlign(builder.ALIGN_CENTER);
+                    builder.addText("________________________________________________");
+                }else{
+                    builder.addTextAlign(builder.ALIGN_RIGHT);
+                    builder.addText("COPIA COMERCIO\n");
+                    builder.addTextAlign(builder.ALIGN_CENTER);
+                    builder.addText("________________________________________________");
+                }
+                builder.addFeedLine(2);
+                builder.addCut(Builder.CUT_FEED);
+                printer = Utilidades.getPrinter();
+
+                printer.sendData(builder, SEND_TIMEOUT, status, battery);
+
+                retorna = true;
+            } catch (EposException e) {
+                // TODO Auto-generated catch block
                 e.printStackTrace();
+                retorna = false;
             }
 
-            builder.addFeedLine(1);
-            builder.addTextAlign(builder.ALIGN_CENTER);
-            builder.addText("Timbre Electronico S.I.I. Res. 0 del 2013 \n");
-            builder.addText("Verifique documento en: www.portaldte.cl");
+        if(cont==0)
+            Thread.sleep(9000);
+        cont++;
 
-            builder.addFeedLine(3);
-
-            builder.addCut(Builder.CUT_FEED);
-            printer = Utilidades.getPrinter();
-
-            printer.sendData(builder, SEND_TIMEOUT, status, battery);
-
-            retorna = true;
-        } catch (EposException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-            retorna = false;
-        }
+        }while (cont < 2);
 
         return retorna;
     }
@@ -1534,6 +1591,50 @@ public class Utilidades {
             e.printStackTrace();
             return "";
         }
+    }
+
+    public void impresionPrueba(Activity activity) throws UnsupportedEncodingException, InterruptedException {
+
+            final int SEND_TIMEOUT = 10 * 10000;
+
+            int[] status = new int[1];
+            int[] battery = new int[1];
+
+            Boolean retorna = false;
+            Intent intent = new Intent();
+            intent.putExtra("printername", "TM-P80");
+            intent.putExtra("language", Builder.MODEL_ANK);
+            Builder builder = null;
+            intent = activity.getIntent();
+
+            try {
+                Print printer = Utilidades.getPrinter();
+                builder = new Builder("TM-P80", Builder.MODEL_ANK);
+                builder.addTextLineSpace(20);
+                builder.addTextFont(builder.FONT_B);
+                builder.addTextSize(1, 1);
+                builder.addTextAlign(builder.ALIGN_CENTER);
+                builder.addText("****************************************************************");
+                builder.addFeedLine(3);
+                builder.addTextSize(2,2);
+                builder.addText("Prueba de conexión con impresora correcta !!!");
+                builder.addFeedLine(3);
+                builder.addText("Remover papel !!!!");
+                builder.addFeedLine(3);
+                builder.addTextSize(1,1);
+                builder.addText("****************************************************************");
+                builder.addTextLineSpace(30);
+                builder.addFeedLine(11);
+                printer = Utilidades.getPrinter();
+
+                printer.sendData(builder, SEND_TIMEOUT, status, battery);
+
+                retorna = true;
+            } catch (EposException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+                retorna = false;
+            }
     }
 
 }

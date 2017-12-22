@@ -9,6 +9,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -48,7 +49,7 @@ import Util.Globales;
 import Util.Utilidades;
 import Util.WebServices;
 
-public class MainFirma extends AppCompatActivity implements View.OnClickListener {
+public class MainFirma extends AppCompatActivity implements View.OnClickListener, LocationListener {
 
     private SignatureView signature;
     private Button btn_finalizar;
@@ -68,6 +69,17 @@ public class MainFirma extends AppCompatActivity implements View.OnClickListener
     private LocationManager locManager;
     private LocationListener locListener;
     LocationManager mLocationManager;
+    double longitudeBest, latitudeBest;
+    double longitudeGPS, latitudeGPS;
+    double longitudeNetwork, latitudeNetwork;
+    Intent intentThatCalled;
+    public double latitude;
+    public double longitude;
+    public LocationManager locationManager;
+    public Criteria criteria;
+    public String bestProvider;
+
+    String voice2text; //added
 
     //private ArrayList<EntregaOdtMasivoTO> listaOdt = new ArrayList<>();
 
@@ -104,26 +116,31 @@ public class MainFirma extends AppCompatActivity implements View.OnClickListener
 
             case R.id.btn_Finalizar: {
                 // GEO-REFERENCIA
-                if (VerificarGPS()) {
-                    // Geo-LOCALIZACION ISOTO
-                    /*Location loc = locManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-                    Globales.latitud = loc.getLatitude();
-                    Globales.longitud = loc.getLongitude();*/
-                    //comenzarLocalizacion();
 
-                    // NUEVA GEO-LOCALIZACION
-                    Location myLocation = comenzarLocalizacion2();
-                    Globales.latitud = myLocation.getLatitude();
-                    Globales.longitud = myLocation.getLongitude();
+                // Nueva GEOREFERENCIA FINAL NO FAKE
+                getLocationFinalNOFAKEUNZELDA();
+                /////////////////////////////////////
 
-                    // Geo-LOCALIZACION JOSE
-                    /*GPSTraker gps = new GPSTraker(activity.getApplicationContext());
+                /*if (VerificarGPS()) {
+                // Geo-LOCALIZACION ISOTO
+                Location loc = locManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                Globales.latitud = loc.getLatitude();
+                Globales.longitud = loc.getLongitude();*
+                //comenzarLocalizacion();
+
+                // NUEVA GEO-LOCALIZACION
+                Location myLocation = comenzarLocalizacion2();
+                Globales.latitud = myLocation.getLatitude();
+                Globales.longitud = myLocation.getLongitude();
+
+                // Geo-LOCALIZACION JOSE
+                    *//*GPSTraker gps = new GPSTraker(activity.getApplicationContext());
                     Location l = gps.getLocation();
                     if (l != null) {
                         Globales.latitud = l.getLatitude();
                         Globales.longitud = l.getLongitude();
-                    }*/
-                }
+                    }*//*
+                }*/
                 new CapturaImagen().execute();
             }
             case R.id.btnLimpiar: {
@@ -174,35 +191,28 @@ public class MainFirma extends AppCompatActivity implements View.OnClickListener
 
 
             // GEO-REFERENCIA
-            /*if (VerificarGPS()) {
-                locManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-
+            //if (VerificarGPS()) {
                 // Geo-LOCALIZACION ISOTO
-                if (ActivityCompat.checkSelfPermission(activity.getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                        && ActivityCompat.checkSelfPermission(activity.getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                    // TODO: Consider calling
-                    //    ActivityCompat#requestPermissions
-                    // here to request the missing permissions, and then overriding
-                    //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                    //                                          int[] grantResults)
-                    // to handle the case where the user grants the permission. See the documentation
-                    // for ActivityCompat#requestPermissions for more details.
-                    //comenzarLocalizacion();
-                    return null;
-                }
-                //Location loc = locManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-                //Globales.latitud = loc.getLatitude();
-                //Globales.longitud = loc.getLongitude();
+                    /*Location loc = locManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                    Globales.latitud = loc.getLatitude();
+                    Globales.longitud = loc.getLongitude();*/
                 //comenzarLocalizacion();
 
+                // NUEVA GEO-LOCALIZACION
+                /*Location myLocation = comenzarLocalizacion2();
+                if (myLocation != null) {
+                    Globales.latitud = myLocation.getLatitude();
+                    Globales.longitud = myLocation.getLongitude();
+                }*/
+
                 // Geo-LOCALIZACION JOSE
-                *//*GPSTraker gps = new GPSTraker(activity.getApplicationContext());
-                Location l = gps.getLocation();
-                if (l != null) {
-                    Globales.latitud = l.getLatitude();
-                    Globales.longitud = l.getLongitude();
-                }*//*
-            }*/
+                    /*GPSTraker gps = new GPSTraker(activity.getApplicationContext());
+                    Location l = gps.getLocation();
+                    if (l != null) {
+                        Globales.latitud = l.getLatitude();
+                        Globales.longitud = l.getLongitude();
+                    }*/
+            //}
 
 
             String tipoPago = "";
@@ -252,17 +262,6 @@ public class MainFirma extends AppCompatActivity implements View.OnClickListener
                 }
             }
 
-            /*if(ResumenEntrega.listaFotos != null){
-                for (int i = 0; i < ResumenEntrega.listaFotos.size(); i++) {
-                    webservices.GuardaImagenODT(ResumenEntrega.listaFotos.get(i).getId(), ResumenEntrega.listaFotos.get(i).getImagen(), Globales.usuario, imei, "", "ENTREGA MOVIL", "CANCELACION FACTURA", Globales.VERSION_APLICACION, "800");
-                }
-            }*/
-
-            /*utilidades.ModificaTipoPago("EFE");// "EFE" = PAGO CON EFECTIVO
-            utilidades.ModificaEstadoXUnaEntrega("1");
-            utilidades.ModificaEstadoConfirmado();*/
-
-            //DocumentoElectronico documentoElectronico = new DocumentoElectronico();
             ArrayList<ArchivoDocElectronicoTO> archivoDocElectronicoTOs = new ArrayList<ArchivoDocElectronicoTO>();
 
 
@@ -275,10 +274,7 @@ public class MainFirma extends AppCompatActivity implements View.OnClickListener
                     while (!impresionValida) {
                         if (util.ConectarEpsonPrueba(activity.getApplicationContext())) {
                             try {
-                                //Llama a la creacion e impresion de la BOLETA
-                                // Desarrollo
-                                //util.BoletaPrueba(activity);
-                                // Prueba real 1
+
                                 if (util.Boleta(activity, archivoDocElectronicoTOs)) {
                                     impresionValida = true;
                                 }
@@ -325,23 +321,16 @@ public class MainFirma extends AppCompatActivity implements View.OnClickListener
                 } catch (EposException e1) {
                     e1.printStackTrace();
                 }
-            }//else if (tipoDoc.equals("CTA")) {
+            }
 
-            /*Intent intento = new Intent(MainFirma.this, MenuUsuario.class);
-            startActivity(intento);
-            finish();
-            System.gc();
-            respStr = "1";
-
-			return respStr;*/
-            //////////////////////////////////////////////////////////////////////////////////////
             resp = new ValidaTO();
             resp2 = new ValidaTO();
 
             try {
                 if (sd.canWrite()) {
                     ByteArrayOutputStream arrayOutputStream = new ByteArrayOutputStream();
-                    imagen.compress(Bitmap.CompressFormat.PNG, 90, arrayOutputStream);
+                    //imagen.compress(Bitmap.CompressFormat.PNG, 90, arrayOutputStream);
+                    imagen.compress(Bitmap.CompressFormat.JPEG, 50, arrayOutputStream);
                     Globales.Imagen = arrayOutputStream.toByteArray();
                     encodedFirma = Base64.encodeToString(Globales.Imagen, Base64.DEFAULT);
                     fichero.createNewFile();
@@ -508,6 +497,7 @@ public class MainFirma extends AppCompatActivity implements View.OnClickListener
         String provider = Settings.Secure.getString(getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
 
         if (!provider.contains("gps")) { //if gps is disabled
+            //if (provider.contains("gps")) { //if gps is disabled
             final AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setMessage("El sistema GPS esta desactivado, ¿Desea activarlo?")
                     .setCancelable(false)
@@ -599,7 +589,8 @@ public class MainFirma extends AppCompatActivity implements View.OnClickListener
         List<String> providers = mLocationManager.getProviders(true);
         Location bestLocation = null;
         for (String provider : providers) {
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                    && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 // TODO: Consider calling
                 //    ActivityCompat#requestPermissions
                 // here to request the missing permissions, and then overriding
@@ -610,7 +601,8 @@ public class MainFirma extends AppCompatActivity implements View.OnClickListener
                 return null;
             }
             Location l = mLocationManager.getLastKnownLocation(provider);
-            if (l == null) {
+            //locationManager.requestLocationUpdates(bestLocation, 1000, 0, this.getIntent());
+            if (l == null && l.getLatitude() != 0.0) {
                 continue;
             }
             if (bestLocation == null || l.getAccuracy() < bestLocation.getAccuracy()) {
@@ -620,5 +612,92 @@ public class MainFirma extends AppCompatActivity implements View.OnClickListener
         }
         return bestLocation;
     }
+
+
+    /////////////////////////////////// PRUEBA GEO-LOCALIZACION ///////////////////////////////////////////
+    public static boolean isLocationEnabled(Context context) {
+        //...............
+        return true;
+    }
+
+    protected void getLocationFinalNOFAKEUNZELDA() {
+        if (isLocationEnabled(activity.getApplicationContext())) {
+            locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+            criteria = new Criteria();
+            bestProvider = String.valueOf(locationManager.getBestProvider(criteria, true)).toString();
+
+            //You can still do this if you like, you might get lucky:
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                // TODO: Consider calling
+                //    ActivityCompat#requestPermissions
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for ActivityCompat#requestPermissions for more details.
+                return;
+            }
+            Location location = locationManager.getLastKnownLocation(bestProvider);
+            if (location != null) {
+                //Log.e("TAG", "GPS is on");
+                Globales.latitud = location.getLatitude();
+                Globales.longitud = location.getLongitude();
+/*                Toast.makeText(MainActivity.this, "latitude:" + latitude + " longitude:" + longitude, Toast.LENGTH_SHORT).show();
+                searchNearestPlace(voice2text);*/
+            }
+            else{
+                //This is what you need:
+                locationManager.requestLocationUpdates(bestProvider, 1000, 0, this);
+            }
+        }
+        else
+        {
+            //prompt user to enable location....
+            //.................
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        locationManager.removeUpdates(this);
+
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        //Hey, a non null location! Sweet!
+
+        //remove location callback:
+        locationManager.removeUpdates(this);
+
+        //open the map:
+        Globales.latitud = location.getLatitude();
+        Globales.longitud = location.getLongitude();
+        /*Toast.makeText(MainActivity.this, "latitude:" + latitude + " longitude:" + longitude, Toast.LENGTH_SHORT).show();
+        searchNearestPlace(voice2text);*/
+    }
+
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+
+    }
+
+    @Override
+    public void onProviderEnabled(String provider) {
+
+    }
+
+    @Override
+    public void onProviderDisabled(String provider) {
+
+    }
+
+    public void searchNearestPlace(String v2txt) {
+        //.....
+    }
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
 
     }
