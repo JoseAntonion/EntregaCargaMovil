@@ -1,8 +1,10 @@
 package app.com.balvarez.entregacargamovil;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -10,6 +12,7 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -20,6 +23,7 @@ import Util.Utilidades;
 public class MainResumenEntrega extends AppCompatActivity implements View.OnClickListener {
 
     private Button btn_finalizar;
+    private Button btnVolverResumen;
     private Utilidades util;
     private ArrayAdapter<String> adaptador;
     private ListView lst_resumen_entrega;
@@ -34,6 +38,8 @@ public class MainResumenEntrega extends AppCompatActivity implements View.OnClic
         setContentView(R.layout.activity_main_resumen_entrega);
         btn_finalizar = (Button) findViewById(R.id.btnFinalizarResumenEntrega);
         btn_finalizar.setOnClickListener(this);
+        btnVolverResumen = (Button) findViewById(R.id.btnVolverResumenEntrega);
+        btnVolverResumen.setOnClickListener(this);
         lst_resumen_entrega = (ListView) findViewById(R.id.lstResumenEntrega);
         try {
             ArrayList<ArchivoOdtPorPatenteTO> contenidoArchivo = new ArrayList<>();
@@ -52,10 +58,6 @@ public class MainResumenEntrega extends AppCompatActivity implements View.OnClic
             //ArrayAdapter<String> adaptador = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,contenidoArchivoPrueba);
             lst_resumen_entrega.setAdapter(adaptador);
             Globales.cantidadOriginalOdts = util.leeCantidadOdtsArchivo();
-        /*} catch (IOException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
-            e.printStackTrace();*/
         }catch (Exception e) {
             e.printStackTrace();
         }
@@ -66,7 +68,18 @@ public class MainResumenEntrega extends AppCompatActivity implements View.OnClic
         switch (v.getId()) {
 
             case R.id.btnFinalizarResumenEntrega: {
+                //Envio de ODT pendientes
+                if(util.verificaConexion(getApplicationContext())){
+                    new EnvioODTPendiente().execute();
+                }
+                /////////////////////////////////
                 MensajeFinReparto();
+                break;
+            }
+            case R.id.btnVolverResumenEntrega: {
+                Intent intent = new Intent(MainResumenEntrega.this, MainODT.class);
+                startActivity(intent);
+                finish();
                 break;
             }
             default:
@@ -111,4 +124,43 @@ public class MainResumenEntrega extends AppCompatActivity implements View.OnClic
 
         return downloadDialog.show();
     }
+
+    public class EnvioODTPendiente extends AsyncTask<Void, Void, String> {
+
+        ProgressDialog MensajeProgreso;
+        String subioOffnile = "";
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            MensajeProgreso = new ProgressDialog(activity);
+            MensajeProgreso.setCancelable(false);
+            MensajeProgreso.setIndeterminate(true);
+            MensajeProgreso.setTitle("Proceso Off-Line");
+            MensajeProgreso.setMessage("Realizando Entrega ODT pendiente...");
+            MensajeProgreso.show();
+        }
+
+        @Override
+        protected String doInBackground(Void... params) {
+            try{
+                if(util.EnviaOdtPendiente()){
+                    //Toast.makeText(mContext, "Se enviaron datos de ODT PENDIENTES",Toast.LENGTH_LONG).show();
+                    subioOffnile = "Se enviaron datos de ODT PENDIENTES";
+                }
+            }catch (Exception e){
+                //Toast.makeText(mContext, e.getMessage(),Toast.LENGTH_LONG).show();
+                subioOffnile = e.getMessage();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String result){
+            if (MensajeProgreso.isShowing())
+                MensajeProgreso.dismiss();
+            Toast.makeText(activity.getApplicationContext(), subioOffnile,Toast.LENGTH_LONG).show();
+        }
+    }
+
 }

@@ -1,6 +1,5 @@
 <resources>
     <string name="app_name">EntregaCargaMovil</string>
-    <string name="Prueba">josetoro</string>
 
     <string name="error_campo_obligatorio">Campo Obligatorio</string>
     <string name="error_campo_rut">Rut Invalido</string>

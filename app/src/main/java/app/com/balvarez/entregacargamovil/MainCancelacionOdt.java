@@ -98,6 +98,21 @@ public class MainCancelacionOdt extends AppCompatActivity implements View.OnClic
     }
 
     @Override
+    public void onBackPressed()
+    {
+        try {
+            if(util.buscaFormaPagoOdt(ODT).equals("PED")) {
+                Globales.totalValoresODT -= util.buscaValorOdt(ODT);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        finish();
+    }
+
+    @Override
     public void onClick(View v) {
         switch (v.getId()) {
 
@@ -154,6 +169,8 @@ public class MainCancelacionOdt extends AppCompatActivity implements View.OnClic
                 break;
         }
     }
+
+
 
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {

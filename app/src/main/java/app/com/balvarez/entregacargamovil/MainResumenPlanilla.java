@@ -58,8 +58,10 @@ public class MainResumenPlanilla extends AppCompatActivity implements View.OnCli
         Globales.esCTACTE = "";
     }
 
+
     @Override
-    public void onBackPressed() {
+    public void onBackPressed()
+    {
         Intent intento = new Intent(MainResumenPlanilla.this, MainEntregaCargaMovil.class);
         startActivity(intento);
         finish();
@@ -93,14 +95,14 @@ public class MainResumenPlanilla extends AppCompatActivity implements View.OnCli
                     // ----------------------------------------------------------------------------------
 
                     // PRUEBA DE PANTALLAS------------------------------------------------------------------
-                    /*Intent intento = new Intent(MainResumenPlanilla.this, MainSeleccionaCtaCte.class);
+                    /*Intent intento = new Intent(MainResumenPlanilla.this, MainFirma.class);
                     startActivity(intento);
                     break;*/
                     //--------------------------------------------------------------------------------------
 
 
                     Intent intento = new Intent(MainResumenPlanilla.this, MainODT.class);
-                    //Intent intento = new Intent(MainResumenPlanilla.this, MainCancelacionOdt.class);
+                    //Intent intento = new Intent(MainResumenPlanilla.this, MainFirma.class);
                     startActivity(intento);
                     break;
 

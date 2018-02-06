@@ -29,20 +29,20 @@ import android.widget.Toast;
 
 import com.coatedmoose.customviews.SignatureView;
 import com.epson.eposprint.EposException;
+import com.google.zxing.WriterException;
 
 import org.json.JSONException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
-import java.util.List;
 
+import To.ArchivoCapturaImagen;
 import To.ArchivoDocElectronicoTO;
 import To.ValidaTO;
 import Util.Globales;
@@ -54,7 +54,6 @@ public class MainFirma extends AppCompatActivity implements View.OnClickListener
     private SignatureView signature;
     private Button btn_finalizar;
     private Button btn_limpiar;
-    private String encodedFirma;
     private Activity activity;
     Intent recibir;
     private String ODT;
@@ -66,18 +65,11 @@ public class MainFirma extends AppCompatActivity implements View.OnClickListener
     private static final int ACTIVAR_GPS = 1;
     private AlertDialog alert;
     boolean impresionValida = false;
-    private LocationManager locManager;
-    private LocationListener locListener;
-    LocationManager mLocationManager;
-    double longitudeBest, latitudeBest;
-    double longitudeGPS, latitudeGPS;
-    double longitudeNetwork, latitudeNetwork;
-    Intent intentThatCalled;
-    public double latitude;
-    public double longitude;
     public LocationManager locationManager;
     public Criteria criteria;
     public String bestProvider;
+    private Bitmap firma;
+    private String firmaB64;
 
     String voice2text; //added
 
@@ -108,6 +100,7 @@ public class MainFirma extends AppCompatActivity implements View.OnClickListener
                 bAdapter.enable();
             }
         }
+        firmaB64 = "";
     }
 
     @Override
@@ -115,33 +108,19 @@ public class MainFirma extends AppCompatActivity implements View.OnClickListener
         switch (v.getId()) {
 
             case R.id.btn_Finalizar: {
+
                 // GEO-REFERENCIA
-
-                // Nueva GEOREFERENCIA FINAL NO FAKE
-                getLocationFinalNOFAKEUNZELDA();
-                /////////////////////////////////////
-
-                /*if (VerificarGPS()) {
-                // Geo-LOCALIZACION ISOTO
-                Location loc = locManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-                Globales.latitud = loc.getLatitude();
-                Globales.longitud = loc.getLongitude();*
-                //comenzarLocalizacion();
-
-                // NUEVA GEO-LOCALIZACION
-                Location myLocation = comenzarLocalizacion2();
-                Globales.latitud = myLocation.getLatitude();
-                Globales.longitud = myLocation.getLongitude();
-
-                // Geo-LOCALIZACION JOSE
-                    *//*GPSTraker gps = new GPSTraker(activity.getApplicationContext());
-                    Location l = gps.getLocation();
-                    if (l != null) {
-                        Globales.latitud = l.getLatitude();
-                        Globales.longitud = l.getLongitude();
-                    }*//*
-                }*/
-                new CapturaImagen().execute();
+                if (VerificarGPS()) {
+                    getLocationFinalNOFAKEUNZELDA();
+                }
+                // Captura firma del control signature y la codifica a un string base64
+                PreparaFirma();
+                //VERIFICA CONEXION A INTERNET
+                if(util.verificaConexion(getApplicationContext())){
+                    new CapturaImagen().execute();
+                }else{
+                    new CapturaImagenOffLine().execute();
+                }
             }
             case R.id.btnLimpiar: {
                 signature.clearSignature();
@@ -151,9 +130,220 @@ public class MainFirma extends AppCompatActivity implements View.OnClickListener
         }
     }
 
+    public class CapturaImagenOffLine extends  AsyncTask<Void, Void, String>{
+
+        ProgressDialog MensajeProgreso;
+        int neto,iva;
+        ArrayList<String> odetes = new ArrayList<>();
+
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            MensajeProgreso = new ProgressDialog(activity);
+            MensajeProgreso.setCancelable(false);
+            MensajeProgreso.setIndeterminate(true);
+            MensajeProgreso.setTitle("Proceso Off-Line");
+            MensajeProgreso.setMessage("Realizando Entrega sin RED...");
+            MensajeProgreso.show();
+        }
+
+        @Override
+        protected String doInBackground(Void... params) {
+            ArrayList<ArchivoCapturaImagen> listaDatosOffline = new ArrayList<>();
+
+            TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+            String imei = telephonyManager.getDeviceId();
+            int i = 0;
+            // CONSULTA SI HAY MAS DE UNA ODT INGRESADA
+            if (Globales.registroOdtMultiples.size() > 1) {
+                for (i = 0; i < Globales.registroOdtMultiples.size(); i++) {
+                    try {
+                        ArchivoCapturaImagen datoOff = new ArchivoCapturaImagen();
+                        datoOff.setPLANILLA(Globales.registroOdtMultiples.get(i).getPlanilla());
+                        datoOff.setODT(Globales.registroOdtMultiples.get(i).getOdt());
+                        // Se crea un array con las ODTS entregadas, para poder enviarlas al metodo de impresion
+                        odetes.add(Globales.registroOdtMultiples.get(i).getOdt());
+                        /////////////////////////////////////////////////////////
+                        datoOff.setRUT(Globales.datosReceptor.getRut());
+                        datoOff.setNOMBRE(Globales.datosReceptor.getNombre());
+                        datoOff.setTELEFONO(Globales.datosReceptor.getTelefono());
+                        datoOff.setIMEI(imei);
+                        datoOff.setAPPATERNO(Globales.datosReceptor.getApPaterno());
+                        datoOff.setAPMATERNO(Globales.datosReceptor.getApMaterno());
+                        // Valida si la ODT es para traspaso a CtaCte
+                        if(!Globales.ctaTraspaso.equals("")){
+                            datoOff.setTIPOPAGO("CTA");
+                        }else{
+                            datoOff.setTIPOPAGO(util.buscaFormaPagoOdt(Globales.registroOdtMultiples.get(i).getOdt()));
+                        }
+                        //////////////////////////////////////////////
+                        datoOff.setTOTAL(util.buscaValorOdt(Globales.registroOdtMultiples.get(i).getOdt()));
+                        if (datoOff.getTOTAL() > 0) {
+                            try {
+                                neto = Redondeo(datoOff.getTOTAL() / 1.19);
+                                iva = Redondeo(neto * 0.19);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                        datoOff.setNETO(neto);
+                        datoOff.setIVA(iva);
+                        datoOff.setFIRMA(firmaB64);
+                        if(tipoDoc.equals("factura")){
+                            datoOff.setTIPODOCUMENTO("33");
+                            datoOff.setRUTFACTURA(Globales.factura.getRutFactura());
+                            datoOff.setRAZONFACTURA(Globales.factura.getRazonFactura());
+                            datoOff.setDIRECCIONFACTURA(Globales.factura.getDireccionFactura());
+                            datoOff.setCOMUNA(Globales.factura.getDescComuna());
+                            datoOff.setGIROFACTURA(Globales.factura.getGiroFactura());
+                            datoOff.setFONOFACTURA(Globales.factura.getFonoFactura());
+                        }else if(tipoDoc.equals("boleta")){
+                            datoOff.setTIPODOCUMENTO("39");
+                            datoOff.setRUTFACTURA("#");
+                            datoOff.setRAZONFACTURA("#");
+                            datoOff.setDIRECCIONFACTURA("#");
+                            datoOff.setCOMUNA("#");
+                            datoOff.setGIROFACTURA("#");
+                            datoOff.setFONOFACTURA("#");
+                        }else{
+                            datoOff.setTIPODOCUMENTO("#");
+                            datoOff.setRUTFACTURA("#");
+                            datoOff.setRAZONFACTURA("#");
+                            datoOff.setDIRECCIONFACTURA("#");
+                            datoOff.setCOMUNA("#");
+                            datoOff.setGIROFACTURA("#");
+                            datoOff.setFONOFACTURA("#");
+                        }
+                        if(Globales.ctaTraspaso.equals("")){
+                            datoOff.setCtaCte("#");
+                        }else{
+                            datoOff.setCtaCte(Globales.ctaTraspaso);
+                        }
+                        datoOff.setLatitudEntrega(Globales.latitud);
+                        datoOff.setLongitudEntrega(Globales.longitud);
+                        listaDatosOffline.add(datoOff);
+                        util.cambiaEstadoOdtArchivoENTREGADO(Globales.odtMasiva.get(i).getOdt());
+                    } catch (IOException e1) {
+                        e1.printStackTrace();
+                    } catch (JSONException e1) {
+                        e1.printStackTrace();
+                    }
+                }
+            } else {
+                try {
+                    ArchivoCapturaImagen datoOff = new ArchivoCapturaImagen();
+                    datoOff.setPLANILLA(Globales.registroOdtMultiples.get(i).getPlanilla());
+                    datoOff.setODT(Globales.registroOdtMultiples.get(i).getOdt());
+                    // Se agrega odt al arreglo para poder enviarlas al metodo de impresion
+                    odetes.add(Globales.registroOdtMultiples.get(i).getOdt());
+                    ////////////////////////////////////////////////
+                    datoOff.setRUT(Globales.datosReceptor.getRut());
+                    datoOff.setNOMBRE(Globales.datosReceptor.getNombre());
+                    datoOff.setTELEFONO(Globales.datosReceptor.getTelefono());
+                    datoOff.setIMEI(imei);
+                    datoOff.setAPPATERNO(Globales.datosReceptor.getApPaterno());
+                    datoOff.setAPMATERNO(Globales.datosReceptor.getApMaterno());
+                    // Valida si la ODT es para traspaso a CtaCte
+                    if(!Globales.ctaTraspaso.equals("")){
+                        datoOff.setTIPOPAGO("CTA");
+                    }else{
+                        datoOff.setTIPOPAGO(util.buscaFormaPagoOdt(Globales.registroOdtMultiples.get(i).getOdt()));
+                    }
+                    //////////////////////////////////////////////
+                    datoOff.setTOTAL(util.buscaValorOdt(Globales.registroOdtMultiples.get(i).getOdt()));
+                    if (datoOff.getTOTAL() > 0) {
+                        try {
+                            neto = Redondeo(datoOff.getTOTAL() / 1.19);
+                            iva = Redondeo(neto * 0.19);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    datoOff.setNETO(neto);
+                    datoOff.setIVA(iva);
+                    datoOff.setFIRMA(firmaB64);
+                    if(tipoDoc.equals("factura")){
+                        datoOff.setTIPODOCUMENTO("33");
+                        datoOff.setRUTFACTURA(Globales.factura.getRutFactura());
+                        datoOff.setRAZONFACTURA(Globales.factura.getRazonFactura());
+                        datoOff.setDIRECCIONFACTURA(Globales.factura.getDireccionFactura());
+                        datoOff.setCOMUNA(Globales.factura.getDescComuna());
+                        datoOff.setGIROFACTURA(Globales.factura.getGiroFactura());
+                        datoOff.setFONOFACTURA(Globales.factura.getFonoFactura());
+                    }else if(tipoDoc.equals("boleta")){
+                        datoOff.setTIPODOCUMENTO("39");
+                        datoOff.setRUTFACTURA("#");
+                        datoOff.setRAZONFACTURA("#");
+                        datoOff.setDIRECCIONFACTURA("#");
+                        datoOff.setCOMUNA("#");
+                        datoOff.setGIROFACTURA("#");
+                        datoOff.setFONOFACTURA("#");
+                    }else{
+                        datoOff.setTIPODOCUMENTO("#");
+                        datoOff.setRUTFACTURA("#");
+                        datoOff.setRAZONFACTURA("#");
+                        datoOff.setDIRECCIONFACTURA("#");
+                        datoOff.setCOMUNA("#");
+                        datoOff.setGIROFACTURA("#");
+                        datoOff.setFONOFACTURA("#");
+                    }
+                    if(Globales.ctaTraspaso.equals("")){
+                        datoOff.setCtaCte("#");
+                    }else{
+                        datoOff.setCtaCte(Globales.ctaTraspaso);
+                    }
+                    datoOff.setLatitudEntrega(Globales.latitud);
+                    datoOff.setLongitudEntrega(Globales.longitud);
+                    listaDatosOffline.add(datoOff);
+                    util.cambiaEstadoOdtArchivoENTREGADO(Globales.registroOdtMultiples.get(i).getOdt());
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                } catch (JSONException e1) {
+                    e1.printStackTrace();
+                }
+            }
+
+            // ESCRIBE EN ARCHIVO LOCAL LOS DATOS NECESARIOS PARA SU POSTERIOR ENVÍO
+            util.escribirEnArchivo(listaDatosOffline,"OFFLINE");
+            try {
+                if(util.buscaFormaPagoOdt(Globales.registroOdtMultiples.get(i).getOdt()).equals("PED")){
+                    if(Globales.ctaTraspaso.equals("")){
+                        if (util.ConectarEpsonPrueba(activity.getApplicationContext())) {
+                            // IMPRESION OFFLINE
+                            util.ImprimeOffLine(activity, odetes);
+                        }
+                    }
+                }
+            } catch (EposException e) {
+                e.printStackTrace();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            } catch (WriterException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String result){
+            if (MensajeProgreso.isShowing())
+                MensajeProgreso.dismiss();
+            MensajeFinRepartoOFFLINE();
+        }
+
+    }
+
     public class CapturaImagen extends AsyncTask<Void, Void, String> {
 
-        Bitmap imagen = signature.getImage();
+        //Bitmap imagen = signature.getImage();
+
         File sd = Environment.getExternalStorageDirectory();
         File fichero = new File(sd, "firma.jpg");
         WebServices ws = new WebServices();
@@ -169,7 +359,7 @@ public class MainFirma extends AppCompatActivity implements View.OnClickListener
             MensajeProgreso = new ProgressDialog(activity);
             MensajeProgreso.setCancelable(false);
             MensajeProgreso.setIndeterminate(true);
-            MensajeProgreso.setMessage("Ingresando Firma...");
+            MensajeProgreso.setMessage("Realizando Entrega...");
             MensajeProgreso.show();
 
         }
@@ -188,32 +378,6 @@ public class MainFirma extends AppCompatActivity implements View.OnClickListener
             } catch (JSONException e1) {
                 e1.printStackTrace();
             }
-
-
-            // GEO-REFERENCIA
-            //if (VerificarGPS()) {
-                // Geo-LOCALIZACION ISOTO
-                    /*Location loc = locManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-                    Globales.latitud = loc.getLatitude();
-                    Globales.longitud = loc.getLongitude();*/
-                //comenzarLocalizacion();
-
-                // NUEVA GEO-LOCALIZACION
-                /*Location myLocation = comenzarLocalizacion2();
-                if (myLocation != null) {
-                    Globales.latitud = myLocation.getLatitude();
-                    Globales.longitud = myLocation.getLongitude();
-                }*/
-
-                // Geo-LOCALIZACION JOSE
-                    /*GPSTraker gps = new GPSTraker(activity.getApplicationContext());
-                    Location l = gps.getLocation();
-                    if (l != null) {
-                        Globales.latitud = l.getLatitude();
-                        Globales.longitud = l.getLongitude();
-                    }*/
-            //}
-
 
             String tipoPago = "";
             String odt = "";
@@ -328,24 +492,17 @@ public class MainFirma extends AppCompatActivity implements View.OnClickListener
 
             try {
                 if (sd.canWrite()) {
-                    ByteArrayOutputStream arrayOutputStream = new ByteArrayOutputStream();
-                    //imagen.compress(Bitmap.CompressFormat.PNG, 90, arrayOutputStream);
-                    imagen.compress(Bitmap.CompressFormat.JPEG, 50, arrayOutputStream);
-                    Globales.Imagen = arrayOutputStream.toByteArray();
-                    encodedFirma = Base64.encodeToString(Globales.Imagen, Base64.DEFAULT);
-                    fichero.createNewFile();
-                    OutputStream os = new FileOutputStream(fichero);
-                    imagen.compress(Bitmap.CompressFormat.JPEG, 90, os);
-                    os.close();
 
                     if (Globales.odtMasiva != null) {
                         for (int o = 0; o < Globales.odtMasiva.size(); o++) {
-                            resp = ws.GrabaImagen(RUT, encodedFirma, "ACT", RUT, imei, Globales.odtMasiva.get(o).getOdt(), "ENTREGA");
+                            //resp = ws.GrabaImagen(RUT, encodedFirma, "ACT", RUT, imei, Globales.odtMasiva.get(o).getOdt(), "ENTREGA");
+                            resp = ws.GrabaImagen(RUT, firmaB64, "ACT", RUT, imei, Globales.odtMasiva.get(o).getOdt(), "ENTREGA");
                             resp2 = ws.CambiaEstadoODT(Globales.odtMasiva.get(o).getOdt(), "99", RUT, "MainFirma", Globales.version, "EntregaCargaMovil", imei);
                             util.cambiaEstadoOdtArchivoENTREGADO(Globales.odtMasiva.get(o).getOdt());
                         }
                     } else {
-                        resp = ws.GrabaImagen(RUT, encodedFirma, "ACT", RUT, imei, ODT, "ENTREGA");
+                        //resp = ws.GrabaImagen(RUT, encodedFirma, "ACT", RUT, imei, ODT, "ENTREGA");
+                        resp = ws.GrabaImagen(RUT, firmaB64, "ACT", RUT, imei, ODT, "ENTREGA");
                         resp2 = ws.CambiaEstadoODT(ODT, "99", imei, "MainFirma", Globales.version, "EntregaCargaMovil", imei);
                         util.cambiaEstadoOdtArchivoENTREGADO(ODT);
                     }
@@ -374,30 +531,7 @@ public class MainFirma extends AppCompatActivity implements View.OnClickListener
                         e.getMessage(), Toast.LENGTH_LONG).show();
                 e.printStackTrace();
             }
-            // PRUEBAS IMPRESION ----------------------------------------------------------------
-            /*TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-            String imei = telephonyManager.getDeviceId();*/
 
-            //WebServices ws = new WebServices();
-            /*Globales.Impresora = "00:01:90:C2:C4:C6";
-            try {
-                //ws.retornaImpresoraPrueba(imei);
-                if(!Globales.esCTACTE.equals("si")){
-                    if(util.ConectarEpsonPrueba(activity.getApplicationContext())) {
-                        if (tipoDoc.equals("factura"))
-                            util.FacturaPrueba(activity);
-                        else
-                            util.BoletaPrueba(activity);
-                    }
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (EposException e) {
-                e.printStackTrace();
-            } catch (WriterException e) {
-                e.printStackTrace();
-            }*/
-            // ----------------------------------------------------------------------------------
             return null;
         }
 
@@ -462,6 +596,35 @@ public class MainFirma extends AppCompatActivity implements View.OnClickListener
         return downloadDialog.show();
     }
 
+    private AlertDialog MensajeFinRepartoOFFLINE() {
+
+        final String DEFAULT_TITLE = "Entrega Carga Movil";
+        final String DEFAULT_MESSAGE = "ODT Entregada Correctamente";
+        final String DEFAULT_YES = "Aceptar";
+
+        Globales.totalValoresODT = 0;
+        Globales.banderaTipoPago = "";
+        Globales.registroOdtMultiples = null;
+        Globales.primera = false;
+        Globales.esCTACTE = "";
+
+        AlertDialog.Builder downloadDialog = new AlertDialog.Builder(activity);
+        downloadDialog.setTitle(DEFAULT_TITLE);
+        downloadDialog.setMessage(DEFAULT_MESSAGE);
+        downloadDialog.setPositiveButton(DEFAULT_YES,
+                new DialogInterface.OnClickListener() {
+
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        Intent intent = new Intent(MainFirma.this, MainODT.class);
+                        startActivity(intent);
+                        finish();
+                    }
+                });
+
+        return downloadDialog.show();
+    }
+
     private AlertDialog MensajeFinRepartoINCORRECTO() {
         final String DEFAULT_TITLE = "Entrega Carga Movil";
         final String DEFAULT_MESSAGE = "Problemas en el proceso - MainFirma";
@@ -492,34 +655,6 @@ public class MainFirma extends AppCompatActivity implements View.OnClickListener
         return downloadDialog.show();
     }
 
-    private boolean VerificarGPS() {
-        boolean retorna = false;
-        String provider = Settings.Secure.getString(getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
-
-        if (!provider.contains("gps")) { //if gps is disabled
-            //if (provider.contains("gps")) { //if gps is disabled
-            final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setMessage("El sistema GPS esta desactivado, ¿Desea activarlo?")
-                    .setCancelable(false)
-                    .setPositiveButton("Si", new DialogInterface.OnClickListener() {
-                        public void onClick(@SuppressWarnings("unused") final DialogInterface dialog, @SuppressWarnings("unused") final int id) {
-                            startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
-                        }
-                    })
-                    .setNegativeButton("No", new DialogInterface.OnClickListener() {
-                        public void onClick(final DialogInterface dialog, @SuppressWarnings("unused") final int id) {
-                            mHandler.sendEmptyMessage(ACTIVAR_GPS);
-                            dialog.cancel();
-                        }
-                    });
-            alert = builder.create();
-            alert.show();
-        } else {
-            retorna = true;
-        }
-        return retorna;
-    }
-
     private int Redondeo(double valor) {
         String val = valor + "";
         BigDecimal big = new BigDecimal(val);
@@ -528,93 +663,8 @@ public class MainFirma extends AppCompatActivity implements View.OnClickListener
         return redondeado;
     }
 
-    private void comenzarLocalizacion() {
-        // Obtenemos una referencia al LocationManager
 
-        locManager = (LocationManager) activity.getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
-
-        // Obtenemos la ultima posicion conocida
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return;
-        }
-
-
-        Location loc = locManager
-                .getLastKnownLocation(LocationManager.GPS_PROVIDER);
-
-        // Mostramos la ultima posicion conocida
-        //mostrarPosicion(loc);
-
-        //Asignar latitu y longitud a variales
-
-
-        // Nos registramos para recibir actualizaciones de la posicion
-        locListener = new LocationListener() {
-            public void onLocationChanged(Location location) {
-                //mostrarPosicion(location);
-            }
-
-            public void onProviderDisabled(String provider) {
-                // lblEstado.setText("Provider OFF");
-            }
-
-            public void onProviderEnabled(String provider) {
-                // lblEstado.setText("Provider ON ");
-            }
-
-            public void onStatusChanged(String provider, int status,
-                                        Bundle extras) {
-                // Log.i("", "Provider Status: " + status);
-                // lblEstado.setText("Provider Status: " + status);
-            }
-        };
-
-        locManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000,
-                0, locListener);
-
-        Globales.latitud = loc.getLatitude();
-        Globales.longitud = loc.getLongitude();
-    }
-
-    private Location comenzarLocalizacion2() {
-        mLocationManager = (LocationManager) getApplicationContext().getSystemService(LOCATION_SERVICE);
-        List<String> providers = mLocationManager.getProviders(true);
-        Location bestLocation = null;
-        for (String provider : providers) {
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                    && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                // TODO: Consider calling
-                //    ActivityCompat#requestPermissions
-                // here to request the missing permissions, and then overriding
-                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                //                                          int[] grantResults)
-                // to handle the case where the user grants the permission. See the documentation
-                // for ActivityCompat#requestPermissions for more details.
-                return null;
-            }
-            Location l = mLocationManager.getLastKnownLocation(provider);
-            //locationManager.requestLocationUpdates(bestLocation, 1000, 0, this.getIntent());
-            if (l == null && l.getLatitude() != 0.0) {
-                continue;
-            }
-            if (bestLocation == null || l.getAccuracy() < bestLocation.getAccuracy()) {
-                // Found best last known location: %s", l);
-                bestLocation = l;
-            }
-        }
-        return bestLocation;
-    }
-
-
-    /////////////////////////////////// PRUEBA GEO-LOCALIZACION ///////////////////////////////////////////
+    /////////////////////////////////// GEO-LOCALIZACION ///////////////////////////////////////////
     public static boolean isLocationEnabled(Context context) {
         //...............
         return true;
@@ -666,16 +716,7 @@ public class MainFirma extends AppCompatActivity implements View.OnClickListener
 
     @Override
     public void onLocationChanged(Location location) {
-        //Hey, a non null location! Sweet!
 
-        //remove location callback:
-        locationManager.removeUpdates(this);
-
-        //open the map:
-        Globales.latitud = location.getLatitude();
-        Globales.longitud = location.getLongitude();
-        /*Toast.makeText(MainActivity.this, "latitude:" + latitude + " longitude:" + longitude, Toast.LENGTH_SHORT).show();
-        searchNearestPlace(voice2text);*/
     }
 
     @Override
@@ -697,7 +738,39 @@ public class MainFirma extends AppCompatActivity implements View.OnClickListener
         //.....
     }
     ///////////////////////////////////////////////////////////////////////////////////////////////////////
+    public void PreparaFirma(){
+        firma = signature.getImage();
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        firma.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+        byte[] byteArray = stream.toByteArray();
+        firmaB64 = android.util.Base64.encodeToString(byteArray, Base64.NO_WRAP);
+    }
 
+    private boolean VerificarGPS(){
+        boolean retorna = false;
+        String provider = Settings.Secure.getString(getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
 
+        if(!provider.contains("gps")){ //if gps is disabled
+            final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setMessage("El sistema GPS esta desactivado, ¿Desea activarlo?")
+                    .setCancelable(false)
+                    .setPositiveButton("Si", new DialogInterface.OnClickListener() {
+                        public void onClick(@SuppressWarnings("unused") final DialogInterface dialog, @SuppressWarnings("unused") final int id) {
+                            startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+                        }
+                    })
+                    .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                        public void onClick(final DialogInterface dialog, @SuppressWarnings("unused") final int id) {
+                            mHandler.sendEmptyMessage(ACTIVAR_GPS);
+                            dialog.cancel();
+                        }
+                    });
+            alert = builder.create();
+            alert.show();
+        }else{
+            retorna = true;
+        }
+        return retorna;
+    }
 
     }

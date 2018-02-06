@@ -67,8 +67,9 @@ public class MainEscanerBulto extends AppCompatActivity implements View.OnClickL
         btn_bulto_manual = (ImageButton) findViewById(R.id.btnBultoManual);
         btn_bulto_manual.setOnClickListener(this);
         btn_entrega_carga = (Button) findViewById(R.id.btnEntregaCarga2);
-        btn_entrega_carga.setEnabled(false);
-        btn_entrega_carga.setOnClickListener(new View.OnClickListener(){
+        //btn_entrega_carga.setEnabled(false);
+        btn_entrega_carga.setOnClickListener(this);
+        /*btn_entrega_carga.setOnClickListener(new View.OnClickListener(){
 
             @Override
             public void onClick(View v) {
@@ -80,7 +81,7 @@ public class MainEscanerBulto extends AppCompatActivity implements View.OnClickL
                 }
 
             }
-        });
+        });*/
         //btn_entrega_carga.setOnClickListener(this);
         btn_NO_entrega_carga = (Button) findViewById(R.id.btnNoEntregaCarga2);
         btn_NO_entrega_carga.setOnClickListener(this);
@@ -97,9 +98,11 @@ public class MainEscanerBulto extends AppCompatActivity implements View.OnClickL
 
         recibir = getIntent();
         Bundle extras = recibir.getExtras();
-        OLD2 = (extras.get("old2") == null)?"":extras.get("old2").toString();
-        ODT = (extras.get("odt") == null)?"":extras.get("odt").toString();
-        aux = (extras.get("aux") == null)?0: (int) extras.get("aux");
+        if(extras != null){
+            OLD2 = (extras.get("old2") == null)?"":extras.get("old2").toString();
+            ODT = (extras.get("odt") == null)?"":extras.get("odt").toString();
+            aux = (extras.get("aux") == null)?0: (int) extras.get("aux");
+        }
         txt_OdtAEntregar.setText(ODT);
         txt_OdtAEntregar.setEnabled(false);
         mScanMgr = ScanManager.getInstance();
@@ -142,6 +145,11 @@ public class MainEscanerBulto extends AppCompatActivity implements View.OnClickL
             }
             case R.id.btnBultoManual: {
                 try {
+                    //Envio de ODT pendientes
+                    if(util.verificaConexion(getApplicationContext())){
+                        new EnvioODTPendiente().execute();
+                    }
+                    /////////////////////////////////
                     if(!txtBultoManual.getText().toString().equals("")){
                         if(util.validaBulto(txtBultoManual.getText().toString())){
                             if(validaNumeroCodigoBarraRepetido(txtBultoManual.getText().toString())){
@@ -186,10 +194,15 @@ public class MainEscanerBulto extends AppCompatActivity implements View.OnClickL
                 }
                 break;
             }
-            /*case R.id.btnEntregaCarga2: {
-                new ValidaEntrega().execute();
+            case R.id.btnEntregaCarga2: {
+                if(Globales.cantidadBultosOriginal == leidos){
+                    new ValidaEntrega().execute();
+                }else{
+                    Toast.makeText(activity.getApplicationContext(),
+                            "Aun hay bultos faltantes !!!", Toast.LENGTH_LONG).show();
+                }
                 break;
-            }*/
+            }
 
             default:
                 break;
@@ -243,6 +256,11 @@ public class MainEscanerBulto extends AppCompatActivity implements View.OnClickL
                     svalue1=svalue1==null?"":svalue1;
                     svalue2=svalue2==null?"":svalue2;
                     if (svalue1.length()>0) {
+                        //Envio de ODT pendientes
+                        if(util.verificaConexion(getApplicationContext())){
+                            new EnvioODTPendiente().execute();
+                        }
+                        /////////////////////////////////
                         if(util.validaBulto(svalue1)){
                             if(validaNumeroCodigoBarraRepetido(svalue1)){
                                 if(Globales.cantidadBultosOriginal > leidos){
@@ -345,7 +363,7 @@ public class MainEscanerBulto extends AppCompatActivity implements View.OnClickL
         try {
             if(util.buscaFormaPagoOdt(ODT).equals("PED")){
                 Globales.totalValoresODT += util.buscaValorOdt(ODT);
-            }
+        }
         } catch (IOException e) {
             e.printStackTrace();
         } catch (JSONException e) {
@@ -456,4 +474,43 @@ public class MainEscanerBulto extends AppCompatActivity implements View.OnClickL
         }
         return encontro;
     }
+
+    public class EnvioODTPendiente extends AsyncTask<Void, Void, String> {
+
+        ProgressDialog MensajeProgreso;
+        String subioOffnile = "";
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            MensajeProgreso = new ProgressDialog(activity);
+            MensajeProgreso.setCancelable(false);
+            MensajeProgreso.setIndeterminate(true);
+            MensajeProgreso.setTitle("Proceso Off-Line");
+            MensajeProgreso.setMessage("Realizando Entrega ODT pendiente...");
+            MensajeProgreso.show();
+        }
+
+        @Override
+        protected String doInBackground(Void... params) {
+            try{
+                if(util.EnviaOdtPendiente()){
+                    //Toast.makeText(mContext, "Se enviaron datos de ODT PENDIENTES",Toast.LENGTH_LONG).show();
+                    subioOffnile = "Se enviaron datos de ODT PENDIENTES";
+                }
+            }catch (Exception e){
+                //Toast.makeText(mContext, e.getMessage(),Toast.LENGTH_LONG).show();
+                subioOffnile = e.getMessage();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String result){
+            if (MensajeProgreso.isShowing())
+                MensajeProgreso.dismiss();
+            Toast.makeText(activity.getApplicationContext(), subioOffnile,Toast.LENGTH_LONG).show();
+        }
+    }
+
 }

@@ -31,8 +31,10 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 
+import To.ArchivoCapturaImagen;
 import To.ArchivoDocElectronicoTO;
 import To.ArchivoOdtPorPatenteTO;
 import To.BoletaTO;
@@ -74,10 +76,12 @@ public class Utilidades {
         File nomArchivo2 = null;
         File nomArchivo3 = null;
         File nomArchivo4 = null;
+        File nomArchivo5 = null;
         FileWriter lfilewriter = null;
         FileWriter lfilewriter2 = null;
         FileWriter lfilewriter3 = null;
         FileWriter lfilewriter4 = null;
+        FileWriter lfilewriter5 = null;
         BufferedWriter lout = null;
         File lroot = Environment.getExternalStorageDirectory();
         Globales.rutaArchivos = lroot.getAbsolutePath();
@@ -86,22 +90,25 @@ public class Utilidades {
         try {
             if (lroot.canWrite()) {
                 File dir = new File(Globales.rutaArchivosFinal);
-                if (!dir.exists()) {
+                //if (!dir.exists()) { ********* Se comenta esta linea para que cree el archivo nuevo siempre, reemplazando los existentes **********
                     dir.mkdirs();
                     nomArchivo = new File(dir, "ArchivoDatosEntrega.txt");
                     nomArchivo2 = new File(dir, "comunas.txt");
                     nomArchivo3 = new File(dir, "ciudades.txt");
                     nomArchivo4 = new File(dir, "docElectronico.txt");
+                    nomArchivo5 = new File(dir, "datosCapturaImagen.txt");
                     lfilewriter = new FileWriter(nomArchivo);
                     lfilewriter2 = new FileWriter(nomArchivo2);
                     lfilewriter3 = new FileWriter(nomArchivo3);
                     lfilewriter4 = new FileWriter(nomArchivo4);
-                }
+                    lfilewriter4 = new FileWriter(nomArchivo5);
+                //}
             }
             Globales.odtsXpatente = Globales.rutaArchivosFinal+"ArchivoDatosEntrega.txt";
             Globales.Comunas = Globales.rutaArchivosFinal+"comunas.txt";
             Globales.Ciudades = Globales.rutaArchivosFinal+"ciudades.txt";
             Globales.docElectronico = Globales.rutaArchivosFinal+"docElectronico.txt";
+            Globales.infoCapturaImagen = Globales.rutaArchivosFinal+"datosCapturaImagen.txt";
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -113,6 +120,38 @@ public class Utilidades {
 
         try {
             switch (tipo){
+                case "OFFLINE-REINGRESO":{
+
+                    ArrayList<ArchivoCapturaImagen> listOffLine = (ArrayList<ArchivoCapturaImagen>)lista;
+                    lfile = new File(Globales.infoCapturaImagen);
+                    lfilewriter = new FileWriter(lfile, true);
+                    BufferedWriter ex = new BufferedWriter(lfilewriter);
+                    for (int i = 0; i < listOffLine.size(); i++) {
+                        ex.write("\n"+"reingreso" + "~" + listOffLine.get(i).getPLANILLA() + "~" + listOffLine.get(i).getODT() + "~" + listOffLine.get(i).getIMEI()
+                                + "~" + String.valueOf(listOffLine.get(i).getFIRMA()) + "~" + listOffLine.get(i).getLatitudEntrega()+ "~" +listOffLine.get(i).getLongitudEntrega()
+                                + "~" + listOffLine.get(i).getCantidadBultosODT() + "~" + listOffLine.get(i).getCodigoMotivoReingreso());
+                    }
+                    ex.close();
+                    break;
+                }
+                case "OFFLINE":{
+
+                    ArrayList<ArchivoCapturaImagen> listOffLine = (ArrayList<ArchivoCapturaImagen>)lista;
+                    lfile = new File(Globales.infoCapturaImagen);
+                    lfilewriter = new FileWriter(lfile, true);
+                    BufferedWriter ex = new BufferedWriter(lfilewriter);
+                    for (int i = 0; i < listOffLine.size(); i++) {
+                        ex.write("\n" + listOffLine.get(i).getPLANILLA() + "~" + listOffLine.get(i).getODT() + "~" + listOffLine.get(i).getRUT()
+                                + "~" + listOffLine.get(i).getNOMBRE() + "~" + listOffLine.get(i).getTELEFONO() + "~" + listOffLine.get(i).getIMEI()
+                                + "~" + listOffLine.get(i).getAPPATERNO() + "~" + listOffLine.get(i).getAPMATERNO() + "~" + listOffLine.get(i).getTIPOPAGO()
+                                + "~" + String.valueOf(listOffLine.get(i).getNETO()) + "~" + String.valueOf(listOffLine.get(i).getIVA()) + "~" + String.valueOf(listOffLine.get(i).getTOTAL())
+                                + "~" + String.valueOf(listOffLine.get(i).getFIRMA())+ "~" +listOffLine.get(i).getTIPODOCUMENTO()+ "~" +listOffLine.get(i).getRUTFACTURA()
+                                + "~" +listOffLine.get(i).getRAZONFACTURA()+ "~" +listOffLine.get(i).getDIRECCIONFACTURA()+ "~" +listOffLine.get(i).getCOMUNA()+ "~" +listOffLine.get(i).getGIROFACTURA()
+                                + "~" +listOffLine.get(i).getFONOFACTURA()+ "~" +listOffLine.get(i).getCtaCte()+ "~" +listOffLine.get(i).getLatitudEntrega()+ "~" +listOffLine.get(i).getLongitudEntrega());
+                    }
+                    ex.close();
+                    break;
+                }
                 case "ODTS":{
 
                     ArrayList<ArchivoOdtPorPatenteTO> listODT = (ArrayList<ArchivoOdtPorPatenteTO>)lista;
@@ -1352,6 +1391,64 @@ public class Utilidades {
         return planilla;
     }
 
+    public void ImprimeOffLine(Activity activity, Object odt) throws UnsupportedEncodingException, WriterException, InterruptedException {
+
+        final int SEND_TIMEOUT = 10 * 10000;
+
+        int[] status = new int[1];
+        int[] battery = new int[1];
+        // FECHA ACTUAL
+        String fechaActual = fechaActual();
+
+        ArrayList<String> listaODTES = (ArrayList<String>) odt;
+        Boolean retorna = false;
+        Intent intent = new Intent();
+        intent.putExtra("printername", "TM-P80");
+        intent.putExtra("language", Builder.MODEL_ANK);
+        Builder builder = null;
+        intent = activity.getIntent();
+
+        try {
+            Print printer = Utilidades.getPrinter();
+            builder = new Builder("TM-P80", Builder.MODEL_ANK);
+            builder.addTextLineSpace(20);
+            builder.addTextFont(builder.FONT_B);
+            builder.addTextSize(1, 1);
+            builder.addTextAlign(builder.ALIGN_CENTER);
+            builder.addText("*****************\n");
+            builder.addText(fechaActual);
+            builder.addFeedLine(3);
+            builder.addTextSize(1,1);
+            builder.addText("Con el numero de Orden de Transporte\n");
+            builder.addText("Pruede consultar por su documento electronico en :\n");
+            builder.addFeedLine(3);
+            builder.addTextSize(2,2);
+            builder.addText("www.pullmancargo.cl\n");
+            builder.addFeedLine(3);
+            builder.addTextSize(2,2);
+            builder.addText("Orden de Transporte\n");
+            builder.addTextSize(3,3);
+            builder.addFeedLine(1);
+            for (int i = 0;i < listaODTES.size();i++){
+                builder.addText(listaODTES.get(i)+"\n");
+            }
+            builder.addTextSize(1, 1);
+            builder.addFeedLine(3);
+            builder.addText("*****************");
+            builder.addTextLineSpace(30);
+            builder.addFeedLine(11);
+            printer = Utilidades.getPrinter();
+
+            printer.sendData(builder, SEND_TIMEOUT, status, battery);
+
+            retorna = true;
+        } catch (EposException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            retorna = false;
+        }
+    }
+
     public Boolean Factura(Activity activity,ArrayList<ArchivoDocElectronicoTO> archivoDocElectronicoTO) throws UnsupportedEncodingException, WriterException, InterruptedException {
 
         Boolean retorna = false;
@@ -1635,6 +1732,82 @@ public class Utilidades {
                 e.printStackTrace();
                 retorna = false;
             }
+    }
+
+    public String fechaActual(){
+        Calendar c = Calendar.getInstance();
+        SimpleDateFormat df = new SimpleDateFormat("dd 'de' MMMM 'de' yyyy");
+        String fecha = df.format(c.getTime());
+        return fecha;
+    }
+
+    public boolean EnviaOdtPendiente() throws IOException, JSONException {
+
+        String mensajeOk = "";
+        String mensajeOk2 = "";
+        FileReader fr = null;
+        WebServices WS = new WebServices();
+        ArrayList<ArchivoDocElectronicoTO> archivoDocElectronicoTOs = new ArrayList<ArchivoDocElectronicoTO>();
+        boolean realizado = false;
+
+        try {
+            fr = new FileReader(Globales.infoCapturaImagen);
+            BufferedReader br = new BufferedReader(fr);
+            String s = br.readLine();
+            if (s != null) {
+                while (s != null){
+                    if (!s.equalsIgnoreCase("") && !s.equalsIgnoreCase("XXXXXXXXXXXXXXXXXX")) {
+                        this.recibeSplit = s.split("~");
+                        if (recibeSplit[0] != "" || recibeSplit[0] != null) {
+                            // Valida si el envio es un reingreso o una entrega
+                            if(recibeSplit[0].equals("reingreso")){
+                                WS.GrabaImagen(recibeSplit[3],recibeSplit[4],"ACT",recibeSplit[3],recibeSplit[3],recibeSplit[2],"REINGRESO");
+                                WS.GrabaReingreso(recibeSplit[1],recibeSplit[2], Integer.parseInt(recibeSplit[7]),"T",recibeSplit[8]);
+                            }else{
+                                //  VALIDA DATOS VACIOS REEMPLAZADOS CON (#)
+                                recibeSplit[13] = recibeSplit[13].equals("#")?"cta":recibeSplit[13];
+                                recibeSplit[14] = recibeSplit[14].equals("#")?"":recibeSplit[14];
+                                recibeSplit[15] = recibeSplit[15].equals("#")?"":recibeSplit[15];
+                                recibeSplit[16] = recibeSplit[16].equals("#")?"":recibeSplit[16];
+                                recibeSplit[17] = recibeSplit[17].equals("#")?"":recibeSplit[17];
+                                recibeSplit[18] = recibeSplit[18].equals("#")?"":recibeSplit[18];
+                                recibeSplit[19] = recibeSplit[19].equals("#")?"":recibeSplit[19];
+                                // COMIENZA PROCESO DE CARGA DE ODTS PENDIENTES PARA SUBIR A SISTEMA
+                                WS.retornaImpresoraPrueba(recibeSplit[5]);
+                                WS.GuardarEntrega(recibeSplit[0],recibeSplit[1],recibeSplit[2],recibeSplit[3],recibeSplit[4],recibeSplit[5],"EntregaCargaMovil",Globales.version,recibeSplit[3],
+                                        recibeSplit[6],recibeSplit[7],"%20","%20","%20");
+                                if(!recibeSplit[13].equals("cta")){ // GENERA BOLETA O FACTURA
+                                    archivoDocElectronicoTOs = WS.RetornaDocContable(recibeSplit[13],"02","",recibeSplit[14],recibeSplit[15],recibeSplit[16],recibeSplit[17],recibeSplit[8],"0",recibeSplit[9]
+                                            ,recibeSplit[10],recibeSplit[11],"","","000000000000000","03","61",recibeSplit[5],recibeSplit[5],recibeSplit[5],"EntregaCargaMovil","MainODT",Globales.version,"","1","-1",
+                                            recibeSplit[18],"","",recibeSplit[19],"",recibeSplit[1]);
+                                }else{ // REALIZA TRASPASO A
+                                    mensajeOk = WS.RealizaTraspaso(recibeSplit[20],recibeSplit[1]);
+                                }
+                                WS.GrabaImagen(recibeSplit[2],recibeSplit[12],"ACT",recibeSplit[2],recibeSplit[5],recibeSplit[1],"ENTREGA");
+                                WS.CambiaEstadoODT(recibeSplit[1],"99",recibeSplit[5],"MainODT",Globales.version,"EntregaCargaMovil",recibeSplit[5]);
+                            }
+                            realizado = true;
+                            EliminaFilaArchivo(Globales.infoCapturaImagen,s);
+                        }
+                    }
+                    s = br.readLine();
+                }
+            }
+        } catch (Exception ex) {
+            //Log.e("error", "Error al leer fichero desde memoria interna");
+            //ex.printStackTrace();
+            throw ex;
+        } finally {
+            try {
+                if (fr != null) {
+                    fr.close();
+                }
+            } catch (IOException e) {
+                //e.printStackTrace();
+                throw e;
+            }
+        }
+        return realizado;
     }
 
 }

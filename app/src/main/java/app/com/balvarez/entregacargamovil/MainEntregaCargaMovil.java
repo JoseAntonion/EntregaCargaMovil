@@ -185,7 +185,7 @@ public class MainEntregaCargaMovil extends AppCompatActivity {
 
             @Override
             public void onClick(View v) {
-                //txt_patente.setText("");
+                txt_patente.setText("");
                 // PRUEBAS IMPRESION ----------------------------------------------------------------
                 /*Utilidades util = new Utilidades();
                 TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
@@ -207,6 +207,10 @@ public class MainEntregaCargaMovil extends AppCompatActivity {
                     e.printStackTrace();
                 }*/
                 // ----------------------------------------------------------------------------------
+                // PRUEBAS -----------------------------------------------
+
+
+                //--------------------------------------------------------
             }
         });
         txt_patente = (TextView) findViewById(R.id.txtPatente);
@@ -322,6 +326,7 @@ public class MainEntregaCargaMovil extends AppCompatActivity {
                         if (util.ConectarEpsonPrueba(activity.getApplicationContext())) {
                             try {
                                 util.impresionPrueba(activity);
+                                //util.ImprimeOffLine(activity,"50000005774");
                             } catch (Exception e) {
                                 Toast.makeText(activity.getApplicationContext(),
                                         "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();

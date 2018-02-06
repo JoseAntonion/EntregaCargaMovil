@@ -1,8 +1,10 @@
 package app.com.balvarez.entregacargamovil;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -41,6 +43,7 @@ public class MainEntregaCarga extends AppCompatActivity implements View.OnClickL
         activity = this;
         util = new Utilidades();
         recibir = getIntent();
+        MainODT main = new MainODT();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_entrega_carga);
         btn_entrega_carga = (Button) findViewById(R.id.btnEntregaCarga);
@@ -79,6 +82,11 @@ public class MainEntregaCarga extends AppCompatActivity implements View.OnClickL
         switch (v.getId()) {
 
             case R.id.btnEntregaCarga: {
+                //Envio de ODT pendientes
+                if(util.verificaConexion(getApplicationContext())){
+                    new EnvioODTPendiente().execute();
+                }
+                /////////////////////////////////
                 if(cantidadBultosIngresado == cantidadBultosMaximo){
                     MensajeEntregaMasivo(cantidadBultosMaximo,cantidadBultosIngresado);
                 }else{
@@ -89,6 +97,11 @@ public class MainEntregaCarga extends AppCompatActivity implements View.OnClickL
                 break;
             }
             case R.id.btnNoEntregaCarga: {
+                //Envio de ODT pendientes
+                if(util.verificaConexion(getApplicationContext())){
+                    new EnvioODTPendiente().execute();
+                }
+                /////////////////////////////////
                 Intent intento = new Intent(MainEntregaCarga.this, MainMotivoNoEntrega.class);
                 intento.putExtra("odt", ODT);
                 startActivity(intento);
@@ -169,4 +182,43 @@ public class MainEntregaCarga extends AppCompatActivity implements View.OnClickL
 
         return downloadDialog.show();
     }
+
+    public class EnvioODTPendiente extends AsyncTask<Void, Void, String> {
+
+        ProgressDialog MensajeProgreso;
+        String subioOffnile = "";
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            MensajeProgreso = new ProgressDialog(activity);
+            MensajeProgreso.setCancelable(false);
+            MensajeProgreso.setIndeterminate(true);
+            MensajeProgreso.setTitle("Proceso Off-Line");
+            MensajeProgreso.setMessage("Realizando Entrega ODT pendiente...");
+            MensajeProgreso.show();
+        }
+
+        @Override
+        protected String doInBackground(Void... params) {
+            try{
+                if(util.EnviaOdtPendiente()){
+                    //Toast.makeText(mContext, "Se enviaron datos de ODT PENDIENTES",Toast.LENGTH_LONG).show();
+                    subioOffnile = "Se enviaron datos de ODT PENDIENTES";
+                }
+            }catch (Exception e){
+                //Toast.makeText(mContext, e.getMessage(),Toast.LENGTH_LONG).show();
+                subioOffnile = e.getMessage();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String result){
+            if (MensajeProgreso.isShowing())
+                MensajeProgreso.dismiss();
+            Toast.makeText(activity.getApplicationContext(), subioOffnile,Toast.LENGTH_LONG).show();
+        }
+    }
+
 }

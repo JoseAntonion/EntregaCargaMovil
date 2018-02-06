@@ -1,12 +1,17 @@
 package app.com.balvarez.entregacargamovil;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.location.Criteria;
 import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
@@ -26,47 +31,46 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.json.JSONException;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import To.ArchivoCapturaImagen;
 import To.TipoReingresoTO;
 import To.ValidaTO;
-import Util.GPSTraker;
 import Util.Globales;
 import Util.Utilidades;
 import Util.WebServices;
 
-public class MainMotivoNoEntrega extends AppCompatActivity implements View.OnClickListener, AdapterView.OnItemSelectedListener {
+import static app.com.balvarez.entregacargamovil.MainFirma.isLocationEnabled;
 
-    private static final String LOGTAG = "";
-    private static final int PETICION_PERMISO_LOCALIZACION = 1;
+public class MainMotivoNoEntrega extends AppCompatActivity implements View.OnClickListener, AdapterView.OnItemSelectedListener, LocationListener {
+
     private Button btn_finalizar;
     private Button btn_limpiar;
     private Button btn_tomarFoto;
     private Spinner spn_motivo;
-    private ArrayAdapter spinner_adapter;
     private TextView txtNombreFoto;
     private Intent recibir;
     static final int REQUEST_IMAGE_CAPTURE = 1;
     private String ODT = "";
-    private String NombreFoto = "fotoPrueba.jpg";
+    private String NombreFoto = "FotoRespaldo.jpg";
     private String encodedImage2;
     private Activity activity;
     private Utilidades util;
-    private Bitmap bMap;
-    private int RESULT_LOAD_IMG = 0;
-    private int REQUEST_CAMERA = 0, SELECT_FILE = 1;
-    String imgDecodableString;
-    private String userChoosenTask;
     private static final int ACTIVAR_GPS = 1;
-    private Handler mHandler;
     private AlertDialog alert;
     private String codigoReingreso = "";
-    private double latitud;
-    private double longitud;
+    public LocationManager locationManager;
+    public Criteria criteria;
+    public String bestProvider;
+    private LocationListener locListener;
+    private Handler mHandler;
+
 
 
     @Override
@@ -100,17 +104,15 @@ public class MainMotivoNoEntrega extends AppCompatActivity implements View.OnCli
             case R.id.btnFinalizarNoEntrega: {
                 // GEO-REFERENCIA
                 if (VerificarGPS()) {
-
-                    GPSTraker gps = new GPSTraker(activity.getApplicationContext());
-                    Location l = gps.getLocation();
-                    if (l != null) {
-                        Globales.latitud = l.getLatitude();
-                        Globales.longitud = l.getLongitude();
-                    }
+                    getLocationFinalNOFAKEUNZELDA();
                 }
                 if (!codigoReingreso.isEmpty() && !codigoReingreso.equals("99")) {
                     if (txtNombreFoto.getVisibility() != View.INVISIBLE) {
-                        new CapturaImagen().execute();
+                        if(util.verificaConexion(getApplicationContext())){
+                            new CapturaImagen().execute();
+                        }else{
+                            new CapturaImagenOffLine().execute();
+                        }
                     } else {
                         Toast.makeText(activity.getApplicationContext(),
                                 "Debe tomar FOTOGRAFIA !!!", Toast.LENGTH_LONG).show();
@@ -144,7 +146,7 @@ public class MainMotivoNoEntrega extends AppCompatActivity implements View.OnCli
             Bundle extras = data.getExtras();
             Bitmap imageBitmap = (Bitmap) extras.get("data");
             ByteArrayOutputStream stream = new ByteArrayOutputStream();
-            imageBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+            imageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
             byte[] byteArray = stream.toByteArray();
             encodedImage2 = android.util.Base64.encodeToString(byteArray, Base64.NO_WRAP);
             //ListaFotosTO.lista.add(byteArray);
@@ -168,7 +170,18 @@ public class MainMotivoNoEntrega extends AppCompatActivity implements View.OnCli
 
     @Override
     public void onNothingSelected(AdapterView<?> parent) {
-
+    }
+    @Override
+    public void onLocationChanged(Location location) {
+    }
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+    }
+    @Override
+    public void onProviderEnabled(String provider) {
+    }
+    @Override
+    public void onProviderDisabled(String provider) {
     }
 
     public class CapturaImagen extends AsyncTask<Void, Void, String> {
@@ -265,6 +278,96 @@ public class MainMotivoNoEntrega extends AppCompatActivity implements View.OnCli
                 MensajeFinRepartoINCORRECTO(resp.getMensaje()+" - "+resp2.getMensaje());
             }
         }
+    }
+
+    public class CapturaImagenOffLine extends  AsyncTask<Void, Void, String>{
+
+        ProgressDialog MensajeProgreso;
+        ArrayList<String> odetes = new ArrayList<>();
+
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            MensajeProgreso = new ProgressDialog(activity);
+            MensajeProgreso.setCancelable(false);
+            MensajeProgreso.setIndeterminate(true);
+            MensajeProgreso.setTitle("Proceso Off-Line");
+            MensajeProgreso.setMessage("Registrando reingreso sin RED...");
+            MensajeProgreso.show();
+        }
+
+        @Override
+        protected String doInBackground(Void... params) {
+            ArrayList<ArchivoCapturaImagen> listaDatosOffline = new ArrayList<>();
+
+            TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+            String imei = telephonyManager.getDeviceId();
+            int i = 0;
+            // CONSULTA SI HAY MAS DE UNA ODT INGRESADA
+            if (Globales.registroOdtMultiples.size() > 1) {
+                for (i = 0; i < Globales.registroOdtMultiples.size(); i++) {
+                    try {
+                        ArchivoCapturaImagen datoOff = new ArchivoCapturaImagen();
+                        datoOff.setPLANILLA(Globales.registroOdtMultiples.get(i).getPlanilla());
+                        datoOff.setODT(Globales.registroOdtMultiples.get(i).getOdt());
+                        // Se crea un array con las ODTS entregadas, para poder enviarlas al metodo de impresion
+                        odetes.add(Globales.registroOdtMultiples.get(i).getOdt());
+                        /////////////////////////////////////////////////////////
+                        datoOff.setIMEI(imei);
+                        datoOff.setFIRMA(encodedImage2);
+                        // Vuelve a llamar al metodo de geolocalizacion, por si esta nulo
+                        getLocationFinalNOFAKEUNZELDA();
+                        datoOff.setLatitudEntrega(Globales.latitud);
+                        datoOff.setLongitudEntrega(Globales.longitud);
+                        datoOff.setCantidadBultosODT(util.leeCantidadBultosODT(Globales.registroOdtMultiples.get(i).getOdt()));
+                        datoOff.setCodigoMotivoReingreso(codigoReingreso);
+                        listaDatosOffline.add(datoOff);
+                        util.cambiaEstadoOdtArchivoENTREGADO(Globales.odtMasiva.get(i).getOdt());
+                    } catch (IOException e1) {
+                        e1.printStackTrace();
+                    } catch (JSONException e1) {
+                        e1.printStackTrace();
+                    }
+                }
+            } else {
+                try {
+                    ArchivoCapturaImagen datoOff = new ArchivoCapturaImagen();
+                    datoOff.setPLANILLA(util.buscaPlanillaOdt(ODT));
+                    datoOff.setODT(ODT);
+                    // Se crea un array con las ODTS entregadas, para poder enviarlas al metodo de impresion
+                    odetes.add(ODT);
+                    /////////////////////////////////////////////////////////
+                    datoOff.setIMEI(imei);
+                    datoOff.setFIRMA(encodedImage2);
+                    // Vuelve a llamar al metodo de geolocalizacion, por si esta nulo
+                    getLocationFinalNOFAKEUNZELDA();
+                    datoOff.setLatitudEntrega(Globales.latitud);
+                    datoOff.setLongitudEntrega(Globales.longitud);
+                    datoOff.setCantidadBultosODT(util.leeCantidadBultosODT(ODT));
+                    datoOff.setCodigoMotivoReingreso(codigoReingreso);
+                    listaDatosOffline.add(datoOff);
+                    util.cambiaEstadoOdtArchivoENTREGADO(ODT);
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                } catch (JSONException e1) {
+                    e1.printStackTrace();
+                }
+            }
+            // ESCRIBE EN ARCHIVO LOCAL LOS DATOS NECESARIOS PARA SU POSTERIOR ENVÍO
+            util.escribirEnArchivo(listaDatosOffline,"OFFLINE-REINGRESO");
+            // Se cambia a valor 1 para no generar problemas de entrega multiple (Mensaje "Debe ingresar una ODT del mismo tipo de pago")
+            Globales.banderaTipoPago = "1";
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String result){
+            if (MensajeProgreso.isShowing())
+                MensajeProgreso.dismiss();
+            MensajeFinRepartoCORRECTO();
+        }
+
     }
 
     private AlertDialog MensajeFinRepartoCORRECTO() {
@@ -365,6 +468,44 @@ public class MainMotivoNoEntrega extends AppCompatActivity implements View.OnCli
         adapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
 
         return adapter;
+    }
+
+    protected void getLocationFinalNOFAKEUNZELDA() {
+        if (isLocationEnabled(activity.getApplicationContext())) {
+            locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+            criteria = new Criteria();
+            bestProvider = String.valueOf(locationManager.getBestProvider(criteria, true)).toString();
+
+            //You can still do this if you like, you might get lucky:
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                // TODO: Consider calling
+                //    ActivityCompat#requestPermissions
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for ActivityCompat#requestPermissions for more details.
+                return;
+            }
+            Location location = locationManager.getLastKnownLocation(bestProvider);
+            //do{
+                if (location != null) {
+                    //Log.e("TAG", "GPS is on");
+                    Globales.latitud = location.getLatitude();
+                    Globales.longitud = location.getLongitude();
+/*                Toast.makeText(MainActivity.this, "latitude:" + latitude + " longitude:" + longitude, Toast.LENGTH_SHORT).show();
+                searchNearestPlace(voice2text);*/
+                } else {
+                    //This is what you need:
+                    locationManager.requestLocationUpdates(bestProvider, 1000, 0, this);
+                }
+            //}while (location == null);
+        }
+        else
+        {
+            //prompt user to enable location....
+            //.................
+        }
     }
 
 }

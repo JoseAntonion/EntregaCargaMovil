@@ -7,7 +7,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
-import android.text.Editable;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -20,6 +19,7 @@ import org.json.JSONException;
 import java.io.IOException;
 
 import Util.Globales;
+import Util.Utilidades;
 import Util.WebServices;
 
 /**
@@ -37,6 +37,7 @@ public class MainSeleccionaCtaCte extends AppCompatActivity implements View.OnCl
     private Button btnVolverCtaCte;
     private Button btnSiguienteCtaCte;
     private TextView lblDescripcionCuenta;
+    Utilidades util;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -57,6 +58,7 @@ public class MainSeleccionaCtaCte extends AppCompatActivity implements View.OnCl
         if(extras != null){
             ODT = (extras.get("odt") == null)?"":extras.get("odt").toString();
         }
+        util = new Utilidades();
     }
 
 
@@ -72,17 +74,31 @@ public class MainSeleccionaCtaCte extends AppCompatActivity implements View.OnCl
                 break;
             }
             case R.id.btnBuscaCtaCte: {
-                if(!txtCtaCte.getText().equals("")){
-                    new BuscaCuenta(txtCtaCte.getText()).execute();
+                Globales.ctaTraspaso = String.valueOf(txtCtaCte.getText());
+                if(util.verificaConexion(activity.getApplicationContext())){
+                    if(!txtCtaCte.getText().equals("")){
+                        new BuscaCuenta().execute();
+                    }
+                }else{
+                    Toast.makeText(activity.getApplicationContext(), "Sin conexion a internet. No se pudo buscar descripcion de la Cuenta",
+                            Toast.LENGTH_LONG).show();
                 }
                 break;
             }
             case R.id.btnSiguienteCtaCte: {
-                if(lblDescripcionCuenta.getText().equals("No se encontraron registros !!!")){
-                    Toast.makeText(activity.getApplicationContext(), "debe ingresar una cuenta valida !!!",
-                            Toast.LENGTH_LONG).show();
+                Globales.ctaTraspaso = String.valueOf(txtCtaCte.getText());
+                if(util.verificaConexion(activity.getApplicationContext())){
+                    if(lblDescripcionCuenta.getText().equals("No se encontraron registros !!!")){
+                        Toast.makeText(activity.getApplicationContext(), "debe ingresar una cuenta valida !!!",
+                                Toast.LENGTH_LONG).show();
+                    }else{
+                        new RealizaTraspaso().execute();
+                    }
                 }else{
-                    new RealizaTraspaso(txtCtaCte.getText()).execute();
+                    Intent intento = new Intent(MainSeleccionaCtaCte.this, MainInfoReceptorCarga.class);
+                    intento.putExtra("ODT",Globales.odtPrincipal);
+                    intento.putExtra("tipoDoc","CTA");
+                    startActivity(intento);
                 }
                 break;
             }
@@ -97,9 +113,8 @@ public class MainSeleccionaCtaCte extends AppCompatActivity implements View.OnCl
         String CtaCte = "";
         String mensajeOk = "";
 
-        public RealizaTraspaso(Editable text) {
-            CtaCte = String.valueOf(text);
-        }
+        /*public RealizaTraspaso(Editable text) {Globales.ctaTraspaso = String.valueOf(text);
+        }*/
 
         @Override
         protected void onPreExecute() {
@@ -116,7 +131,7 @@ public class MainSeleccionaCtaCte extends AppCompatActivity implements View.OnCl
 
             WebServices ws = new WebServices();
             try {
-                mensajeOk = ws.RealizaTraspaso(CtaCte,Globales.odtPrincipal);
+                mensajeOk = ws.RealizaTraspaso(Globales.ctaTraspaso,Globales.odtPrincipal);
             } catch (IOException e) {
                 e.printStackTrace();
             } catch (JSONException e) {
@@ -157,9 +172,9 @@ public class MainSeleccionaCtaCte extends AppCompatActivity implements View.OnCl
         String CtaCte = "";
         ProgressDialog MensajeProgreso;
 
-        public BuscaCuenta(Editable text) {
+        /*public BuscaCuenta(Editable text) {
             CtaCte = String.valueOf(text);
-        }
+        }*/
 
         @Override
         protected void onPreExecute() {
@@ -175,7 +190,7 @@ public class MainSeleccionaCtaCte extends AppCompatActivity implements View.OnCl
         protected String doInBackground(Void... params) {
             WebServices ws = new WebServices();
             try {
-                Globales.cuentaDesc = ws.buscaDatosCtaCte(CtaCte);
+                Globales.cuentaDesc = ws.buscaDatosCtaCte(Globales.ctaTraspaso);
 
             } catch (IOException e) {
                 e.printStackTrace();

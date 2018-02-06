@@ -42,4 +42,7 @@ public class Globales extends Application {
     public static ArrayList<String> bultosMultiples;
     public static String cuentaDesc;
     public static String odtPrincipal;
+    public static String pruebaBack = "1";
+    public static String infoCapturaImagen;
+    public static String ctaTraspaso = "";
 }

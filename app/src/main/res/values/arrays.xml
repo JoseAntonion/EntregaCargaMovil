@@ -1,15 +1,2 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string-array name="reingreso">
-        <item>SIN MORADORES</item>
-        <item>CLIENTE SIN DINERO</item>
-        <item>FUERA DE PLAZO</item>
-        <item>SE CAMBIO DE DOMICILIO</item>
-        <item>NO EXISTE DIRECCION</item>
-        <item>NO RESPONDEN</item>
-        <item>NO RECIBE</item>
-        <item>FALTA ORDEN DE COMPRA</item>
-        <item>BULTO NO CORRESPONDE</item>
-        <item>DAÑO MERCADERIA</item>
-    </string-array>
-</resources>
+<resources></resources>

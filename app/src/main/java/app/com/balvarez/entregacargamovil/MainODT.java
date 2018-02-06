@@ -1,10 +1,12 @@
 package app.com.balvarez.entregacargamovil;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -96,6 +98,11 @@ public class MainODT extends AppCompatActivity implements View.OnClickListener {
         switch (v.getId()) {
 
             case R.id.btnFinReparto: {
+                //Envio de ODT pendientes
+                if(util.verificaConexion(getApplicationContext())){
+                    new  EnvioODTPendiente().execute();
+                }
+                /////////////////////////////////
                 Intent intento = new Intent(MainODT.this, MainResumenEntrega.class);
                 startActivity(intento);
                 finish();
@@ -109,6 +116,11 @@ public class MainODT extends AppCompatActivity implements View.OnClickListener {
             case R.id.btnOdtManual: {
                 if(!txtOdtManual.getText().toString().equals("")){
                     validaNumeroODTtipoPago(txtOdtManual.getText().toString());
+                    //Envio de ODT pendientes
+                    if(util.verificaConexion(getApplicationContext())){
+                        new  EnvioODTPendiente().execute();
+                    }
+                    /////////////////////////////////
                 }else{
                     Toast.makeText(activity.getApplicationContext(), "Debe ingresar numero de ODT", Toast.LENGTH_LONG).show();
                 }
@@ -172,6 +184,11 @@ public class MainODT extends AppCompatActivity implements View.OnClickListener {
                     svalue1=svalue1==null?"":svalue1;
                     svalue2=svalue2==null?"":svalue2;
                     if (svalue1.length()>0) {
+                        //Envio de ODT pendientes
+                        if(util.verificaConexion(getApplicationContext())){
+                            new  EnvioODTPendiente().execute();
+                        }
+                        /////////////////////////////////
                         validaNumeroODTtipoPago(svalue1.replace("*",""));
                     }
 
@@ -244,5 +261,44 @@ public class MainODT extends AppCompatActivity implements View.OnClickListener {
 
     }
 
+    public class EnvioODTPendiente extends AsyncTask<Void, Void, String> {
+
+        ProgressDialog MensajeProgreso;
+        String subioOffnile = "";
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            MensajeProgreso = new ProgressDialog(activity);
+            MensajeProgreso.setCancelable(false);
+            MensajeProgreso.setIndeterminate(true);
+            MensajeProgreso.setTitle("Proceso Off-Line");
+            MensajeProgreso.setMessage("Realizando Entrega ODT pendiente...");
+            MensajeProgreso.show();
+        }
+
+        @Override
+        protected String doInBackground(Void... params) {
+            try{
+                if(util.EnviaOdtPendiente()){
+                    //Toast.makeText(mContext, "Se enviaron datos de ODT PENDIENTES",Toast.LENGTH_LONG).show();
+                    subioOffnile = "Se enviaron datos de ODT PENDIENTES";
+                }
+            }catch (Exception e){
+                //Toast.makeText(mContext, e.getMessage(),Toast.LENGTH_LONG).show();
+                subioOffnile = e.getMessage();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String result){
+            if (MensajeProgreso.isShowing())
+                MensajeProgreso.dismiss();
+            if(!subioOffnile.equals("")){
+                Toast.makeText(activity.getApplicationContext(), subioOffnile,Toast.LENGTH_LONG).show();
+            }
+        }
+    }
 }
 

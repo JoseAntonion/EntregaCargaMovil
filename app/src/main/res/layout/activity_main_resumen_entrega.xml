@@ -59,13 +59,28 @@
             android:layout_below="@+id/textView9">
 
             <Button
+                android:id="@+id/btnVolverResumenEntrega"
+                style="@style/Botton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBaseline="@+id/btnFinalizarResumenEntrega"
+                android:layout_alignBottom="@+id/btnFinalizarResumenEntrega"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_marginEnd="21dp"
+                android:layout_marginRight="21dp"
+                android:layout_toLeftOf="@+id/btnFinalizarResumenEntrega"
+                android:text="volver" />
+
+            <Button
                 android:id="@+id/btnFinalizarResumenEntrega"
                 style="@style/Botton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
-                android:layout_centerHorizontal="true"
-                android:layout_marginBottom="38dp"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:layout_below="@+id/lstResumenEntrega"
+                android:layout_marginTop="17dp"
                 android:text="finalizar" />
 
             <ListView
@@ -73,7 +88,7 @@
                 android:layout_height="221dp"
                 android:id="@+id/lstResumenEntrega"
                 android:headerDividersEnabled="false"
-                android:layout_marginTop="21dp"
+                android:layout_marginTop="22dp"
                 android:layout_alignParentTop="true"
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentStart="true" />
