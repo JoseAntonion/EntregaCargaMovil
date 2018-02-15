@@ -1,7 +1,9 @@
 package app.com.balvarez.entregacargamovil;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
@@ -11,9 +13,12 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import To.DatosReceptorTO;
+import To.UsuarioReceptorTO;
 import Util.Globales;
+import Util.Utilidades;
+import Util.WebServices;
 
-public class MainInfoReceptorCarga extends AppCompatActivity implements View.OnClickListener{//, View.OnFocusChangeListener {
+public class MainInfoReceptorCarga extends AppCompatActivity implements View.OnClickListener, View.OnFocusChangeListener {//, View.OnFocusChangeListener {
 
     private Activity activity;
     private EditText txt_RutReceptor;
@@ -28,6 +33,9 @@ public class MainInfoReceptorCarga extends AppCompatActivity implements View.OnC
     private EditText txtFonoReceptor;
     private String RUT = "";
     private DatosReceptorTO datosReceptor;
+    Utilidades util;
+    private String rutReceptor = "";
+    WebServices WS;
     //private ArrayList<EntregaOdtMasivoTO> listaOdt = new ArrayList<>();
 
     @Override
@@ -36,6 +44,8 @@ public class MainInfoReceptorCarga extends AppCompatActivity implements View.OnC
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_info_receptor_carga);
         recibir = getIntent();
+        util = new Utilidades();
+        WS = new WebServices();
         txt_RutReceptor = (EditText) findViewById(R.id.txtRutReceptor);
         //RUT = txtRutReceptor.getText().toString();
         txtNombreReceptor = (EditText) findViewById(R.id.txtNombreReceptor);
@@ -53,7 +63,7 @@ public class MainInfoReceptorCarga extends AppCompatActivity implements View.OnC
             tipoDoc = (extras.get("tipoDoc") == null)?"":extras.get("tipoDoc").toString();
         }
 
-        //txt_RutReceptor.setOnFocusChangeListener(this);
+        txt_RutReceptor.setOnFocusChangeListener(this);
         txt_RutReceptor.requestFocus();
     }
 
@@ -76,6 +86,9 @@ public class MainInfoReceptorCarga extends AppCompatActivity implements View.OnC
                             datosReceptor.setTelefono(txtFonoReceptor.getText().toString());
                             datosReceptor.setRut(txt_RutReceptor.getText().toString());
                             Globales.datosReceptor = datosReceptor;
+                            if(util.verificaConexion(activity.getApplicationContext())){
+                                new GraModDatosReceptor(datosReceptor).execute();
+                            }
                             if(Globales.odtMasiva == null){
                                 Intent intento = new Intent(MainInfoReceptorCarga.this, MainFirma.class);
                                 intento.putExtra("odt", ODT);
@@ -103,19 +116,6 @@ public class MainInfoReceptorCarga extends AppCompatActivity implements View.OnC
                 break;
         }
     }
-
-    /*public void onFocusChange(View v, boolean hasFocus) {
-        if (!hasFocus) {
-            // CODIGO A EJECUTAR CUANDO EL EDITTEXT PIERDA EL FOCO
-            if(!validarRut(txt_RutReceptor.getText().toString())){
-            //if(!validarRut(v.toString())){
-                Toast.makeText(activity.getApplicationContext(),
-                        "Debe ingresa un RUT VALIDO !!", Toast.LENGTH_LONG).show();
-                //txt_RutReceptor.requestFocusFromTouch();
-            }
-        }
-
-    }*/
 
     public void limpiar(){
         txt_RutReceptor.setText("");
@@ -189,4 +189,116 @@ public class MainInfoReceptorCarga extends AppCompatActivity implements View.OnC
         //new GuardaPago().execute();
     }
 
+    @Override
+    public void onFocusChange(View v, boolean hasFocus) {
+        UsuarioReceptorTO usuario = new UsuarioReceptorTO();
+
+        if(!hasFocus){
+            if(util.verificaConexion(activity.getApplicationContext())){
+                try {
+                    new BuscaDatosReceptor(String.valueOf(txt_RutReceptor.getText())).execute();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    public class BuscaDatosReceptor extends AsyncTask<Void, Void, String> {
+
+        ProgressDialog MensajeProgreso;
+        WebServices WS = new WebServices();
+        UsuarioReceptorTO usuario = new UsuarioReceptorTO();
+        String rut = "";
+        boolean trajoDatos = false;
+
+        public BuscaDatosReceptor(String s) {
+            rut = s;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            MensajeProgreso = new ProgressDialog(activity);
+            MensajeProgreso.setCancelable(false);
+            MensajeProgreso.setIndeterminate(true);
+            MensajeProgreso.setTitle("Consulta Usuario");
+            MensajeProgreso.setMessage("Consultando RUT en sistema...");
+            MensajeProgreso.show();
+        }
+
+        @Override
+        protected String doInBackground(Void... params) {
+            try {
+                usuario = WS.TraeDatosUsuarioReceptor(rut);
+                if(usuario != null) {
+                    trajoDatos = true;
+                }
+            }catch (Exception e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String result){
+            if (MensajeProgreso.isShowing())
+                MensajeProgreso.dismiss();
+            if(trajoDatos) {
+                txtNombreReceptor.setText(usuario.getNombre());
+                txtApPaternoReceptor.setText(usuario.getApPaterno());
+                txtApMaternoReceptor.setText(usuario.getApMaterno());
+                txtFonoReceptor.setText(usuario.getTelefono());
+            }else {
+                Toast.makeText(activity.getApplicationContext(),
+                        "No se encontraron registros", Toast.LENGTH_LONG).show();
+            }
+        }
+    }
+
+    public class GraModDatosReceptor extends AsyncTask<Void, Void, String> {
+
+        ProgressDialog MensajeProgreso;
+        WebServices WS = new WebServices();
+        String respuesta = "";
+        DatosReceptorTO receptor = new DatosReceptorTO();
+
+        public GraModDatosReceptor(DatosReceptorTO datosReceptor) {
+            receptor = datosReceptor;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            MensajeProgreso = new ProgressDialog(activity);
+            MensajeProgreso.setCancelable(false);
+            MensajeProgreso.setIndeterminate(true);
+            MensajeProgreso.setTitle("Registro Usuario");
+            MensajeProgreso.setMessage("Modificando información...");
+            MensajeProgreso.show();
+        }
+
+        @Override
+        protected String doInBackground(Void... params) {
+            try {
+                respuesta = WS.GraModUsuarioReceptor(receptor.getRut(),receptor.getNombre(),receptor.getApPaterno(),receptor.getApMaterno(),receptor.getTelefono());
+            }catch (Exception e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String result){
+            if (MensajeProgreso.isShowing())
+                MensajeProgreso.dismiss();
+            if(respuesta.equals("Realizado correctamente")) {
+                Toast.makeText(activity.getApplicationContext(),
+                        respuesta, Toast.LENGTH_LONG).show();
+            }else{
+                Toast.makeText(activity.getApplicationContext(),
+                        "Error en MainInfoReceptorCarga: "+respuesta, Toast.LENGTH_LONG).show();
+            }
+        }
+    }
 }

@@ -208,8 +208,11 @@ public class MainEntregaCargaMovil extends AppCompatActivity {
                 }*/
                 // ----------------------------------------------------------------------------------
                 // PRUEBAS -----------------------------------------------
-
-
+                /*Intent intent = new Intent(MainEntregaCargaMovil.this, MainInfoReceptorCarga.class);
+                //Intent intent = new Intent(MainEntregaCargaMovil.this, MainCancelacionOdt.class);
+                startActivity(intent);
+                System.gc();
+                finish();*/
                 //--------------------------------------------------------
             }
         });

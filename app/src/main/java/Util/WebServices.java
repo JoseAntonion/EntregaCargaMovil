@@ -19,6 +19,7 @@ import To.ArchivoDocElectronicoTO;
 import To.ArchivoOdtPorPatenteTO;
 import To.CiudadTO;
 import To.ComunaTO;
+import To.UsuarioReceptorTO;
 import To.ValidaTO;
 
 public class WebServices {
@@ -655,6 +656,80 @@ public class WebServices {
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("odt", odt);
             jsonObject.put("cta", cta);
+            //
+            StringEntity stringEntity = new StringEntity(jsonObject.toString());
+            stringEntity.setContentType("application/json");
+            httppost.setEntity(stringEntity);
+            // ejecuta
+            HttpResponse response = httpclient.execute(httppost);
+            String respStr = EntityUtils.toString(response.getEntity());
+
+            responseObject = new JSONObject(respStr);
+            validaTO.setValida(responseObject.getString("Valida"));
+            validaTO.setError(responseObject.getString("Error"));
+            validaTO.setMensaje(responseObject.getString("Mensaje"));
+            // return true;
+            respuesta = validaTO.getMensaje();
+
+        } catch (Exception e) {
+
+            respuesta = e.getMessage();
+            return respuesta;
+        }
+        return respuesta;
+    }
+
+    public UsuarioReceptorTO TraeDatosUsuarioReceptor(String rut) throws IOException, JSONException {
+        String respStr;
+        UsuarioReceptorTO usuario = new UsuarioReceptorTO();
+        HttpClient httpClient;
+        HttpGet del;
+        HttpResponse resp;
+        JSONObject responseObject;
+        JSONObject responseObject1;
+        httpClient = new DefaultHttpClient();
+        ValidaTO validaTO = null;
+
+        del = new HttpGet(RUTA_WEB_SERVICE + "/TraeDatosClienteReceptor/rut="+rut);
+        del.setHeader("content-type", "application/json");
+
+        try {
+            resp = httpClient.execute(del);
+            respStr = EntityUtils.toString(resp.getEntity());
+
+            responseObject = new JSONObject(respStr);
+            responseObject1 = responseObject.getJSONObject("requestClienteReceptorTO");
+            usuario.setRut(String.valueOf(responseObject1.getString("rut").equals("")?"":responseObject1.getString("rut")));
+            usuario.setNombre(String.valueOf(responseObject1.getString("nombre").equals("")?"":responseObject1.getString("nombre")));
+            usuario.setApPaterno(String.valueOf(responseObject1.getString("apPaterno").equals("")?"":responseObject1.getString("apPaterno")));
+            usuario.setApMaterno(String.valueOf(responseObject1.getString("apMaterno").equals("")?"":responseObject1.getString("apMaterno")));
+            usuario.setTelefono(String.valueOf(responseObject1.getString("fono").equals("")?"":responseObject1.getString("fono")));
+        }catch (Exception e){
+            throw e;
+        }
+
+        return usuario;
+    }
+
+    public String GraModUsuarioReceptor(String rut,String nombre, String appaterno, String apmaterno, String fono) throws IOException, ClientProtocolException, JSONException {
+        ValidaTO validaTO = new ValidaTO();
+        String respuesta = "";
+
+        try {
+
+            HttpClient httpclient = new DefaultHttpClient();
+            JSONObject responseObject;
+            HttpPost httppost = new HttpPost(RUTA_WEB_SERVICE+ "/AgregaClienteReceptor");
+            httppost.setHeader("Content-Type", "application/json");
+
+
+            // forma el JSON y tipo de contenido
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("rut", rut);
+            jsonObject.put("nombre", nombre);
+            jsonObject.put("apPaterno", appaterno);
+            jsonObject.put("apMaterno", apmaterno);
+            jsonObject.put("fono", fono);
             //
             StringEntity stringEntity = new StringEntity(jsonObject.toString());
             stringEntity.setContentType("application/json");
